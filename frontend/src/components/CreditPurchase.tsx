@@ -64,7 +64,7 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-2xl w-full">
+      <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <div className="bg-white border-b border-beige-200 p-6 flex items-center justify-between rounded-t-2xl">
           <div className="flex items-center gap-3">
             <div className="bg-beige-100 p-2 rounded-lg">
@@ -100,7 +100,7 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
             <h3 className="text-xl font-bold text-slate-800 mb-6 text-center">
               Choose Your Credit Package
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {packages.map((pkg) => (
                 <div
                   key={pkg.credits}
