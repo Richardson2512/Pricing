@@ -35,12 +35,28 @@ export function SignUp() {
 
       if (data.user) {
         // Create profile with 3 free credits
-        await supabase.from('profiles').insert({
+        const { error: profileError } = await supabase.from('profiles').insert({
           id: data.user.id,
           email: data.user.email!,
           credits: 3,
         });
 
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          // Profile might already exist, try to fetch it
+          const { data: existingProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+          
+          if (!existingProfile) {
+            throw new Error('Failed to create user profile');
+          }
+        }
+
+        // Wait a moment for profile to be available
+        await new Promise(resolve => setTimeout(resolve, 1000));
         navigate('/dashboard');
       }
     } catch (err) {

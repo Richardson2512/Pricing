@@ -5,6 +5,7 @@ import { supabase, Consultation } from '../lib/supabase';
 import { MultiStepQuestionnaire } from './MultiStepQuestionnaire';
 import { CreditPurchase } from './CreditPurchase';
 import { PricingAnalysisResult } from './PricingAnalysisResult';
+import { Footer } from './Footer';
 
 type View = 'dashboard' | 'questionnaire' | 'result';
 
@@ -164,10 +165,10 @@ export function Dashboard() {
             </button>
             <button
               onClick={signOut}
-              className="p-2 text-slate-600 hover:text-slate-800 transition"
-              title="Sign out"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium"
             >
               <LogOut className="w-5 h-5" />
+              Logout
             </button>
           </div>
         </div>
@@ -244,6 +245,8 @@ export function Dashboard() {
       </main>
 
       {showPurchase && <CreditPurchase onClose={() => setShowPurchase(false)} />}
+      
+      <Footer />
     </div>
   );
 }

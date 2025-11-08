@@ -28,6 +28,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (data) {
       setProfile(data);
+    } else if (!error) {
+      // Profile doesn't exist, create it (for OAuth users)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error: insertError } = await supabase.from('profiles').insert({
+          id: user.id,
+          email: user.email!,
+          credits: 3,
+        });
+        
+        if (!insertError) {
+          // Fetch the newly created profile
+          const { data: newProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+          
+          if (newProfile) {
+            setProfile(newProfile);
+          }
+        }
+      }
     }
   };
 
