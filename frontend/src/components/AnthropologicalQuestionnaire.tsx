@@ -500,26 +500,419 @@ function renderQuestionContent(
   return null;
 }
 
-// Helper function to render Stage 1 questions
+// ============================================================================
+// STAGE 1: BUSINESS CONTEXT QUESTIONS
+// ============================================================================
+
 function renderStage1Questions(
   substage: number,
   formData: QuestionnaireState,
   setFormData: React.Dispatch<React.SetStateAction<QuestionnaireState>>
 ) {
-  // Implementation continues in next part...
-  return <div>Stage 1 Question {substage + 1}</div>;
+  switch (substage) {
+    case 0: // Q1.1: What do you want to price?
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What do you want to price?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This helps us understand the nature of your offering
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, offeringType: 'product' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.offeringType === 'product'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <Package className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Product</p>
+              <p className="text-sm text-slate-600 mt-1">Physical or digital goods</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, offeringType: 'service' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.offeringType === 'service'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <Wrench className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Service</p>
+              <p className="text-sm text-slate-600 mt-1">Work you provide to clients</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, offeringType: 'both' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.offeringType === 'both'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <Briefcase className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Both</p>
+              <p className="text-sm text-slate-600 mt-1">Product + Service bundle</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 1: // Q1.2: Is it physical, digital, or hybrid?
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Is it physical, digital, or hybrid?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This determines which markets and platforms we'll analyze
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, medium: 'physical' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.medium === 'physical'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <Package className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Physical</p>
+              <p className="text-sm text-slate-600 mt-1">Tangible, shipped items</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, medium: 'digital' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.medium === 'digital'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <Monitor className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Digital</p>
+              <p className="text-sm text-slate-600 mt-1">Online, downloadable</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, medium: 'hybrid' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.medium === 'hybrid'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <Globe className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Hybrid</p>
+              <p className="text-sm text-slate-600 mt-1">Mix of both</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 2: // Q1.3: Business entity type
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What type of business entity are you?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This helps us understand your overhead and pricing structure
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { value: 'individual', label: 'Individual', desc: 'Solo creator or seller', icon: Users },
+              { value: 'freelancer', label: 'Freelancer', desc: 'Independent professional', icon: Briefcase },
+              { value: 'agency', label: 'Agency', desc: 'Team of professionals', icon: Users },
+              { value: 'company', label: 'Company', desc: 'Registered business', icon: Briefcase },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, businessEntity: option.value as any })}
+                className={`p-6 rounded-xl border-2 transition text-left ${
+                  formData.businessEntity === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <option.icon className="w-6 h-6 text-olive-600 mb-2" />
+                <p className="font-semibold text-slate-800">{option.label}</p>
+                <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 3: // Q1.4: Location and target market
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Where are you located and who is your target market?
+          </h3>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Your Location (City, Country)
+                </div>
+              </label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+                placeholder="e.g., Mumbai, India"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-3">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  Target Market
+                </div>
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { value: 'local', label: 'Local' },
+                  { value: 'regional', label: 'Regional' },
+                  { value: 'national', label: 'National' },
+                  { value: 'global', label: 'Global' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, targetMarket: option.value as any })}
+                    className={`p-3 rounded-lg border-2 transition ${
+                      formData.targetMarket === option.value
+                        ? 'border-olive-600 bg-olive-50'
+                        : 'border-beige-200 hover:border-olive-300'
+                    }`}
+                  >
+                    <p className="font-medium text-slate-800">{option.label}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
+    case 4: // Q1.5: Pricing strategy
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What's your pricing goal?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This helps us optimize for your specific objective
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, pricingStrategy: 'market_rate' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.pricingStrategy === 'market_rate'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <TrendingUp className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Market Rate</p>
+              <p className="text-sm text-slate-600 mt-1">Competitive pricing</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, pricingStrategy: 'cost_based' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.pricingStrategy === 'cost_based'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <DollarSign className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Cost-Based</p>
+              <p className="text-sm text-slate-600 mt-1">Cover costs + margin</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, pricingStrategy: 'premium' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.pricingStrategy === 'premium'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <Award className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Premium</p>
+              <p className="text-sm text-slate-600 mt-1">High-value positioning</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 5: // Q1.6: Competitors
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you have competitors or benchmark offerings in mind?
+          </h3>
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, hasCompetitors: true })}
+                className={`flex-1 p-4 rounded-lg border-2 transition ${
+                  formData.hasCompetitors
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">Yes</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, hasCompetitors: false, competitorLinks: '' })}
+                className={`flex-1 p-4 rounded-lg border-2 transition ${
+                  !formData.hasCompetitors
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">No</p>
+              </button>
+            </div>
+            {formData.hasCompetitors && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Competitor links or names (optional)
+                </label>
+                <textarea
+                  value={formData.competitorLinks}
+                  onChange={(e) => setFormData({ ...formData, competitorLinks: e.target.value })}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+                  rows={4}
+                  placeholder="e.g., https://competitor1.com, Competitor Name 2"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      );
+
+    case 6: // Q1.7: Review and category detection
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Review Your Business Context
+          </h3>
+          <div className="bg-beige-50 rounded-xl p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-olive-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-slate-800">Offering Type</p>
+                <p className="text-slate-600">{formData.offeringType || 'Not specified'}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-olive-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-slate-800">Medium</p>
+                <p className="text-slate-600">{formData.medium || 'Not specified'}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-olive-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-slate-800">Business Entity</p>
+                <p className="text-slate-600">{formData.businessEntity || 'Not specified'}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-olive-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-slate-800">Location & Market</p>
+                <p className="text-slate-600">
+                  {formData.location || 'Not specified'} • {formData.targetMarket || 'Not specified'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-olive-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-slate-800">Pricing Strategy</p>
+                <p className="text-slate-600">{formData.pricingStrategy?.replace('_', ' ') || 'Not specified'}</p>
+              </div>
+            </div>
+          </div>
+          <p className="text-sm text-slate-500 mt-4 text-center">
+            Click Next to continue to category-specific questions
+          </p>
+        </div>
+      );
+
+    default:
+      return <div>Unknown question</div>;
+  }
 }
 
-// Helper functions for other stages...
+// ============================================================================
+// STAGE 2, 3, 4: PLACEHOLDER (TO BE IMPLEMENTED)
+// ============================================================================
+
 function renderStage2Questions(substage: number, formData: QuestionnaireState, setFormData: any) {
-  return <div>Stage 2 Question {substage + 1} for {formData.category}</div>;
+  return (
+    <div className="text-center py-12">
+      <h3 className="text-2xl font-bold text-slate-800 mb-4">
+        Stage 2: {formData.category?.replace(/_/g, ' ').toUpperCase()}
+      </h3>
+      <p className="text-slate-600 mb-4">
+        Question {substage + 1} for this category
+      </p>
+      <p className="text-sm text-slate-500">
+        (Category-specific questions will be implemented here)
+      </p>
+    </div>
+  );
 }
 
 function renderStage3Questions(substage: number, formData: QuestionnaireState, setFormData: any) {
-  return <div>Stage 3 Question {substage + 1}</div>;
+  return (
+    <div className="text-center py-12">
+      <h3 className="text-2xl font-bold text-slate-800 mb-4">
+        Stage 3: Experience & Positioning
+      </h3>
+      <p className="text-slate-600 mb-4">
+        Question {substage + 1}
+      </p>
+      <p className="text-sm text-slate-500">
+        (Experience questions will be implemented here)
+      </p>
+    </div>
+  );
 }
 
 function renderStage4Questions(substage: number, formData: QuestionnaireState, setFormData: any) {
-  return <div>Stage 4 Question {substage + 1}</div>;
+  return (
+    <div className="text-center py-12">
+      <h3 className="text-2xl font-bold text-slate-800 mb-4">
+        Stage 4: Output Preferences
+      </h3>
+      <p className="text-slate-600 mb-4">
+        Question {substage + 1}
+      </p>
+      <p className="text-sm text-slate-500">
+        (Output preference questions will be implemented here)
+      </p>
+    </div>
+  );
 }
 

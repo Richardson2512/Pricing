@@ -3,7 +3,7 @@ import { LogOut, Plus, History, Coins, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Consultation } from '../lib/supabase';
 import { PricingIntakeSelector } from './PricingIntakeSelector';
-import { MultiStepQuestionnaire } from './MultiStepQuestionnaire';
+import { AnthropologicalQuestionnaire } from './AnthropologicalQuestionnaire';
 import { DocumentUploadFlow } from './DocumentUploadFlow';
 import { CreditPurchase } from './CreditPurchase';
 import { PricingAnalysisResult } from './PricingAnalysisResult';
@@ -240,7 +240,7 @@ export function Dashboard() {
             </div>
           )}
 
-          <MultiStepQuestionnaire onSubmit={handleQuestionnaireSubmit} loading={loading} />
+          <AnthropologicalQuestionnaire onSubmit={handleQuestionnaireSubmit} loading={loading} />
         </div>
       </div>
     );
