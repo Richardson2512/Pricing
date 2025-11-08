@@ -320,7 +320,7 @@ ALTER TABLE market_listings ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public read access for market listings"
   ON market_listings FOR SELECT
   TO authenticated, anon
-  USING (is_active = true);
+  USING (true);
 
 -- Service role can manage
 CREATE POLICY "Service role can manage market listings"
@@ -335,7 +335,6 @@ CREATE INDEX IF NOT EXISTS idx_market_category ON market_listings(category);
 CREATE INDEX IF NOT EXISTS idx_market_price ON market_listings(price);
 CREATE INDEX IF NOT EXISTS idx_market_scraped ON market_listings(scraped_at DESC);
 CREATE INDEX IF NOT EXISTS idx_market_business_type ON market_listings(business_type, offering_type);
-CREATE INDEX IF NOT EXISTS idx_market_active ON market_listings(is_active) WHERE is_active = true;
 
 COMMENT ON TABLE market_listings IS 'Scraped pricing data from various marketplaces';
 
@@ -439,8 +438,7 @@ BEGIN
     ROUND(AVG(ml.rating)::numeric, 2) AS avg_rating,
     ROUND(AVG(ml.reviews)::numeric, 0) AS avg_reviews
   FROM market_listings ml
-  WHERE ml.is_active = true
-    AND ml.scraped_at > NOW() - INTERVAL '7 days'
+  WHERE ml.scraped_at > NOW() - INTERVAL '7 days'
     AND (category_filter IS NULL OR ml.category ILIKE '%' || category_filter || '%')
     AND (business_type_filter IS NULL OR ml.business_type = business_type_filter)
     AND (offering_type_filter IS NULL OR ml.offering_type = offering_type_filter)
@@ -514,8 +512,7 @@ CREATE OR REPLACE VIEW latest_market_data AS
 SELECT DISTINCT ON (source, category, title)
   *
 FROM market_listings
-WHERE is_active = true
-  AND scraped_at > NOW() - INTERVAL '7 days'
+WHERE scraped_at > NOW() - INTERVAL '7 days'
 ORDER BY source, category, title, scraped_at DESC;
 
 -- View for user dashboard summary
