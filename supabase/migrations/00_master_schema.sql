@@ -298,6 +298,82 @@ CREATE INDEX IF NOT EXISTS idx_consultations_user ON consultations(user_id);
 CREATE INDEX IF NOT EXISTS idx_consultations_created ON consultations(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_consultations_status ON consultations(status);
 
+-- Add new columns to existing consultations table
+DO $$ 
+BEGIN
+  -- Add questionnaire_id if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'consultations' AND column_name = 'questionnaire_id'
+  ) THEN
+    ALTER TABLE consultations ADD COLUMN questionnaire_id uuid REFERENCES questionnaire_responses(id) ON DELETE SET NULL;
+  END IF;
+  
+  -- Add price_low if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'consultations' AND column_name = 'price_low'
+  ) THEN
+    ALTER TABLE consultations ADD COLUMN price_low numeric;
+  END IF;
+  
+  -- Add price_average if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'consultations' AND column_name = 'price_average'
+  ) THEN
+    ALTER TABLE consultations ADD COLUMN price_average numeric;
+  END IF;
+  
+  -- Add price_high if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'consultations' AND column_name = 'price_high'
+  ) THEN
+    ALTER TABLE consultations ADD COLUMN price_high numeric;
+  END IF;
+  
+  -- Add recommended_price if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'consultations' AND column_name = 'recommended_price'
+  ) THEN
+    ALTER TABLE consultations ADD COLUMN recommended_price numeric;
+  END IF;
+  
+  -- Add market_data_count if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'consultations' AND column_name = 'market_data_count'
+  ) THEN
+    ALTER TABLE consultations ADD COLUMN market_data_count integer DEFAULT 0;
+  END IF;
+  
+  -- Add market_median_price if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'consultations' AND column_name = 'market_median_price'
+  ) THEN
+    ALTER TABLE consultations ADD COLUMN market_median_price numeric;
+  END IF;
+  
+  -- Add market_avg_price if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'consultations' AND column_name = 'market_avg_price'
+  ) THEN
+    ALTER TABLE consultations ADD COLUMN market_avg_price numeric;
+  END IF;
+  
+  -- Add processing_time_seconds if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'consultations' AND column_name = 'processing_time_seconds'
+  ) THEN
+    ALTER TABLE consultations ADD COLUMN processing_time_seconds integer;
+  END IF;
+END $$;
+
 COMMENT ON TABLE consultations IS 'Pricing analysis requests and AI-generated recommendations';
 
 -- ============================================================================
@@ -362,6 +438,42 @@ CREATE POLICY "Users can insert own purchases"
 CREATE INDEX IF NOT EXISTS idx_purchases_user ON credit_purchases(user_id);
 CREATE INDEX IF NOT EXISTS idx_purchases_date ON credit_purchases(purchase_date DESC);
 CREATE INDEX IF NOT EXISTS idx_purchases_status ON credit_purchases(payment_status);
+
+-- Add new columns to existing credit_purchases table
+DO $$ 
+BEGIN
+  -- Add currency if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'credit_purchases' AND column_name = 'currency'
+  ) THEN
+    ALTER TABLE credit_purchases ADD COLUMN currency text DEFAULT 'USD';
+  END IF;
+  
+  -- Add payment_method if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'credit_purchases' AND column_name = 'payment_method'
+  ) THEN
+    ALTER TABLE credit_purchases ADD COLUMN payment_method text;
+  END IF;
+  
+  -- Add payment_provider if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'credit_purchases' AND column_name = 'payment_provider'
+  ) THEN
+    ALTER TABLE credit_purchases ADD COLUMN payment_provider text;
+  END IF;
+  
+  -- Add payment_id if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'credit_purchases' AND column_name = 'payment_id'
+  ) THEN
+    ALTER TABLE credit_purchases ADD COLUMN payment_id text;
+  END IF;
+END $$;
 
 COMMENT ON TABLE credit_purchases IS 'Credit purchase transactions and payment history';
 
