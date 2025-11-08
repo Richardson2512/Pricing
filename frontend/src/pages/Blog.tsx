@@ -107,29 +107,29 @@ export function Blog() {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-[#F5F1E8] pt-24 pb-0">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="flex flex-col items-center gap-10">
+      <section className="bg-[#F5F1E8] pt-16 md:pt-24 pb-0">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex flex-col items-center gap-8 md:gap-10">
             {/* Heading and supporting text */}
-            <div className="flex flex-col items-center gap-6 max-w-4xl">
+            <div className="flex flex-col items-center gap-4 md:gap-6 max-w-full md:max-w-4xl">
               {/* Badge */}
-              <div className="flex items-center justify-center px-3 py-1 bg-[#F5F1E8] border border-olive-600 rounded-2xl">
+              <div className="flex items-center justify-center px-2.5 py-0.5 md:px-3 md:py-1 bg-[#F5F1E8] border border-olive-600 rounded-2xl">
                 <span className="text-sm font-medium text-olive-700">Our blog</span>
               </div>
               
               {/* Heading */}
-              <h1 className="text-5xl font-semibold text-slate-900 text-center leading-tight tracking-tight">
+              <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 text-center leading-tight tracking-tight px-4 md:px-0">
                 Pricing Guides & Resources
               </h1>
               
               {/* Supporting text */}
-              <p className="text-xl text-olive-700 text-center">
+              <p className="text-lg md:text-xl text-olive-700 text-center px-4 md:px-0">
                 Expert advice on how to price your products, services, and freelance work.
               </p>
             </div>
 
             {/* Search Input */}
-            <div className="w-80">
+            <div className="w-full max-w-[343px] md:max-w-[320px]">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
@@ -155,8 +155,8 @@ export function Blog() {
       </div>
 
       {/* Blog Posts Grid */}
-      <section className="bg-[#F5F1E8] pb-24">
-        <div className="max-w-7xl mx-auto px-8">
+      <section className="bg-[#F5F1E8] pb-16 md:pb-24">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
           {loading ? (
             <div className="text-center py-20">
               <div className="w-16 h-16 border-4 border-olive-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -168,17 +168,17 @@ export function Blog() {
               <p className="text-slate-500">Try adjusting your search</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-12">
-              {/* Row 1 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-col gap-8 md:gap-12">
+              {/* Mobile: Single column, Desktop: 3 columns */}
+              <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
                 {filteredPosts.slice(0, 3).map((post) => (
                   <article
                     key={post.id}
                     className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
                     onClick={() => navigate(`/blog/${post.slug}`)}
                   >
-                    {/* Image */}
-                    <div className="w-full h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
+                    {/* Image - 200px on mobile, 240px on desktop */}
+                    <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
                       {post.featured_image_url ? (
                         <img
                           src={post.featured_image_url}
@@ -191,7 +191,7 @@ export function Blog() {
                     </div>
 
                     {/* Content */}
-                    <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
+                    <div className="flex flex-col justify-between p-6 md:p-6 gap-8 flex-grow">
                       {/* Heading and subheading */}
                       <div className="flex flex-col gap-3">
                         {/* Category */}
@@ -203,13 +203,13 @@ export function Blog() {
                         
                         {/* Heading and text */}
                         <div className="flex flex-col gap-3">
-                          {/* Title */}
-                          <h2 className="text-2xl font-semibold text-slate-900 leading-8 line-clamp-2">
+                          {/* Title - 20px on mobile, 24px on desktop */}
+                          <h2 className="text-xl md:text-2xl font-semibold text-slate-900 leading-[30px] md:leading-8 line-clamp-2">
                             {post.title}
                           </h2>
                           
                           {/* Excerpt */}
-                          <p className="text-base text-slate-500 leading-6 line-clamp-3">
+                          <p className="text-base text-slate-500 leading-6 line-clamp-3 md:line-clamp-3">
                             {post.excerpt}
                           </p>
                         </div>
@@ -217,7 +217,7 @@ export function Blog() {
 
                       {/* Author info */}
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center flex-shrink-0">
                           <span className="text-sm font-medium text-olive-700">
                             {post.author_name.charAt(0)}
                           </span>
@@ -232,16 +232,16 @@ export function Blog() {
                 ))}
               </div>
 
-              {/* Row 2 */}
+              {/* Row 2 - Same responsive pattern */}
               {filteredPosts.length > 3 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
                   {filteredPosts.slice(3, 6).map((post) => (
                     <article
                       key={post.id}
                       className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
                       onClick={() => navigate(`/blog/${post.slug}`)}
                     >
-                      <div className="w-full h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
+                      <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
                         {post.featured_image_url ? (
                           <img
                             src={post.featured_image_url}
@@ -260,7 +260,7 @@ export function Blog() {
                             </span>
                           )}
                           <div className="flex flex-col gap-3">
-                            <h2 className="text-2xl font-semibold text-slate-900 leading-8 line-clamp-2">
+                            <h2 className="text-xl md:text-2xl font-semibold text-slate-900 leading-[30px] md:leading-8 line-clamp-2">
                               {post.title}
                             </h2>
                             <p className="text-base text-slate-500 leading-6 line-clamp-3">
@@ -269,7 +269,7 @@ export function Blog() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center flex-shrink-0">
                             <span className="text-sm font-medium text-olive-700">
                               {post.author_name.charAt(0)}
                             </span>
@@ -285,10 +285,10 @@ export function Blog() {
                 </div>
               )}
 
-              {/* Load More Button */}
+              {/* Load More Button - Full width on mobile, centered on desktop */}
               {filteredPosts.length > 6 && (
-                <div className="flex justify-center">
-                  <button className="flex items-center justify-center gap-2 px-5 py-3 bg-[#F5F1E8] border border-olive-600 rounded-lg shadow-sm hover:bg-beige-100 transition">
+                <div className="flex justify-center w-full">
+                  <button className="flex items-center justify-center gap-2 px-5 py-3 bg-[#F5F1E8] border border-olive-600 rounded-lg shadow-sm hover:bg-beige-100 transition w-full md:w-auto">
                     <ArrowRight className="w-5 h-5 text-olive-700 rotate-90" />
                     <span className="text-base font-medium text-olive-700">Load more</span>
                   </button>
