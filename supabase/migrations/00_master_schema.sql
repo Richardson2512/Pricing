@@ -76,6 +76,42 @@ CREATE TRIGGER update_profiles_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+-- Add new columns to existing profiles table
+DO $$ 
+BEGIN
+  -- Add first_name if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'profiles' AND column_name = 'first_name'
+  ) THEN
+    ALTER TABLE profiles ADD COLUMN first_name text;
+  END IF;
+  
+  -- Add last_name if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'profiles' AND column_name = 'last_name'
+  ) THEN
+    ALTER TABLE profiles ADD COLUMN last_name text;
+  END IF;
+  
+  -- Add total_credits_purchased if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'profiles' AND column_name = 'total_credits_purchased'
+  ) THEN
+    ALTER TABLE profiles ADD COLUMN total_credits_purchased integer DEFAULT 0;
+  END IF;
+  
+  -- Add total_analyses_completed if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'profiles' AND column_name = 'total_analyses_completed'
+  ) THEN
+    ALTER TABLE profiles ADD COLUMN total_analyses_completed integer DEFAULT 0;
+  END IF;
+END $$;
+
 COMMENT ON TABLE profiles IS 'User profiles with credit balance and statistics';
 
 -- ============================================================================
@@ -281,11 +317,32 @@ CREATE TABLE IF NOT EXISTS credit_purchases (
   payment_method text,
   payment_provider text,
   payment_id text,
-  payment_status text DEFAULT 'completed' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
+  payment_status text DEFAULT 'completed',
   
   -- Metadata
   purchase_date timestamptz DEFAULT now()
 );
+
+-- Add payment_status column if it doesn't exist (for existing tables)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'credit_purchases' AND column_name = 'payment_status'
+  ) THEN
+    ALTER TABLE credit_purchases ADD COLUMN payment_status text DEFAULT 'completed';
+  END IF;
+END $$;
+
+-- Add constraint after column exists
+DO $$
+BEGIN
+  ALTER TABLE credit_purchases DROP CONSTRAINT IF EXISTS credit_purchases_payment_status_check;
+  ALTER TABLE credit_purchases ADD CONSTRAINT credit_purchases_payment_status_check 
+    CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded'));
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END $$;
 
 ALTER TABLE credit_purchases ENABLE ROW LEVEL SECURITY;
 
