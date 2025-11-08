@@ -144,129 +144,124 @@ export function BlogPost() {
       />
       <Header />
 
-      <main className="flex-1 py-10">
-        <div className="max-w-3xl mx-auto px-6">
-          {/* Breadcrumb */}
-          <div className="mb-8">
-            <button
-              onClick={() => navigate('/blog')}
-              className="text-sm text-slate-600 hover:text-slate-800 transition"
-            >
-              ← Back to Articles
-            </button>
-          </div>
+      <main className="flex-1 py-12 md:py-20">
+        {/* Main Content Container */}
+        <div className="max-w-[1200px] mx-auto px-4 md:px-8 relative">
+          {/* White Content Box */}
+          <div className="bg-white rounded-[30px] shadow-2xl p-8 md:p-16 relative">
+            {/* Top Dashed Line */}
+            <div className="w-full max-w-[332px] h-px border-t border-dashed border-black mx-auto mb-8"></div>
 
-          {/* Article Header */}
-          <article>
+            {/* Publish Date */}
+            <div className="text-center mb-8">
+              <p className="font-serif text-sm text-[#222222]">
+                {formatDate(post.published_at)}
+              </p>
+            </div>
+
             {/* Title */}
-            <h1 className="text-3xl font-semibold text-slate-900 mb-3 leading-snug">
+            <h1 className="font-serif text-2xl md:text-[28px] leading-[37px] uppercase text-center text-black mb-12 max-w-[900px] mx-auto">
               {post.title}
             </h1>
 
-            {/* Meta Info */}
-            <p className="text-slate-600 text-sm mb-8">
-              {formatDate(post.published_at)} • {post.reading_time_minutes} min read • Category:{' '}
-              {post.category && (
-                <Link
-                  to={`/blog?category=${post.category.slug}`}
-                  className="font-medium text-slate-800 hover:text-olive-600 transition"
-                >
-                  {post.category.name}
-                </Link>
-              )}
-            </p>
+            {/* Article Content */}
+            <div 
+              className="max-w-[900px] mx-auto space-y-8
+                [&>p]:font-serif [&>p]:text-base [&>p]:leading-8 [&>p]:text-black [&>p]:mb-6
+                [&>h2]:font-serif [&>h2]:text-3xl [&>h2]:md:text-[38px] [&>h2]:leading-[51px] [&>h2]:font-bold [&>h2]:text-center [&>h2]:uppercase [&>h2]:text-black [&>h2]:my-12
+                [&>h3]:font-serif [&>h3]:text-2xl [&>h3]:font-bold [&>h3]:text-black [&>h3]:my-8
+                [&>blockquote]:font-serif [&>blockquote]:text-3xl [&>blockquote]:md:text-[38px] [&>blockquote]:leading-[51px] [&>blockquote]:font-bold [&>blockquote]:text-center [&>blockquote]:uppercase [&>blockquote]:text-black [&>blockquote]:my-12
+                [&>ul]:font-serif [&>ul]:text-base [&>ul]:leading-8 [&>ul]:text-black [&>ul]:list-disc [&>ul]:pl-8 [&>ul]:space-y-2
+                [&>ol]:font-serif [&>ol]:text-base [&>ol]:leading-8 [&>ol]:text-black [&>ol]:list-decimal [&>ol]:pl-8 [&>ol]:space-y-2
+                [&>a]:text-blue-600 [&>a]:underline hover:[&>a]:text-blue-700
+                [&>strong]:font-semibold [&>strong]:text-black
+                [&>em]:italic
+                [&>code]:bg-slate-100 [&>code]:text-olive-700 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded [&>code]:text-sm [&>code]:font-mono
+                [&>pre]:bg-slate-900 [&>pre]:text-slate-100 [&>pre]:p-6 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>pre]:my-6"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
 
-          {/* Featured Image */}
-          {post.featured_image_url && (
-            <div className="mb-8 rounded-xl overflow-hidden">
-              <img
-                src={post.featured_image_url}
-                alt={post.title}
-                className="w-full h-auto"
-              />
+            {/* Decorative Lines */}
+            <div className="relative my-16 h-32 hidden md:block">
+              <div className="absolute right-[10%] top-0 w-[397px] max-w-[40%] h-[25px] bg-[rgba(107,122,62,0.1)] rounded-full"></div>
+              <div className="absolute left-[10%] top-8 w-[253px] max-w-[30%] h-[25px] bg-[rgba(107,122,62,0.1)] rounded-full"></div>
             </div>
-          )}
 
-          {/* Article Content */}
-          <div 
-            className="prose prose-gray max-w-none
-              prose-headings:font-semibold prose-headings:text-slate-900
-              prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
-              prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-              prose-p:text-slate-800 prose-p:text-[17px] prose-p:leading-relaxed prose-p:mb-6
-              prose-a:text-olive-600 prose-a:font-medium hover:prose-a:text-olive-700
-              prose-strong:text-slate-900 prose-strong:font-semibold
-              prose-ul:list-disc prose-ul:ml-6 prose-ul:mt-2 prose-ul:text-slate-700 prose-ul:mb-6
-              prose-ol:list-decimal prose-ol:ml-6 prose-ol:mt-2 prose-ol:text-slate-700 prose-ol:mb-6
-              prose-li:mb-1
-              prose-code:bg-slate-100 prose-code:text-slate-700 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
-              prose-pre:bg-slate-100 prose-pre:rounded-xl prose-pre:p-4 prose-pre:my-6
-              prose-blockquote:border-l-4 prose-blockquote:border-olive-600 prose-blockquote:pl-4 prose-blockquote:italic
-              first:prose-p:text-slate-800 first:prose-p:text-[17px]"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-
-          {/* Tags */}
-          {post.tags && post.tags.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-beige-200">
-              <div className="flex items-center gap-3 flex-wrap">
-                <Tag className="w-5 h-5 text-olive-600" />
-                {post.tags.map((tag) => (
-                  <Link
-                    key={tag.slug}
-                    to={`/blog?tag=${tag.slug}`}
-                    className="px-3 py-1 bg-beige-100 text-slate-700 text-sm rounded-full hover:bg-olive-100 hover:text-olive-700 transition"
-                  >
-                    {tag.name}
-                  </Link>
-                ))}
+            {/* References Box */}
+            <div className="bg-white rounded-[30px] border-2 border-slate-200 p-6 md:p-8 mt-16 relative shadow-md">
+              <div className="flex flex-col md:flex-row items-start gap-6">
+                {/* Search Icon */}
+                <div className="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 flex items-center justify-center bg-olive-600 rounded-full">
+                  <svg className="w-10 h-10 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                
+                {/* Vertical Line */}
+                <div className="hidden md:block w-px h-32 bg-black"></div>
+                
+                {/* References Text */}
+                <div className="flex-1">
+                  <h4 className="font-serif font-bold text-lg mb-2">References:</h4>
+                  <p className="font-serif text-sm leading-8 text-[#222222]">
+                    {post.tags && post.tags.length > 0 
+                      ? post.tags.map(tag => tag.name).join(', ')
+                      : 'Additional research materials and sources available upon request. This article is based on industry best practices and expert analysis.'}
+                  </p>
+                </div>
               </div>
             </div>
-          )}
 
-            {/* CTA Box */}
-            <div className="mt-12 bg-gradient-to-r from-olive-600 to-olive-700 rounded-2xl p-8 text-white text-center">
-              <h3 className="text-2xl font-bold mb-4">
-                Ready to Price Your Project?
-              </h3>
-              <p className="text-beige-100 mb-6">
-                Get AI-powered pricing recommendations tailored to your specific project.
-              </p>
-              <button
-                onClick={() => navigate('/signup')}
-                className="px-8 py-3 bg-white text-olive-600 rounded-lg hover:bg-beige-50 transition font-semibold"
-              >
-                Get Started Free
-              </button>
+            {/* Bottom Dashed Line */}
+            <div className="mt-16 mb-8 w-full max-w-[332px] h-px border-t border-dashed border-black mx-auto"></div>
+
+            {/* Page Number */}
+            <div className="text-center relative">
+              <span className="font-serif text-base text-black">•</span>
+              <div className="w-1.5 h-1.5 bg-olive-600 rounded-full mx-auto mt-2"></div>
             </div>
-          </article>
+          </div>
+
+          {/* Back Button - Outside white box */}
+          <button
+            onClick={() => navigate('/blog')}
+            className="flex items-center gap-2 text-olive-600 hover:text-olive-700 mt-8 transition font-medium"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Blog</span>
+          </button>
         </div>
 
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-beige-200">
-            <h2 className="text-3xl font-bold text-slate-800 mb-8">Related Articles</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 mt-16">
+            <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">Related Articles</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {relatedPosts.map((relatedPost) => (
                 <div
                   key={relatedPost.id}
-                  onClick={() => navigate(`/blog/${relatedPost.slug}`)}
-                  className="bg-white rounded-xl p-6 border border-beige-200 hover:shadow-lg transition cursor-pointer group"
+                  onClick={() => {
+                    navigate(`/blog/${relatedPost.slug}`);
+                    window.scrollTo(0, 0);
+                  }}
+                  className="bg-white shadow-lg hover:shadow-xl transition cursor-pointer group rounded-none"
                 >
-                  {relatedPost.category && (
-                    <span className="inline-block px-3 py-1 bg-olive-100 text-olive-700 text-xs font-semibold rounded-full mb-3">
-                      {relatedPost.category.name}
-                    </span>
-                  )}
-                  <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-olive-600 transition line-clamp-2">
-                    {relatedPost.title}
-                  </h3>
-                  <p className="text-slate-600 text-sm mb-3 line-clamp-2">
-                    {relatedPost.excerpt}
-                  </p>
-                  <div className="flex items-center gap-1 text-sm text-slate-500">
-                    <Clock className="w-4 h-4" />
-                    <span>{relatedPost.reading_time_minutes} min read</span>
+                  <div className="p-6">
+                    {relatedPost.category && (
+                      <span className="inline-block px-3 py-1 bg-olive-100 text-olive-700 text-xs font-semibold rounded-full mb-3">
+                        {relatedPost.category.name}
+                      </span>
+                    )}
+                    <h3 className="text-xl font-bold text-slate-800 mb-2 group-hover:text-olive-600 transition line-clamp-2">
+                      {relatedPost.title}
+                    </h3>
+                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">
+                      {relatedPost.excerpt}
+                    </p>
+                    <div className="flex items-center gap-1 text-sm text-slate-500">
+                      <Clock className="w-4 h-4" />
+                      <span>{relatedPost.reading_time_minutes} min read</span>
+                    </div>
                   </div>
                 </div>
               ))}
