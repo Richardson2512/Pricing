@@ -34,6 +34,11 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Enable RLS
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
+
 -- RLS Policies
 CREATE POLICY "Users can view own profile"
   ON profiles FOR SELECT
@@ -108,6 +113,9 @@ CREATE TABLE IF NOT EXISTS questionnaire_responses (
 
 ALTER TABLE questionnaire_responses ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own responses" ON questionnaire_responses;
+DROP POLICY IF EXISTS "Users can insert own responses" ON questionnaire_responses;
+
 CREATE POLICY "Users can view own responses"
   ON questionnaire_responses FOR SELECT
   TO authenticated
@@ -153,6 +161,9 @@ CREATE TABLE IF NOT EXISTS uploaded_documents (
 );
 
 ALTER TABLE uploaded_documents ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own documents" ON uploaded_documents;
+DROP POLICY IF EXISTS "Users can insert own documents" ON uploaded_documents;
 
 CREATE POLICY "Users can view own documents"
   ON uploaded_documents FOR SELECT
@@ -211,6 +222,9 @@ CREATE TABLE IF NOT EXISTS consultations (
 
 ALTER TABLE consultations ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own consultations" ON consultations;
+DROP POLICY IF EXISTS "Users can insert own consultations" ON consultations;
+
 CREATE POLICY "Users can view own consultations"
   ON consultations FOR SELECT
   TO authenticated
@@ -251,6 +265,9 @@ CREATE TABLE IF NOT EXISTS credit_purchases (
 );
 
 ALTER TABLE credit_purchases ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own purchases" ON credit_purchases;
+DROP POLICY IF EXISTS "Users can insert own purchases" ON credit_purchases;
 
 CREATE POLICY "Users can view own purchases"
   ON credit_purchases FOR SELECT
@@ -316,6 +333,9 @@ CREATE TABLE IF NOT EXISTS market_listings (
 
 ALTER TABLE market_listings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read access for market listings" ON market_listings;
+DROP POLICY IF EXISTS "Service role can manage market listings" ON market_listings;
+
 -- Public read access for market data
 CREATE POLICY "Public read access for market listings"
   ON market_listings FOR SELECT
@@ -346,6 +366,12 @@ COMMENT ON TABLE market_listings IS 'Scraped pricing data from various marketpla
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('documents', 'documents', false)
 ON CONFLICT (id) DO NOTHING;
+
+-- Drop existing storage policies
+DROP POLICY IF EXISTS "Users can upload own documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view own documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete own documents" ON storage.objects;
+DROP POLICY IF EXISTS "Service role can access all documents" ON storage.objects;
 
 -- Storage policies for documents bucket
 CREATE POLICY "Users can upload own documents"
