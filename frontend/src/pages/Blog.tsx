@@ -179,15 +179,16 @@ export function Blog() {
                     onClick={() => navigate(`/blog/${post.slug}`)}
                   >
                     {/* Image - 200px on mobile, 240px on desktop */}
-                    <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
+                    <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-600 to-olive-800 overflow-hidden relative">
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
                       {post.featured_image_url ? (
                         <img
                           src={post.featured_image_url}
                           alt={post.title}
-                          className="w-full h-full object-cover"
+                          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
                         />
                       ) : (
-                        <span className="text-6xl">📊</span>
+                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
                       )}
                     </div>
 
@@ -242,15 +243,16 @@ export function Blog() {
                       className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
                       onClick={() => navigate(`/blog/${post.slug}`)}
                     >
-                      <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
+                      <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-600 to-olive-800 overflow-hidden relative">
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
                         {post.featured_image_url ? (
                           <img
                             src={post.featured_image_url}
                             alt={post.title}
-                            className="w-full h-full object-cover"
+                            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
                           />
                         ) : (
-                          <span className="text-6xl">📊</span>
+                          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
                         )}
                       </div>
                       <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
@@ -295,15 +297,16 @@ export function Blog() {
                       className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
                       onClick={() => navigate(`/blog/${post.slug}`)}
                     >
-                      <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
+                      <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-600 to-olive-800 overflow-hidden relative">
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
                         {post.featured_image_url ? (
                           <img
                             src={post.featured_image_url}
                             alt={post.title}
-                            className="w-full h-full object-cover"
+                            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
                           />
                         ) : (
-                          <span className="text-6xl">📊</span>
+                          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
                         )}
                       </div>
                       <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
@@ -348,15 +351,16 @@ export function Blog() {
                       className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
                       onClick={() => navigate(`/blog/${post.slug}`)}
                     >
-                      <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
+                      <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-600 to-olive-800 overflow-hidden relative">
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
                         {post.featured_image_url ? (
                           <img
                             src={post.featured_image_url}
                             alt={post.title}
-                            className="w-full h-full object-cover"
+                            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
                           />
                         ) : (
-                          <span className="text-6xl">📊</span>
+                          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
                         )}
                       </div>
                       <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
