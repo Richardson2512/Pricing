@@ -50,9 +50,8 @@ Fixed packages (no custom amounts):
 | 5 | $10 | $2.00 | `pdt_jAHaYI6bUNkXVdTd4tqJ6` | Starter |
 | 10 | $15 | $1.50 | `pdt_c4yyDCsXQsI6GXhJwtfW6` | Professional ⭐ |
 | 20 | $25 | $1.25 | `pdt_ViYh83fJgoA70GKJ76JXe` | Business |
-| 50 | $50 | $1.00 | `pdt_ViYh83fJgoA70GKJ76JXe` | Enterprise |
 
-**Note:** 50-credit package currently uses Business product ID. Create a separate product in Dodo Payments dashboard if you want a dedicated 50-credit product.
+**Note:** Only 3 packages available. These match the products configured in Dodo Payments dashboard.
 
 ---
 

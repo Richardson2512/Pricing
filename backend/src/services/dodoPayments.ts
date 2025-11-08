@@ -8,7 +8,6 @@ const PRODUCT_IDS: { [key: number]: string } = {
   5: 'pdt_jAHaYI6bUNkXVdTd4tqJ6',   // Starter: 5 credits
   10: 'pdt_c4yyDCsXQsI6GXhJwtfW6',  // Professional: 10 credits
   20: 'pdt_ViYh83fJgoA70GKJ76JXe',  // Business: 20 credits
-  50: 'pdt_ViYh83fJgoA70GKJ76JXe',  // Using Business ID for 50 credits (update if you create separate product)
 };
 
 interface CreateCheckoutParams {

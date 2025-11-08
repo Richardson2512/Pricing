@@ -12,7 +12,6 @@ const packages: CreditPackage[] = [
   { credits: 5, price: 10 },
   { credits: 10, price: 15, popular: true },
   { credits: 20, price: 25 },
-  { credits: 50, price: 50 },
 ];
 
 type CreditPurchaseProps = {
@@ -100,7 +99,7 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
             <h3 className="text-xl font-bold text-slate-800 mb-6 text-center">
               Choose Your Credit Package
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {packages.map((pkg) => (
                 <div
                   key={pkg.credits}

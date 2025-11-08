@@ -9,7 +9,6 @@ const CREDIT_PACKAGES = [
   { credits: 5, price: 10, name: 'Starter' },
   { credits: 10, price: 15, name: 'Professional' },
   { credits: 20, price: 25, name: 'Business' },
-  { credits: 50, price: 50, name: 'Enterprise' },
 ];
 
 /**
