@@ -1,15 +1,35 @@
-# PriceWise Scrapers
+# Pricing Scrapers Service
 
-Python-based web scraping layer for collecting market pricing data from multiple platforms.
+Python-based web scraping service with REST API for collecting market pricing data from multiple platforms.
+
+## 🚀 Quick Deploy to Render
+
+**[📖 Complete Render Deployment Guide →](../docs/RENDER_DEPLOYMENT.md)**
+
+```bash
+# 1. Push to GitHub
+git push origin main
+
+# 2. Go to render.com
+# 3. New Web Service → Connect GitHub repo
+# 4. Root Directory: scrapers
+# 5. Add environment variables (see guide)
+# 6. Deploy!
+```
+
+**Service URL**: `https://your-scrapers.onrender.com`
+
+---
 
 ## Architecture
 
-This scraper layer uses **Scrapy** with **Playwright** for JavaScript rendering, collecting structured pricing data from various marketplaces.
+This service provides a **FastAPI REST API** that triggers **Scrapy** spiders with **Playwright** for JavaScript rendering, collecting structured pricing data from various marketplaces.
 
 ## Tech Stack
 
 | Purpose | Tool | Why |
 |---------|------|-----|
+| **API Server** | FastAPI + Uvicorn | Fast, async REST API |
 | Crawling | Scrapy | Production-grade, asynchronous, extensible |
 | JavaScript rendering | Playwright (scrapy-playwright) | Handles dynamic sites like AppSumo, ProductHunt |
 | Data parsing | BeautifulSoup4 / lxml | HTML cleanup and fallback parsing |
@@ -18,6 +38,7 @@ This scraper layer uses **Scrapy** with **Playwright** for JavaScript rendering,
 | Scheduling | Prefect | Orchestrate periodic crawls |
 | Data validation | Pydantic | Ensure data quality |
 | Database | Supabase (PostgreSQL) | Store scraped data |
+| **Deployment** | Render | Cloud hosting |
 
 ## Project Structure
 
