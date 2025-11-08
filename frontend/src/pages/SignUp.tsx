@@ -205,13 +205,6 @@ export function SignUp() {
             </p>
           </div>
 
-          {/* Free Credits Banner */}
-          <div className="mt-6 p-4 bg-beige-100 rounded-lg border border-beige-200">
-            <p className="text-sm text-olive-800 font-medium text-center">
-              🎉 New users get 3 free pricing checks!
-            </p>
-          </div>
-
           {/* Terms */}
           <p className="text-xs text-slate-500 text-center mt-6">
             By signing up, you agree to our{' '}
