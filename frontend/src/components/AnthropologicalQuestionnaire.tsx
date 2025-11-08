@@ -450,15 +450,21 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
     const totalQuestions = stage1Questions + stage2Questions + stage3Questions + stage4Questions;
     
     let answeredQuestions = 0;
-    if (stage > 1) answeredQuestions += stage1Questions;
-    if (stage > 2) answeredQuestions += stage2Questions;
-    if (stage > 3) answeredQuestions += stage3Questions;
-    if (stage === 4) answeredQuestions += substage + 1;
-    else if (stage === 3) answeredQuestions += stage1Questions + stage2Questions + substage + 1;
-    else if (stage === 2) answeredQuestions += stage1Questions + substage + 1;
-    else answeredQuestions += substage + 1;
     
-    return Math.round((answeredQuestions / totalQuestions) * 100);
+    // Calculate based on current stage and substage
+    if (stage === 1) {
+      answeredQuestions = substage + 1;
+    } else if (stage === 2) {
+      answeredQuestions = stage1Questions + substage + 1;
+    } else if (stage === 3) {
+      answeredQuestions = stage1Questions + stage2Questions + substage + 1;
+    } else if (stage === 4) {
+      answeredQuestions = stage1Questions + stage2Questions + stage3Questions + substage + 1;
+    }
+    
+    // Cap at 100%
+    const percentage = Math.round((answeredQuestions / totalQuestions) * 100);
+    return Math.min(percentage, 100);
   };
 
   const getCategoryIcon = () => {
