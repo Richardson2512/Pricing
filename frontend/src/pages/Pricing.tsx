@@ -177,7 +177,7 @@ export function Pricing() {
                   Can I purchase more credits anytime?
                 </h3>
                 <p className="text-slate-600">
-                  Yes, you can purchase additional credits at any time from your dashboard. You can also buy custom amounts.
+                  Yes, you can purchase additional credits at any time from your dashboard. Choose from our flexible credit packages.
                 </p>
               </div>
 

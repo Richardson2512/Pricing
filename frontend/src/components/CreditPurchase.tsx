@@ -72,11 +72,7 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-olive-600 font-bold">✓</span>
-                  <span>Flexible credit packages (5, 10, 20, 50+ credits)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-olive-600 font-bold">✓</span>
-                  <span>Custom credit amounts</span>
+                  <span>Flexible credit packages (5, 10, 20, 50 credits)</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-olive-600 font-bold">✓</span>
