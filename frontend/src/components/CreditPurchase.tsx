@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { Coins, X } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 type CreditPackage = {
@@ -21,61 +19,19 @@ type CreditPurchaseProps = {
 };
 
 export function CreditPurchase({ onClose }: CreditPurchaseProps) {
-  const [customCredits, setCustomCredits] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { profile, refreshProfile } = useAuth();
+  const { profile } = useAuth();
 
-  const handlePurchase = async (credits: number, amount: number) => {
-    if (!profile) return;
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const { error: purchaseError } = await supabase
-        .from('credit_purchases')
-        .insert({
-          user_id: profile.id,
-          credits_purchased: credits,
-          amount_paid: amount,
-        });
-
-      if (purchaseError) throw purchaseError;
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ credits: profile.credits + credits })
-        .eq('id', profile.id);
-
-      if (updateError) throw updateError;
-
-      await refreshProfile();
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Purchase failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCustomPurchase = () => {
-    const credits = parseInt(customCredits);
-    if (credits > 0) {
-      const amount = credits * 2;
-      handlePurchase(credits, amount);
-    }
-  };
+  // Payment integration coming soon - show informational modal only
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-beige-200 p-6 flex items-center justify-between">
+      <div className="bg-white rounded-2xl max-w-2xl w-full">
+        <div className="bg-white border-b border-beige-200 p-6 flex items-center justify-between rounded-t-2xl">
           <div className="flex items-center gap-3">
             <div className="bg-beige-100 p-2 rounded-lg">
               <Coins className="w-6 h-6 text-olive-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-800">Purchase Credits</h2>
+            <h2 className="text-2xl font-bold text-slate-800">Credit Top-Up</h2>
           </div>
           <button
             onClick={onClose}
@@ -85,96 +41,102 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
           </button>
         </div>
 
-        <div className="p-6">
-          <div className="bg-beige-100 border border-beige-200 rounded-xl p-4 mb-6">
-            <p className="text-olive-800 text-center">
+        <div className="p-8 text-center">
+          {/* Current Balance */}
+          <div className="bg-beige-100 border border-beige-200 rounded-xl p-6 mb-8">
+            <p className="text-olive-800 text-lg">
               <span className="font-semibold">Current Balance:</span> {profile?.credits || 0} credits
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4 mb-8">
-            {packages.map((pkg) => (
-              <div
-                key={pkg.credits}
-                className={`relative border-2 rounded-xl p-6 transition hover:shadow-lg ${
-                  pkg.popular
-                    ? 'border-olive-500 bg-beige-50'
-                    : 'border-slate-200 bg-white hover:border-olive-300'
-                }`}
-              >
-                {pkg.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-olive-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                      Popular
-                    </span>
-                  </div>
-                )}
-                <div className="text-center mb-4">
-                  <div className="text-4xl font-bold text-slate-800 mb-2">
+          {/* Coming Soon Message */}
+          <div className="mb-8">
+            <div className="w-20 h-20 bg-olive-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Coins className="w-10 h-10 text-olive-600" />
+            </div>
+            
+            <h3 className="text-3xl font-bold text-slate-800 mb-4">
+              Credit Top-Up Coming Soon! 🚀
+            </h3>
+            
+            <p className="text-lg text-slate-600 mb-6">
+              We're currently integrating secure payment options to make purchasing credits seamless.
+            </p>
+            
+            <div className="bg-olive-50 border border-olive-200 rounded-xl p-6 text-left max-w-md mx-auto">
+              <p className="font-semibold text-olive-900 mb-3">What's coming:</p>
+              <ul className="space-y-2 text-sm text-olive-800">
+                <li className="flex items-start gap-2">
+                  <span className="text-olive-600 font-bold">✓</span>
+                  <span>Multiple payment options (Credit Card, PayPal, UPI)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-olive-600 font-bold">✓</span>
+                  <span>Flexible credit packages (5, 10, 20, 50+ credits)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-olive-600 font-bold">✓</span>
+                  <span>Custom credit amounts</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-olive-600 font-bold">✓</span>
+                  <span>Instant credit delivery</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-olive-600 font-bold">✓</span>
+                  <span>Secure payment processing</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Preview Packages */}
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold text-slate-800 mb-4">
+              Planned Credit Packages:
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {packages.map((pkg) => (
+                <div
+                  key={pkg.credits}
+                  className="border-2 border-beige-200 rounded-xl p-4 bg-beige-50"
+                >
+                  <div className="text-2xl font-bold text-slate-800 mb-1">
                     {pkg.credits}
                   </div>
-                  <div className="text-slate-600">Credits</div>
-                </div>
-                <div className="text-center mb-4">
-                  <div className="text-3xl font-bold text-olive-600">
+                  <div className="text-xs text-slate-600 mb-2">Credits</div>
+                  <div className="text-xl font-bold text-olive-600">
                     ${pkg.price}
                   </div>
-                  <div className="text-sm text-slate-500 mt-1">
-                    ${(pkg.price / pkg.credits).toFixed(2)} per credit
+                  <div className="text-xs text-slate-500 mt-1">
+                    ${(pkg.price / pkg.credits).toFixed(2)}/credit
                   </div>
                 </div>
-                <button
-                  onClick={() => handlePurchase(pkg.credits, pkg.price)}
-                  disabled={loading}
-                  className="w-full bg-olive-600 text-white py-3 rounded-lg font-semibold hover:bg-olive-700 transition disabled:opacity-50"
-                >
-                  Purchase
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="border-t border-slate-200 pt-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">
-              Custom Amount
-            </h3>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <input
-                  type="number"
-                  min="1"
-                  value={customCredits}
-                  onChange={(e) => setCustomCredits(e.target.value)}
-                  placeholder="Enter number of credits"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 focus:border-transparent"
-                />
-                {customCredits && parseInt(customCredits) > 0 && (
-                  <p className="text-sm text-slate-600 mt-2">
-                    Total: ${parseInt(customCredits) * 2}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={handleCustomPurchase}
-                disabled={loading || !customCredits || parseInt(customCredits) <= 0}
-                className="px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Purchase
-              </button>
+              ))}
             </div>
           </div>
 
-          {error && (
-            <div className="mt-4 bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-            <p className="text-sm text-slate-600 text-center">
-              Credits never expire and can be used anytime
+          {/* Contact for Early Access */}
+          <div className="bg-gradient-to-r from-olive-600 to-olive-700 rounded-xl p-6 text-white">
+            <p className="font-semibold mb-2">Need more credits now?</p>
+            <p className="text-sm text-beige-100 mb-4">
+              Contact us for early access to credit purchases or special arrangements.
             </p>
+            <a
+              href="mailto:support@pricewise.com?subject=Credit Purchase Inquiry"
+              className="inline-block px-6 py-3 bg-white text-olive-600 rounded-lg font-semibold hover:bg-beige-50 transition"
+            >
+              Contact Support
+            </a>
           </div>
+
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="mt-8 px-8 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
