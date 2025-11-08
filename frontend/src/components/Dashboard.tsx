@@ -65,7 +65,8 @@ export function Dashboard() {
         experienceLevel: formData.skillLevel || 'intermediate', // 'beginner', 'intermediate', 'expert'
         region: formData.location || 'Global',
         niche: formData.digitalCategory || formData.serviceType || formData.productType || '',
-        pricingGoal: formData.pricingStrategy || 'market_rate', // 'cost_plus', 'market_rate', 'premium'
+        // Map pricingStrategy to backend enum values
+        pricingGoal: formData.pricingStrategy === 'cost_based' ? 'cost_plus' : (formData.pricingStrategy || 'market_rate'), // 'cost_plus', 'market_rate', 'premium'
         
         // Construct detailed descriptions from questionnaire data
         productDescription: buildProductDescription(formData),
