@@ -53,10 +53,10 @@ export function Contact() {
                       Our team is here to help
                     </p>
                     <a
-                      href="mailto:support@pricewise.com"
+                      href="mailto:support@howmuchshouldiprice.com"
                       className="text-olive-600 hover:text-olive-700 font-medium"
                     >
-                      support@pricewise.com
+                      support@howmuchshouldiprice.com
                     </a>
                   </div>
                 </div>
@@ -225,10 +225,10 @@ export function Contact() {
                   Interested in enterprise solutions?
                 </p>
                 <a
-                  href="mailto:sales@pricewise.com"
+                  href="mailto:sales@howmuchshouldiprice.com"
                   className="text-olive-600 hover:text-olive-700 font-medium"
                 >
-                  sales@pricewise.com
+                  sales@howmuchshouldiprice.com
                 </a>
               </div>
 
@@ -238,10 +238,10 @@ export function Contact() {
                   Need help with your account?
                 </p>
                 <a
-                  href="mailto:support@pricewise.com"
+                  href="mailto:support@howmuchshouldiprice.com"
                   className="text-olive-600 hover:text-olive-700 font-medium"
                 >
-                  support@pricewise.com
+                  support@howmuchshouldiprice.com
                 </a>
               </div>
 
@@ -251,10 +251,10 @@ export function Contact() {
                   Interested in partnering with us?
                 </p>
                 <a
-                  href="mailto:partners@pricewise.com"
+                  href="mailto:partners@howmuchshouldiprice.com"
                   className="text-olive-600 hover:text-olive-700 font-medium"
                 >
-                  partners@pricewise.com
+                  partners@howmuchshouldiprice.com
                 </a>
               </div>
             </div>

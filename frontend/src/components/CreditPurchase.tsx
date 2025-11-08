@@ -123,7 +123,7 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
               Contact us for early access to credit purchases or special arrangements.
             </p>
             <a
-              href="mailto:support@pricewise.com?subject=Credit Purchase Inquiry"
+              href="mailto:support@howmuchshouldiprice.com?subject=Credit Purchase Inquiry"
               className="inline-block px-6 py-3 bg-white text-olive-600 rounded-lg font-semibold hover:bg-beige-50 transition"
             >
               Contact Support

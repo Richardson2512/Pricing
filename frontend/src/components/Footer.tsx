@@ -76,8 +76,8 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm">
                 <Mail className="w-4 h-4 text-olive-400" />
-                <a href="mailto:support@pricewise.com" className="hover:text-olive-400 transition">
-                  support@pricewise.com
+                <a href="mailto:support@howmuchshouldiprice.com" className="hover:text-olive-400 transition">
+                  support@howmuchshouldiprice.com
                 </a>
               </li>
               <li className="flex items-center gap-2 text-sm">

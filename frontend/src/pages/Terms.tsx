@@ -210,7 +210,7 @@ export function Terms() {
                   To request a refund:
                 </p>
                 <ol className="list-decimal list-inside text-slate-600 space-y-2">
-                  <li>Contact our support team at support@pricewise.com</li>
+                  <li>Contact our support team at support@howmuchshouldiprice.com</li>
                   <li>Provide your account email and reason for refund</li>
                   <li>We'll review your request within 2-3 business days</li>
                   <li>If approved, refund will be processed to original payment method</li>
@@ -234,7 +234,7 @@ export function Terms() {
               <div>
                 <h3 className="text-xl font-semibold text-slate-800 mb-3">Questions?</h3>
                 <p className="text-slate-600 leading-relaxed">
-                  If you have any questions about our refund policy, please contact us at support@pricewise.com or call +1 (234) 567-890.
+                  If you have any questions about our refund policy, please contact us at support@howmuchshouldiprice.com or call +1 (234) 567-890.
                 </p>
               </div>
             </div>
