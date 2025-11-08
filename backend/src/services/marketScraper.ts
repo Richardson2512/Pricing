@@ -17,6 +17,7 @@ interface ScrapingConfig {
   offeringType: 'product' | 'service';
   region: string;
   niche?: string;
+  sources?: string[];
 }
 
 // Map business types to relevant platforms

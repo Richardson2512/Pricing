@@ -16,7 +16,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 app.use(helmet());
 
 // CORS configuration - support multiple origins for Vercel deployments
-const allowedOrigins = [
+const allowedOrigins: (string | RegExp)[] = [
   'http://localhost:5173', // Local development
   'http://localhost:5174', // Alternative local port
   FRONTEND_URL, // Production frontend

@@ -63,6 +63,15 @@ export function Landing() {
       <section className="flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center max-w-4xl mx-auto">
+            {/* Logo */}
+            <div className="flex justify-center mb-8">
+              <img 
+                src="/logo.png" 
+                alt="HowMuchShouldIPrice Logo" 
+                className="h-20 w-auto"
+              />
+            </div>
+            
             <h1 className="text-5xl md:text-6xl font-bold text-slate-800 mb-6">
               How Much Should I{' '}
               <span className="text-olive-600">Price</span>

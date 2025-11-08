@@ -28,6 +28,7 @@ export interface PricingInput {
   offeringType: 'product' | 'service';
   experienceLevel: 'beginner' | 'intermediate' | 'expert';
   region: string;
+  targetMarket?: string;
   niche?: string;
   pricingGoal: 'cost_plus' | 'market_rate' | 'premium';
   productDescription: string;
@@ -356,7 +357,7 @@ Your response must be actionable and specific enough that the user can implement
       throw new Error(`DeepSeek API error: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
 
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       throw new Error('Invalid response from DeepSeek API');

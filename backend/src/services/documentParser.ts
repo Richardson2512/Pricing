@@ -103,7 +103,7 @@ Rules:
       return {};
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
     const content = data.choices[0].message.content;
 
     // Try to parse JSON from response

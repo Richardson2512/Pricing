@@ -21,11 +21,15 @@ export function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="bg-olive-600 p-2 rounded-lg group-hover:bg-olive-700 transition">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-slate-800">PriceWise</span>
+          <Link to="/" className="flex items-center gap-3 group">
+            <img 
+              src="/logo.png" 
+              alt="HowMuchShouldIPrice Logo" 
+              className="h-10 w-auto"
+            />
+            <span className="text-2xl font-bold text-slate-800 group-hover:text-olive-600 transition">
+              HowMuchShouldIPrice
+            </span>
           </Link>
 
           {/* Desktop Navigation */}

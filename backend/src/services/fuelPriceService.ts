@@ -266,12 +266,9 @@ export function getVehicleEfficiency(location: string, vehicleType: 'bike' | 'ca
 // EXPORT
 // ============================================================================
 
-export default {
+export {
   getFuelPricesByLocation,
   getIndiaFuelPrices,
-  convertCurrency,
-  formatCurrency,
-  getCurrencyByLocation,
   kmToMiles,
   milesToKm,
   formatDistance,

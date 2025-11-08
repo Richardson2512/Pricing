@@ -10,11 +10,15 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="bg-olive-600 p-2 rounded-lg">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-white">PriceWise</span>
+            <Link to="/" className="flex items-center gap-3 mb-4 group">
+              <img 
+                src="/logo.png" 
+                alt="HowMuchShouldIPrice Logo" 
+                className="h-8 w-auto"
+              />
+              <span className="text-xl font-bold text-white group-hover:text-beige-200 transition">
+                HowMuchShouldIPrice
+              </span>
             </Link>
             <p className="text-sm text-slate-400">
               AI-powered pricing recommendations to help your business thrive.
