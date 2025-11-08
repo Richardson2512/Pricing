@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { supabaseAdmin } from '../config/supabase.js';
 import { authenticateUser, AuthRequest } from '../middleware/auth.js';
+import { generatePricingRecommendation } from '../services/deepseek.js';
 
 const router = Router();
 
@@ -15,43 +16,7 @@ const consultationSchema = z.object({
   valueProposition: z.string().min(1),
 });
 
-// Generate pricing recommendation
-const generatePricingRecommendation = (data: {
-  businessType: string;
-  targetMarket: string;
-  productDescription: string;
-  costToDeliver: string;
-  competitorPricing: string;
-  valueProposition: string;
-}) => {
-  return `Based on your ${data.businessType} business targeting ${data.targetMarket}, here's our pricing recommendation:
-
-PRICING STRATEGY:
-Given your cost structure (${data.costToDeliver}) and competitive landscape (${data.competitorPricing}), we recommend a value-based pricing approach.
-
-RECOMMENDED PRICE RANGE:
-Consider positioning your offering in the premium segment of your market, reflecting the unique value you provide: ${data.valueProposition}
-
-KEY CONSIDERATIONS:
-1. Cost Coverage: Ensure your pricing covers all costs with a healthy margin
-2. Market Positioning: Align with how you want to be perceived in ${data.targetMarket}
-3. Value Delivery: Price should reflect the value you deliver, not just your costs
-4. Competitive Landscape: Stay aware of ${data.competitorPricing} but don't race to the bottom
-
-PRICING MODELS TO CONSIDER:
-- Tiered pricing: Offer multiple levels to capture different customer segments
-- Value-based: Price according to the value delivered to customers
-- Freemium: Offer a free tier to acquire users, premium for advanced features
-- Usage-based: Charge based on consumption or usage levels
-
-NEXT STEPS:
-1. Test your pricing with a small segment of customers
-2. Monitor customer feedback and conversion rates
-3. Be prepared to iterate based on market response
-4. Consider offering early-bird discounts to gain initial traction
-
-Remember: Pricing is not permanent. Start with a hypothesis and refine based on real market feedback.`;
-};
+// Note: generatePricingRecommendation is now imported from deepseek.ts service
 
 // Get all consultations for authenticated user
 router.get('/', authenticateUser, async (req: AuthRequest, res) => {
@@ -94,8 +59,8 @@ router.post('/', authenticateUser, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Insufficient credits' });
     }
 
-    // Generate recommendation
-    const recommendation = generatePricingRecommendation(validatedData);
+    // Generate recommendation using DeepSeek AI
+    const recommendation = await generatePricingRecommendation(validatedData);
 
     // Create consultation
     const { data: consultation, error: consultationError } = await supabaseAdmin

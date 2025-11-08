@@ -35,42 +35,8 @@ export function Dashboard() {
     }
   };
 
-  const generatePricingRecommendation = (data: {
-    businessType: string;
-    targetMarket: string;
-    productDescription: string;
-    costToDeliver: string;
-    competitorPricing: string;
-    valueProposition: string;
-  }) => {
-    return `Based on your ${data.businessType} business targeting ${data.targetMarket}, here's our pricing recommendation:
-
-PRICING STRATEGY:
-Given your cost structure (${data.costToDeliver}) and competitive landscape (${data.competitorPricing}), we recommend a value-based pricing approach.
-
-RECOMMENDED PRICE RANGE:
-Consider positioning your offering in the premium segment of your market, reflecting the unique value you provide: ${data.valueProposition}
-
-KEY CONSIDERATIONS:
-1. Cost Coverage: Ensure your pricing covers all costs with a healthy margin
-2. Market Positioning: Align with how you want to be perceived in ${data.targetMarket}
-3. Value Delivery: Price should reflect the value you deliver, not just your costs
-4. Competitive Landscape: Stay aware of ${data.competitorPricing} but don't race to the bottom
-
-PRICING MODELS TO CONSIDER:
-- Tiered pricing: Offer multiple levels to capture different customer segments
-- Value-based: Price according to the value delivered to customers
-- Freemium: Offer a free tier to acquire users, premium for advanced features
-- Usage-based: Charge based on consumption or usage levels
-
-NEXT STEPS:
-1. Test your pricing with a small segment of customers
-2. Monitor customer feedback and conversion rates
-3. Be prepared to iterate based on market response
-4. Consider offering early-bird discounts to gain initial traction
-
-Remember: Pricing is not permanent. Start with a hypothesis and refine based on real market feedback.`;
-  };
+  // API endpoint for backend
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   const handleQuestionnaireSubmit = async (formData: {
     businessType: string;
@@ -89,31 +55,29 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
     setError('');
 
     try {
-      const recommendation = generatePricingRecommendation(formData);
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('Not authenticated');
+      }
 
-      const { data: consultation, error: consultationError } = await supabase
-        .from('consultations')
-        .insert({
-          user_id: profile.id,
-          business_type: formData.businessType,
-          target_market: formData.targetMarket,
-          product_description: formData.productDescription,
-          cost_to_deliver: formData.costToDeliver,
-          competitor_pricing: formData.competitorPricing,
-          value_proposition: formData.valueProposition,
-          pricing_recommendation: recommendation,
-        })
-        .select()
-        .single();
+      // Call backend API to generate pricing with DeepSeek
+      const response = await fetch(`${API_URL}/api/consultations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(formData),
+      });
 
-      if (consultationError) throw consultationError;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate pricing');
+      }
 
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ credits: profile.credits - 1 })
-        .eq('id', profile.id);
-
-      if (updateError) throw updateError;
+      const { consultation } = await response.json();
 
       await refreshProfile();
       await fetchConsultations();

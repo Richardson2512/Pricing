@@ -7,6 +7,7 @@ Backend API server for the PriceWise pricing consultation platform.
 - **Node.js** with **Express.js**
 - **TypeScript** for type safety
 - **Supabase** for database and authentication
+- **DeepSeek V3 AI** for intelligent pricing recommendations
 - **Zod** for request validation
 - **Helmet** for security headers
 - **CORS** for cross-origin requests
@@ -53,6 +54,7 @@ Edit `.env`:
 SUPABASE_URL=your-supabase-url
 SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+DEEPSEEK_API_KEY=your-deepseek-api-key
 PORT=3001
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
