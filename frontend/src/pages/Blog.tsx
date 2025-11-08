@@ -97,6 +97,23 @@ export function Blog() {
     });
   };
 
+  // Get relevant stock image based on blog post title/category
+  const getStockImage = (post: BlogPost, index: number) => {
+    const images = [
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80', // Data analytics
+      'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80', // Business meeting
+      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80', // Charts and graphs
+      'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=800&q=80', // Calculator/finance
+      'https://images.unsplash.com/photo-1590650153855-d9e808231d41?w=800&q=80', // Freelancer workspace
+      'https://images.unsplash.com/photo-1556155092-490a1ba16284?w=800&q=80', // Money/coins
+      'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80', // Office desk
+      'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=80', // Person working
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80', // Business person
+      'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&q=80', // Laptop work
+    ];
+    return post.featured_image_url || images[index % images.length];
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 flex flex-col">
       <SEO
@@ -172,7 +189,7 @@ export function Blog() {
             <div className="flex flex-col gap-8 md:gap-12">
               {/* Row 1 - First 3 posts */}
               <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
-                {filteredPosts.slice(0, 3).map((post) => (
+                {filteredPosts.slice(0, 3).map((post, index) => (
                   <article
                     key={post.id}
                     className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
@@ -181,15 +198,11 @@ export function Blog() {
                     {/* Image - 200px on mobile, 240px on desktop */}
                     <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-600 to-olive-800 overflow-hidden relative">
                       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
-                      {post.featured_image_url ? (
-                        <img
-                          src={post.featured_image_url}
-                          alt={post.title}
-                          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
-                      )}
+                      <img
+                        src={getStockImage(post, index)}
+                        alt={post.title}
+                        className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
+                      />
                     </div>
 
                     {/* Content */}
@@ -219,10 +232,12 @@ export function Blog() {
 
                       {/* Author info */}
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-medium text-olive-700">
-                            {post.author_name.charAt(0)}
-                          </span>
+                        <div className="w-10 h-10 rounded-full bg-white border-2 border-olive-600 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          <img 
+                            src="/logo.png" 
+                            alt="HowMuchShouldIPrice Logo" 
+                            className="w-6 h-6 object-contain"
+                          />
                         </div>
                         <div className="flex flex-col">
                           <span className="text-sm font-medium text-slate-900">{post.author_name}</span>
@@ -237,7 +252,7 @@ export function Blog() {
               {/* Row 2 - Posts 4-6 */}
               {filteredPosts.length > 3 && visiblePosts >= 6 && (
                 <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
-                  {filteredPosts.slice(3, 6).map((post) => (
+                  {filteredPosts.slice(3, 6).map((post, idx) => (
                     <article
                       key={post.id}
                       className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
@@ -245,15 +260,11 @@ export function Blog() {
                     >
                       <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-600 to-olive-800 overflow-hidden relative">
                         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
-                        {post.featured_image_url ? (
-                          <img
-                            src={post.featured_image_url}
-                            alt={post.title}
-                            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
-                        )}
+                        <img
+                          src={getStockImage(post, idx + 3)}
+                          alt={post.title}
+                          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
+                        />
                       </div>
                       <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
                         <div className="flex flex-col gap-3">
@@ -291,7 +302,7 @@ export function Blog() {
               {/* Row 3 - Posts 7-9 */}
               {filteredPosts.length > 6 && visiblePosts >= 9 && (
                 <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
-                  {filteredPosts.slice(6, 9).map((post) => (
+                  {filteredPosts.slice(6, 9).map((post, idx) => (
                     <article
                       key={post.id}
                       className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
@@ -299,15 +310,11 @@ export function Blog() {
                     >
                       <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-600 to-olive-800 overflow-hidden relative">
                         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
-                        {post.featured_image_url ? (
-                          <img
-                            src={post.featured_image_url}
-                            alt={post.title}
-                            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
-                        )}
+                        <img
+                          src={getStockImage(post, idx + 6)}
+                          alt={post.title}
+                          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
+                        />
                       </div>
                       <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
                         <div className="flex flex-col gap-3">
@@ -345,7 +352,7 @@ export function Blog() {
               {/* Row 4 - Posts 10+ */}
               {filteredPosts.length > 9 && visiblePosts >= 12 && (
                 <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
-                  {filteredPosts.slice(9, visiblePosts).map((post) => (
+                  {filteredPosts.slice(9, visiblePosts).map((post, idx) => (
                     <article
                       key={post.id}
                       className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
@@ -353,15 +360,11 @@ export function Blog() {
                     >
                       <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-600 to-olive-800 overflow-hidden relative">
                         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
-                        {post.featured_image_url ? (
-                          <img
-                            src={post.featured_image_url}
-                            alt={post.title}
-                            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
-                        )}
+                        <img
+                          src={getStockImage(post, idx + 9)}
+                          alt={post.title}
+                          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
+                        />
                       </div>
                       <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
                         <div className="flex flex-col gap-3">
