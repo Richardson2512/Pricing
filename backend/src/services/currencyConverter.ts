@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
+import { rateLimitTracker } from './rateLimitTracker.js';
 
 dotenv.config();
 
@@ -79,11 +80,14 @@ const CACHE_DURATION = 3600000; // 1 hour in milliseconds
 // ============================================================================
 
 /**
- * Fetch latest exchange rates from multiple free APIs
- * Primary: exchangerate-api.com - Free tier: 1500 requests/month
- * Fallback 1: frankfurter.app - Free, no API key, ECB data
- * Fallback 2: exchangerate.host - Free tier: 100 requests/month
- * Fallback 3: fixer.io - Free tier: 100 requests/month (requires key)
+ * Fetch latest exchange rates using chain fallback
+ * ORDERED BY RATE LIMIT (Highest → Lowest):
+ * 1. frankfurter.app - 10,000/day, Free, No API key, ECB data
+ * 2. exchangerate-api.com - 1,500/month, Free, No API key
+ * 3. exchangerate.host - 100/month, Free, No API key
+ * 4. fixer.io - 100/month, Free tier, API key required
+ * 5. Cached rates (1 hour stale)
+ * 6. Approximate rates (last resort)
  */
 async function fetchExchangeRates(baseCurrency: string = 'USD'): Promise<CurrencyRates | null> {
   // Check cache first
@@ -93,136 +97,142 @@ async function fetchExchangeRates(baseCurrency: string = 'USD'): Promise<Currenc
     return cachedRates;
   }
 
-  // Try exchangerate-api.com (Primary)
-  try {
-    console.log('💱 Fetching rates from exchangerate-api.com...');
-    const url = `https://api.exchangerate-api.com/v4/latest/${baseCurrency}`;
-    const response = await fetch(url, { timeout: 5000 } as any);
-    const data = await response.json() as any;
+  // Define service chain (highest rate limit first)
+  const services = [
+    { name: 'frankfurter', requiresKey: false },
+    { name: 'exchangerate-api', requiresKey: false },
+    { name: 'exchangerate-host', requiresKey: false },
+    { name: 'fixer', requiresKey: true },
+  ];
 
-    if (data && data.rates) {
-      cachedRates = {
-        base: baseCurrency,
-        rates: data.rates,
-        timestamp: now,
-      };
-      lastFetchTime = now;
-      console.log('✅ Exchange rates fetched successfully');
-      return cachedRates;
+  // Try each service in order
+  for (const service of services) {
+    // Check rate limit
+    if (!rateLimitTracker.canUseService(service.name)) {
+      console.log(`⏭️ ${service.name} rate limit reached, skipping to next service`);
+      continue;
     }
-  } catch (error) {
-    console.warn('⚠️ exchangerate-api.com failed, trying fallback...');
-  }
 
-  // Fallback 1: frankfurter.app (ECB data)
-  try {
-    console.log('💱 Fetching rates from frankfurter.app...');
-    const url = `https://api.frankfurter.app/latest?from=${baseCurrency}`;
-    const response = await fetch(url, { timeout: 5000 } as any);
-    const data = await response.json() as any;
-
-    if (data && data.rates) {
-      cachedRates = {
-        base: baseCurrency,
-        rates: { [baseCurrency]: 1, ...data.rates },
-        timestamp: now,
-      };
-      lastFetchTime = now;
-      console.log('✅ Frankfurter rates fetched successfully');
-      return cachedRates;
+    // Check if API key required and available
+    if (service.requiresKey) {
+      const apiKey = process.env[`${service.name.toUpperCase()}_API_KEY`];
+      if (!apiKey) {
+        console.log(`⏭️ ${service.name} requires API key (not configured), skipping`);
+        continue;
+      }
     }
-  } catch (error) {
-    console.warn('⚠️ frankfurter.app failed, trying next fallback...');
-  }
 
-  // Fallback 2: exchangerate.host
-  try {
-    console.log('💱 Fetching rates from exchangerate.host...');
-    const url = `https://api.exchangerate.host/latest?base=${baseCurrency}`;
-    const response = await fetch(url, { timeout: 5000 } as any);
-    const data = await response.json() as any;
-
-    if (data && data.rates) {
-      cachedRates = {
-        base: baseCurrency,
-        rates: data.rates,
-        timestamp: now,
-      };
-      lastFetchTime = now;
-      console.log('✅ exchangerate.host rates fetched successfully');
-      return cachedRates;
-    }
-  } catch (error) {
-    console.warn('⚠️ exchangerate.host failed, trying next fallback...');
-  }
-
-  // Fallback 3: fixer.io (requires API key)
-  const FIXER_API_KEY = process.env.FIXER_API_KEY;
-  if (FIXER_API_KEY) {
+    // Try the service
     try {
-      console.log('💱 Fetching rates from fixer.io...');
-      const url = `http://data.fixer.io/api/latest?access_key=${FIXER_API_KEY}&base=${baseCurrency}`;
-      const response = await fetch(url, { timeout: 5000 } as any);
-      const data = await response.json() as any;
-
-      if (data && data.rates) {
-        cachedRates = {
-          base: baseCurrency,
-          rates: data.rates,
-          timestamp: now,
-        };
+      console.log(`💱 Fetching rates from ${service.name}...`);
+      const rates = await fetchFromCurrencyService(service.name, baseCurrency);
+      
+      if (rates) {
+        cachedRates = rates;
         lastFetchTime = now;
-        console.log('✅ Fixer.io rates fetched successfully');
+        rateLimitTracker.recordUsage(service.name);
+        console.log(`✅ ${service.name} rates fetched successfully`);
         return cachedRates;
       }
-    } catch (error) {
-      console.warn('⚠️ fixer.io failed');
+    } catch (error: any) {
+      // Check if it's a rate limit error
+      if (error.message?.includes('rate limit') || error.message?.includes('429') || error.response?.status === 429) {
+        console.warn(`⚠️ ${service.name} rate limit hit, marking and trying next...`);
+        // Force mark as rate limited
+        for (let i = 0; i < 1000; i++) {
+          rateLimitTracker.recordUsage(service.name);
+        }
+      } else {
+        console.warn(`⚠️ ${service.name} failed: ${error.message}, trying next...`);
+      }
     }
   }
 
-  // Final fallback: Use last known rates or approximate rates
-  console.warn('⚠️ All exchange rate APIs failed, using fallback rates');
-  
+  // Fallback: Use stale cached rates
   if (cachedRates) {
-    console.log('✅ Using stale cached rates (better than nothing)');
+    console.warn('⚠️ All APIs exhausted, using stale cached rates');
     return cachedRates;
   }
 
-  // Last resort: Approximate rates (updated periodically)
-  console.log('⚠️ Using approximate exchange rates (last resort)');
+  // Last resort: Approximate rates
+  console.warn('⚠️ No cache available, using approximate exchange rates (last resort)');
   return {
     base: 'USD',
     rates: {
-      USD: 1,
-      EUR: 0.92,
-      GBP: 0.79,
-      INR: 83.12,
-      JPY: 149.50,
-      CNY: 7.24,
-      AUD: 1.52,
-      CAD: 1.36,
-      SGD: 1.34,
-      AED: 3.67,
-      SAR: 3.75,
-      ZAR: 18.50,
-      BRL: 4.95,
-      MXN: 17.20,
-      RUB: 92.50,
-      KRW: 1320,
-      IDR: 15600,
-      MYR: 4.72,
-      THB: 35.50,
-      PHP: 56.20,
-      VND: 24500,
-      PKR: 278,
-      BDT: 110,
-      LKR: 325,
-      NGN: 790,
-      EGP: 31,
-      KES: 155,
+      USD: 1, EUR: 0.92, GBP: 0.79, INR: 83.12, JPY: 149.50,
+      CNY: 7.24, AUD: 1.52, CAD: 1.36, SGD: 1.34, AED: 3.67,
+      SAR: 3.75, ZAR: 18.50, BRL: 4.95, MXN: 17.20, RUB: 92.50,
+      KRW: 1320, IDR: 15600, MYR: 4.72, THB: 35.50, PHP: 56.20,
+      VND: 24500, PKR: 278, BDT: 110, LKR: 325, NGN: 790,
+      EGP: 31, KES: 155,
     },
     timestamp: Date.now(),
   };
+}
+
+/**
+ * Fetch from specific currency service
+ */
+async function fetchFromCurrencyService(service: string, baseCurrency: string): Promise<CurrencyRates | null> {
+  const now = Date.now();
+  
+  switch (service) {
+    case 'frankfurter':
+      const frankfurterUrl = `https://api.frankfurter.app/latest?from=${baseCurrency}`;
+      const frankfurterRes = await fetch(frankfurterUrl, { timeout: 5000 } as any);
+      const frankfurterData = await frankfurterRes.json() as any;
+      if (frankfurterData && frankfurterData.rates) {
+        return {
+          base: baseCurrency,
+          rates: { [baseCurrency]: 1, ...frankfurterData.rates },
+          timestamp: now,
+        };
+      }
+      return null;
+
+    case 'exchangerate-api':
+      const exchangerateUrl = `https://api.exchangerate-api.com/v4/latest/${baseCurrency}`;
+      const exchangerateRes = await fetch(exchangerateUrl, { timeout: 5000 } as any);
+      const exchangerateData = await exchangerateRes.json() as any;
+      if (exchangerateData && exchangerateData.rates) {
+        return {
+          base: baseCurrency,
+          rates: exchangerateData.rates,
+          timestamp: now,
+        };
+      }
+      return null;
+
+    case 'exchangerate-host':
+      const hostUrl = `https://api.exchangerate.host/latest?base=${baseCurrency}`;
+      const hostRes = await fetch(hostUrl, { timeout: 5000 } as any);
+      const hostData = await hostRes.json() as any;
+      if (hostData && hostData.rates) {
+        return {
+          base: baseCurrency,
+          rates: hostData.rates,
+          timestamp: now,
+        };
+      }
+      return null;
+
+    case 'fixer':
+      const fixerKey = process.env.FIXER_API_KEY;
+      const fixerUrl = `http://data.fixer.io/api/latest?access_key=${fixerKey}&base=${baseCurrency}`;
+      const fixerRes = await fetch(fixerUrl, { timeout: 5000 } as any);
+      const fixerData = await fixerRes.json() as any;
+      if (fixerData && fixerData.rates) {
+        return {
+          base: baseCurrency,
+          rates: fixerData.rates,
+          timestamp: now,
+        };
+      }
+      return null;
+
+    default:
+      return null;
+  }
 }
 
 /**

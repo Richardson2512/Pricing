@@ -4,6 +4,7 @@ import axios from 'axios';
 import { getDistance } from 'geolib';
 import { getFuelPricesByLocation, getVehicleEfficiency, formatDistance, kmToMiles } from './fuelPriceService.js';
 import { convertCurrency, formatCurrency, getCurrencyByLocation } from './currencyConverter.js';
+import { rateLimitTracker } from './rateLimitTracker.js';
 
 dotenv.config();
 
@@ -73,107 +74,126 @@ const TRAVEL_TIME_FACTOR = 0.5; // 50% of hourly rate for travel time
 // ============================================================================
 
 /**
- * Get coordinates for a location using Nominatim (OpenStreetMap)
- * Fallback 1: Nominatim (OSM) - Free, no API key
- * Fallback 2: OpenCage Geocoder - Free tier: 2500 requests/day
- * Fallback 3: Photon (Komoot) - Free, no API key
- * Fallback 4: LocationIQ - Free tier: 5000 requests/day
+ * Get coordinates for a location using geocoding chain
+ * ORDERED BY RATE LIMIT (Highest → Lowest):
+ * 1. Photon (Komoot) - 10,000/day, Free, No API key
+ * 2. LocationIQ - 5,000/day, Free tier, API key required
+ * 3. OpenCage - 2,500/day, Free tier, API key required
+ * 4. Nominatim (OSM) - ~3,600/hour (1/sec), Free, No API key
  */
 async function geocode(location: string): Promise<{ lat: number; lon: number } | null> {
-  // Try Nominatim first (Primary)
-  try {
-    console.log('🌍 Geocoding with Nominatim (OSM)...');
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`;
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'PriceWise-App/1.0',
-      },
-    });
-    
-    const data = await response.json() as any[];
-    
-    if (data && data.length > 0) {
-      console.log('✅ Nominatim geocoding successful');
-      return {
-        lat: parseFloat(data[0].lat),
-        lon: parseFloat(data[0].lon),
-      };
-    }
-  } catch (error) {
-    console.warn('⚠️ Nominatim failed, trying fallback...');
-  }
+  // Define service chain (highest rate limit first)
+  const services = [
+    { name: 'photon', requiresKey: false },
+    { name: 'locationiq', requiresKey: true },
+    { name: 'opencage', requiresKey: true },
+    { name: 'nominatim', requiresKey: false },
+  ];
 
-  // Fallback 2: Photon (Komoot)
-  try {
-    console.log('🌍 Geocoding with Photon (Komoot)...');
-    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(location)}&limit=1`;
-    const response = await fetch(url);
-    const data = await response.json() as any;
-    
-    if (data.features && data.features.length > 0) {
-      const coords = data.features[0].geometry.coordinates;
-      console.log('✅ Photon geocoding successful');
-      return {
-        lat: coords[1],
-        lon: coords[0],
-      };
+  // Try each service in order
+  for (const service of services) {
+    // Check rate limit
+    if (!rateLimitTracker.canUseService(service.name)) {
+      console.log(`⏭️ ${service.name} rate limit reached, skipping to next service`);
+      continue;
     }
-  } catch (error) {
-    console.warn('⚠️ Photon failed, trying next fallback...');
-  }
 
-  // Fallback 3: OpenCage (requires API key but has free tier)
-  const OPENCAGE_API_KEY = process.env.OPENCAGE_API_KEY;
-  if (OPENCAGE_API_KEY) {
-    try {
-      console.log('🌍 Geocoding with OpenCage...');
-      const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=${OPENCAGE_API_KEY}&limit=1`;
-      const response = await fetch(url);
-      const data = await response.json() as any;
-      
-      if (data.results && data.results.length > 0) {
-        console.log('✅ OpenCage geocoding successful');
-        return {
-          lat: data.results[0].geometry.lat,
-          lon: data.results[0].geometry.lng,
-        };
+    // Check if API key required and available
+    if (service.requiresKey) {
+      const apiKey = process.env[`${service.name.toUpperCase()}_API_KEY`];
+      if (!apiKey) {
+        console.log(`⏭️ ${service.name} requires API key (not configured), skipping`);
+        continue;
       }
-    } catch (error) {
-      console.warn('⚠️ OpenCage failed');
     }
-  }
 
-  // Fallback 4: LocationIQ (requires API key but has free tier)
-  const LOCATIONIQ_API_KEY = process.env.LOCATIONIQ_API_KEY;
-  if (LOCATIONIQ_API_KEY) {
+    // Try the service
     try {
-      console.log('🌍 Geocoding with LocationIQ...');
-      const url = `https://us1.locationiq.com/v1/search.php?key=${LOCATIONIQ_API_KEY}&q=${encodeURIComponent(location)}&format=json&limit=1`;
-      const response = await fetch(url);
-      const data = await response.json() as any[];
+      console.log(`🌍 Geocoding with ${service.name}...`);
+      const result = await geocodeWithService(service.name, location);
       
-      if (data && data.length > 0) {
-        console.log('✅ LocationIQ geocoding successful');
-        return {
-          lat: parseFloat(data[0].lat),
-          lon: parseFloat(data[0].lon),
-        };
+      if (result) {
+        rateLimitTracker.recordUsage(service.name);
+        console.log(`✅ ${service.name} geocoding successful`);
+        return result;
       }
-    } catch (error) {
-      console.warn('⚠️ LocationIQ failed');
+    } catch (error: any) {
+      // Check if it's a rate limit error
+      if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+        console.warn(`⚠️ ${service.name} rate limit hit, marking and trying next...`);
+        // Force mark as rate limited
+        for (let i = 0; i < 1000; i++) {
+          rateLimitTracker.recordUsage(service.name);
+        }
+      } else {
+        console.warn(`⚠️ ${service.name} failed: ${error.message}, trying next...`);
+      }
     }
   }
 
-  console.error('❌ All geocoding services failed for:', location);
+  console.error('❌ All geocoding services exhausted for:', location);
   return null;
 }
 
 /**
- * Calculate distance and travel time using multiple routing services
- * Primary: OSRM (Open Source Routing Machine) - Free, no API key
- * Fallback 1: GraphHopper - Free tier: 500 requests/day
- * Fallback 2: OpenRouteService - Free tier: 2000 requests/day
- * Fallback 3: Geolib (straight-line distance) - Always works
+ * Geocode with specific service
+ */
+async function geocodeWithService(service: string, location: string): Promise<{ lat: number; lon: number } | null> {
+  switch (service) {
+    case 'photon':
+      const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(location)}&limit=1`;
+      const photonRes = await fetch(photonUrl, { timeout: 5000 } as any);
+      const photonData = await photonRes.json() as any;
+      if (photonData.features && photonData.features.length > 0) {
+        const coords = photonData.features[0].geometry.coordinates;
+        return { lat: coords[1], lon: coords[0] };
+      }
+      return null;
+
+    case 'locationiq':
+      const locationiqKey = process.env.LOCATIONIQ_API_KEY;
+      const locationiqUrl = `https://us1.locationiq.com/v1/search.php?key=${locationiqKey}&q=${encodeURIComponent(location)}&format=json&limit=1`;
+      const locationiqRes = await fetch(locationiqUrl, { timeout: 5000 } as any);
+      const locationiqData = await locationiqRes.json() as any[];
+      if (locationiqData && locationiqData.length > 0) {
+        return { lat: parseFloat(locationiqData[0].lat), lon: parseFloat(locationiqData[0].lon) };
+      }
+      return null;
+
+    case 'opencage':
+      const opencageKey = process.env.OPENCAGE_API_KEY;
+      const opencageUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=${opencageKey}&limit=1`;
+      const opencageRes = await fetch(opencageUrl, { timeout: 5000 } as any);
+      const opencageData = await opencageRes.json() as any;
+      if (opencageData.results && opencageData.results.length > 0) {
+        return { lat: opencageData.results[0].geometry.lat, lon: opencageData.results[0].geometry.lng };
+      }
+      return null;
+
+    case 'nominatim':
+      const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`;
+      const nominatimRes = await fetch(nominatimUrl, {
+        headers: { 'User-Agent': 'PriceWise-App/1.0' },
+        timeout: 5000,
+      } as any);
+      const nominatimData = await nominatimRes.json() as any[];
+      if (nominatimData && nominatimData.length > 0) {
+        return { lat: parseFloat(nominatimData[0].lat), lon: parseFloat(nominatimData[0].lon) };
+      }
+      return null;
+
+    default:
+      return null;
+  }
+}
+
+/**
+ * Calculate distance and travel time using routing chain
+ * ORDERED BY RATE LIMIT (Highest → Lowest):
+ * 1. OSRM - 10,000/day, Free, No API key
+ * 2. OpenRouteService - 2,000/day, Free tier, API key required
+ * 3. GraphHopper - 500/day, Free tier, API key required
+ * 4. Geolib - Unlimited (local calculation), Always works
  */
 async function calculateRoute(
   origin: string,
@@ -189,102 +209,129 @@ async function calculateRoute(
     return null;
   }
 
-  // Try OSRM first (Primary)
-  try {
-    console.log('🗺️ Calculating route with OSRM...');
-    const url = `http://router.project-osrm.org/route/v1/${mode}/${originCoords.lon},${originCoords.lat};${destCoords.lon},${destCoords.lat}?overview=false`;
-    
-    const response = await fetch(url, { timeout: 5000 } as any);
-    const data = await response.json() as any;
-    
-    if (data.routes && data.routes.length > 0) {
-      const route = data.routes[0];
-      console.log('✅ OSRM routing successful');
-      return {
-        distance_km: route.distance / 1000,
-        duration_hours: route.duration / 3600,
-      };
-    }
-  } catch (error) {
-    console.warn('⚠️ OSRM failed, trying fallback...');
-  }
+  // Define service chain (highest rate limit first)
+  const services = [
+    { name: 'osrm', requiresKey: false },
+    { name: 'openrouteservice', requiresKey: true },
+    { name: 'graphhopper', requiresKey: true },
+    { name: 'geolib', requiresKey: false }, // Always works
+  ];
 
-  // Fallback 1: GraphHopper
-  const GRAPHHOPPER_API_KEY = process.env.GRAPHHOPPER_API_KEY;
-  if (GRAPHHOPPER_API_KEY) {
-    try {
-      console.log('🗺️ Calculating route with GraphHopper...');
-      const url = `https://graphhopper.com/api/1/route?point=${originCoords.lat},${originCoords.lon}&point=${destCoords.lat},${destCoords.lon}&vehicle=${mode === 'driving' ? 'car' : mode}&key=${GRAPHHOPPER_API_KEY}`;
-      
-      const response = await axios.get(url, { timeout: 5000 });
-      const data = response.data;
-      
-      if (data.paths && data.paths.length > 0) {
-        const path = data.paths[0];
-        console.log('✅ GraphHopper routing successful');
-        return {
-          distance_km: path.distance / 1000,
-          duration_hours: path.time / 3600000,
-        };
+  // Try each service in order
+  for (const service of services) {
+    // Check rate limit
+    if (!rateLimitTracker.canUseService(service.name)) {
+      console.log(`⏭️ ${service.name} rate limit reached, skipping to next service`);
+      continue;
+    }
+
+    // Check if API key required and available
+    if (service.requiresKey) {
+      const apiKey = process.env[`${service.name.toUpperCase()}_API_KEY`];
+      if (!apiKey) {
+        console.log(`⏭️ ${service.name} requires API key (not configured), skipping`);
+        continue;
       }
-    } catch (error) {
-      console.warn('⚠️ GraphHopper failed, trying next fallback...');
+    }
+
+    // Try the service
+    try {
+      console.log(`🗺️ Calculating route with ${service.name}...`);
+      const result = await routeWithService(service.name, originCoords, destCoords, mode);
+      
+      if (result) {
+        rateLimitTracker.recordUsage(service.name);
+        console.log(`✅ ${service.name} routing successful`);
+        return result;
+      }
+    } catch (error: any) {
+      // Check if it's a rate limit error
+      if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+        console.warn(`⚠️ ${service.name} rate limit hit, marking and trying next...`);
+        // Force mark as rate limited
+        for (let i = 0; i < 1000; i++) {
+          rateLimitTracker.recordUsage(service.name);
+        }
+      } else {
+        console.warn(`⚠️ ${service.name} failed: ${error.message}, trying next...`);
+      }
     }
   }
 
-  // Fallback 2: OpenRouteService
-  const ORS_API_KEY = process.env.OPENROUTESERVICE_API_KEY;
-  if (ORS_API_KEY) {
-    try {
-      console.log('🗺️ Calculating route with OpenRouteService...');
-      const profile = mode === 'driving' ? 'driving-car' : mode === 'cycling' ? 'cycling-regular' : 'foot-walking';
-      const url = `https://api.openrouteservice.org/v2/directions/${profile}?start=${originCoords.lon},${originCoords.lat}&end=${destCoords.lon},${destCoords.lat}`;
-      
-      const response = await axios.get(url, {
-        headers: { 'Authorization': ORS_API_KEY },
-        timeout: 5000,
-      });
-      const data = response.data;
-      
-      if (data.features && data.features.length > 0) {
-        const route = data.features[0].properties.segments[0];
-        console.log('✅ OpenRouteService routing successful');
+  console.error('❌ All routing services exhausted (should not happen - Geolib always works)');
+  return null;
+}
+
+/**
+ * Route with specific service
+ */
+async function routeWithService(
+  service: string,
+  originCoords: { lat: number; lon: number },
+  destCoords: { lat: number; lon: number },
+  mode: 'driving' | 'walking' | 'cycling'
+): Promise<{ distance_km: number; duration_hours: number } | null> {
+  switch (service) {
+    case 'osrm':
+      const osrmUrl = `http://router.project-osrm.org/route/v1/${mode}/${originCoords.lon},${originCoords.lat};${destCoords.lon},${destCoords.lat}?overview=false`;
+      const osrmRes = await fetch(osrmUrl, { timeout: 5000 } as any);
+      const osrmData = await osrmRes.json() as any;
+      if (osrmData.routes && osrmData.routes.length > 0) {
+        const route = osrmData.routes[0];
         return {
           distance_km: route.distance / 1000,
           duration_hours: route.duration / 3600,
         };
       }
-    } catch (error) {
-      console.warn('⚠️ OpenRouteService failed, using straight-line distance...');
-    }
-  }
+      return null;
 
-  // Fallback 3: Geolib (straight-line distance - always works)
-  try {
-    console.log('🗺️ Calculating straight-line distance with Geolib...');
-    const distanceMeters = getDistance(
-      { latitude: originCoords.lat, longitude: originCoords.lon },
-      { latitude: destCoords.lat, longitude: destCoords.lon }
-    );
-    
-    const distance_km = distanceMeters / 1000;
-    
-    // Estimate duration based on average speed
-    const avg_speed_kmh = mode === 'driving' ? 60 : mode === 'cycling' ? 20 : 5;
-    const duration_hours = distance_km / avg_speed_kmh;
-    
-    // Add 30% for road routing (straight-line is shorter than actual roads)
-    const adjusted_distance_km = distance_km * 1.3;
-    const adjusted_duration_hours = duration_hours * 1.3;
-    
-    console.log('✅ Geolib straight-line calculation successful (with 30% road adjustment)');
-    return {
-      distance_km: adjusted_distance_km,
-      duration_hours: adjusted_duration_hours,
-    };
-  } catch (error) {
-    console.error('❌ Even Geolib failed:', error);
-    return null;
+    case 'openrouteservice':
+      const orsKey = process.env.OPENROUTESERVICE_API_KEY;
+      const profile = mode === 'driving' ? 'driving-car' : mode === 'cycling' ? 'cycling-regular' : 'foot-walking';
+      const orsUrl = `https://api.openrouteservice.org/v2/directions/${profile}?start=${originCoords.lon},${originCoords.lat}&end=${destCoords.lon},${destCoords.lat}`;
+      const orsRes = await axios.get(orsUrl, {
+        headers: { 'Authorization': orsKey },
+        timeout: 5000,
+      });
+      if (orsRes.data.features && orsRes.data.features.length > 0) {
+        const route = orsRes.data.features[0].properties.segments[0];
+        return {
+          distance_km: route.distance / 1000,
+          duration_hours: route.duration / 3600,
+        };
+      }
+      return null;
+
+    case 'graphhopper':
+      const ghKey = process.env.GRAPHHOPPER_API_KEY;
+      const ghUrl = `https://graphhopper.com/api/1/route?point=${originCoords.lat},${originCoords.lon}&point=${destCoords.lat},${destCoords.lon}&vehicle=${mode === 'driving' ? 'car' : mode}&key=${ghKey}`;
+      const ghRes = await axios.get(ghUrl, { timeout: 5000 });
+      if (ghRes.data.paths && ghRes.data.paths.length > 0) {
+        const path = ghRes.data.paths[0];
+        return {
+          distance_km: path.distance / 1000,
+          duration_hours: path.time / 3600000,
+        };
+      }
+      return null;
+
+    case 'geolib':
+      // Straight-line distance (always works)
+      const distanceMeters = getDistance(
+        { latitude: originCoords.lat, longitude: originCoords.lon },
+        { latitude: destCoords.lat, longitude: destCoords.lon }
+      );
+      const distance_km = distanceMeters / 1000;
+      const avg_speed_kmh = mode === 'driving' ? 60 : mode === 'cycling' ? 20 : 5;
+      const duration_hours = distance_km / avg_speed_kmh;
+      // Add 30% for road routing
+      return {
+        distance_km: distance_km * 1.3,
+        duration_hours: duration_hours * 1.3,
+      };
+
+    default:
+      return null;
   }
 }
 
