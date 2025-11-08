@@ -1,212 +1,352 @@
-# PriceWise - Pricing Consultation Platform
+# HowMuchShouldIPrice.com
 
-A full-stack web application that provides AI-powered pricing recommendations for businesses. Users can answer a questionnaire about their business and receive personalized pricing strategies.
+> AI-powered pricing intelligence platform that helps entrepreneurs, freelancers, and businesses determine optimal pricing for their products and services.
 
-## 🎨 Features
+**Live Site:** [https://howmuchshouldiprice.com](https://howmuchshouldiprice.com)
 
-- **User Authentication** - Secure email/password authentication via Supabase
-- **Credit System** - Purchase credits to access pricing consultations
-- **Pricing Consultations** - Answer 6 questions and get detailed pricing recommendations
-- **Consultation History** - View all past consultations
-- **Modern UI** - Clean, responsive design with olive green and beige color theme
+---
 
 ## 🏗️ Project Structure
 
+This is a monorepo containing three independent, self-contained services:
+
 ```
 project/
-├── frontend/              # React + TypeScript frontend
-│   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── contexts/     # Context providers
-│   │   └── lib/          # Utilities and configs
-│   ├── package.json
-│   └── README.md
-│
-├── backend/              # Express + TypeScript API
-│   ├── src/
-│   │   ├── config/      # Configuration files
-│   │   ├── middleware/  # Express middleware
-│   │   └── routes/      # API routes
-│   ├── package.json
-│   └── README.md
-│
-├── supabase/            # Database migrations
-│   └── migrations/
-│
-└── README.md            # This file
+├── frontend/          # React + TypeScript + Vite (Vercel)
+├── backend/           # Express + TypeScript (Railway)
+├── scrapers/          # Python + Scrapy (AWS Lambda)
+├── supabase/          # Database migrations
+├── docs/              # All documentation
+└── README.md          # This file
 ```
+
+### 📱 [Frontend](./frontend/)
+- **Tech Stack**: React, TypeScript, Vite, Tailwind CSS
+- **Deployment**: Vercel
+- **URL**: https://howmuchshouldiprice.com
+- **Features**: User interface, authentication, questionnaire, pricing display
+- [Frontend README →](./frontend/README.md)
+
+### 🔧 [Backend](./backend/)
+- **Tech Stack**: Express, TypeScript, Node.js
+- **Deployment**: Railway
+- **URL**: https://your-backend.railway.app
+- **Features**: API endpoints, DeepSeek AI integration, data processing
+- [Backend README →](./backend/README.md)
+
+### 🕷️ [Scrapers](./scrapers/)
+- **Tech Stack**: Python, Scrapy, Playwright
+- **Deployment**: AWS Lambda / Separate Service
+- **Purpose**: Market data collection from multiple platforms
+- [Scrapers README →](./scrapers/README.md)
+
+### 🗄️ [Database](./supabase/)
+- **Tech**: Supabase (PostgreSQL)
+- **Migrations**: SQL files in `supabase/migrations/`
+- **Features**: User data, consultations, credit tracking, market listings
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-
-- Node.js 18+ and npm
-- Supabase account and project
-- Git
+- Node.js 18+
+- Python 3.9+ (for scrapers)
+- Supabase account
+- DeepSeek API key
 
 ### 1. Clone Repository
-
 ```bash
 git clone https://github.com/Richardson2512/Pricing.git
-cd Pricing
+cd project
 ```
 
-### 2. Setup Backend
-
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Edit .env with your Supabase credentials
-npm run dev
-```
-
-Backend runs on `http://localhost:3001`
-
-### 3. Setup Frontend
-
+### 2. Setup Frontend
 ```bash
 cd frontend
 npm install
-cp .env.example .env
+cp env.example .env
 # Edit .env with your Supabase credentials
 npm run dev
+# Opens at http://localhost:5173
 ```
 
-Frontend runs on `http://localhost:5173`
-
-### 4. Setup Database
-
-Run the migration file in your Supabase SQL editor:
-```sql
--- Located in: supabase/migrations/20251107172549_create_pricing_platform_schema.sql
+### 3. Setup Backend
+```bash
+cd backend
+npm install
+cp env.example .env
+# Edit .env with your credentials
+npm run dev
+# Runs at http://localhost:3001
 ```
 
-## 🔧 Tech Stack
-
-### Frontend
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Supabase Client
-- Lucide React (icons)
-
-### Backend
-- Node.js
-- Express.js
-- TypeScript
-- Supabase (PostgreSQL + Auth)
-- Zod (validation)
-- Helmet (security)
-
-## 📦 Deployment
-
-### Frontend Deployment
-
-**Vercel (Recommended)**
-1. Connect GitHub repository
-2. Set root directory to `frontend`
-3. Add environment variables
-4. Deploy
-
-**Netlify**
-1. Build command: `npm run build`
-2. Publish directory: `frontend/dist`
-3. Add environment variables
-
-### Backend Deployment
-
-**Railway (Recommended)**
-1. Connect GitHub repository
-2. Set root directory to `backend`
-3. Add environment variables
-4. Deploy
-
-**Heroku / Render**
-1. Create new app
-2. Set buildpack to Node.js
-3. Add environment variables
-4. Deploy from GitHub
-
-## 🔐 Environment Variables
-
-### Frontend (.env)
-```
-VITE_SUPABASE_URL=your-supabase-url
-VITE_SUPABASE_ANON_KEY=your-anon-key
-VITE_API_URL=http://localhost:3001
+### 4. Setup Scrapers (Optional)
+```bash
+cd scrapers
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+playwright install chromium
 ```
 
-### Backend (.env)
+### 5. Setup Database
+```bash
+# Run migrations in Supabase dashboard
+# Copy SQL from supabase/migrations/00_master_schema.sql
+# Or use Supabase CLI:
+supabase db push
 ```
-SUPABASE_URL=your-supabase-url
-SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+---
+
+## 📚 Documentation
+
+All documentation is organized in the [`docs/`](./docs/) folder:
+
+### 🚀 Deployment Guides
+- **[Vercel Deployment Guide](./docs/VERCEL_DEPLOYMENT.md)** - Complete Vercel setup
+- **[Quick Deploy (10 min)](./docs/QUICK_DEPLOY.md)** - Fast deployment guide
+- **[Domain Configuration](./docs/DOMAIN_CONFIGURATION.md)** - Custom domain setup
+
+### 🏛️ Architecture & Design
+- **[System Architecture](./docs/ARCHITECTURE.md)** - Overall system design
+- **[Data Flow Verification](./docs/DATA_FLOW_VERIFICATION.md)** - Frontend to backend flow
+- **[Dual Intake System](./docs/DUAL_INTAKE_SYSTEM.md)** - Questionnaire + document upload
+
+### ✨ Features & Specifications
+- **[Anthropological Questionnaire](./docs/ANTHROPOLOGICAL_QUESTIONNAIRE_SPEC.md)** - 70+ question spec
+- **[Questionnaire Structure](./docs/QUESTIONNAIRE_STRUCTURE.md)** - Question flow logic
+- **[Fallback Systems](./docs/FALLBACK_SYSTEMS.md)** - API fallback chains
+- **[SEO Guide](./docs/SEO_GUIDE.md)** - SEO optimization strategy
+
+### 🗄️ Database
+- **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database configuration
+- **[Project Summary](./docs/PROJECT_SUMMARY.md)** - Complete project overview
+
+---
+
+## 🌐 Deployment
+
+Each folder is self-contained and can be deployed independently:
+
+### Frontend → Vercel
+```bash
+cd frontend
+vercel --prod
+```
+**Configuration**: `frontend/vercel.json`
+
+### Backend → Railway
+```bash
+cd backend
+railway up
+```
+**Configuration**: Railway dashboard
+
+### Scrapers → AWS Lambda (Optional)
+```bash
+cd scrapers
+# Package and deploy to Lambda
+# Or run as separate service
+```
+
+### Database → Supabase
+Already hosted - just run migrations from `supabase/migrations/`
+
+---
+
+## 🔑 Environment Variables
+
+### Frontend (`.env`)
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key
+VITE_BACKEND_URL=https://your-backend.railway.app
+```
+
+### Backend (`.env`)
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+DEEPSEEK_API_KEY=sk-your-deepseek-key
 PORT=3001
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
+NODE_ENV=production
+FRONTEND_URL=https://howmuchshouldiprice.com
 ```
 
-## 📊 Database Schema
+See `env.example` files in each folder for complete lists.
 
-### Tables
-- **profiles** - User profiles with credit balance
-- **consultations** - Pricing consultation records
-- **credit_purchases** - Transaction history
+---
 
-All tables have Row Level Security (RLS) enabled.
+## 🛠️ Tech Stack
 
-## 🛠️ Development
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Frontend** | React + TypeScript + Vite | User interface |
+| **Styling** | Tailwind CSS | Responsive design |
+| **Backend** | Express + TypeScript | REST API |
+| **Database** | Supabase (PostgreSQL) | Data storage |
+| **Auth** | Supabase Auth | User authentication |
+| **AI** | DeepSeek V3 | Pricing recommendations |
+| **Scraping** | Python + Scrapy + Playwright | Market data collection |
+| **Hosting** | Vercel + Railway | Cloud deployment |
 
-### Frontend
+---
+
+## 📦 Key Features
+
+### ✅ Pricing Intelligence
+- AI-powered pricing recommendations
+- Market data analysis from 7+ platforms
+- Tiered pricing for SaaS products
+- Hourly/project rates for services
+- Unit/wholesale pricing for products
+
+### ✅ Dual Intake System
+- **Manual Questionnaire**: 70+ questions across 4 stages
+- **Document Upload**: AI parses SoW, contracts, invoices
+
+### ✅ Advanced Features
+- Travel cost calculations (geocoding + routing)
+- Currency conversion (25+ currencies)
+- Multi-tier fallback systems for APIs
+- Progressive background analysis
+- Credit-based usage system
+
+### ✅ User Experience
+- SEO optimized (target keywords integrated)
+- Mobile responsive
+- Fast loading (Vite optimization)
+- Secure authentication
+- Real-time pricing updates
+
+---
+
+## 🎯 Target Keywords
+
+- "how much should i charge for my project"
+- "how much should i price for my project"
+- "pricing calculator"
+- "freelance pricing tool"
+- "AI pricing recommendations"
+
+---
+
+## 📊 Project Status
+
+| Component | Status | Deployment |
+|-----------|--------|------------|
+| Frontend | ✅ Complete | Vercel |
+| Backend | ✅ Complete | Railway |
+| Database | ✅ Complete | Supabase |
+| Scrapers | ✅ Complete | Pending |
+| SEO | ✅ Optimized | Live |
+| Documentation | ✅ Complete | This repo |
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📝 Development Workflow
+
+### Local Development
 ```bash
-cd frontend
-npm run dev          # Start dev server
-npm run build        # Build for production
-npm run lint         # Lint code
-npm run typecheck    # Type checking
+# Terminal 1 - Frontend
+cd frontend && npm run dev
+
+# Terminal 2 - Backend
+cd backend && npm run dev
+
+# Terminal 3 - Scrapers (optional)
+cd scrapers && scrapy crawl fiverr -a query="design"
 ```
 
-### Backend
+### Testing
 ```bash
-cd backend
-npm run dev          # Start dev server with hot reload
-npm run build        # Build TypeScript
-npm start            # Run production build
-npm run lint         # Lint code
+# Frontend
+cd frontend && npm run typecheck
+
+# Backend
+cd backend && npm run build
 ```
 
-## 📝 API Endpoints
+### Deployment
+```bash
+# Commit and push to main branch
+git add .
+git commit -m "Your changes"
+git push origin main
 
-### Consultations
-- `GET /api/consultations` - Get all consultations
-- `POST /api/consultations` - Create consultation (costs 1 credit)
-- `GET /api/consultations/:id` - Get specific consultation
+# Vercel auto-deploys frontend
+# Railway auto-deploys backend
+```
 
-### Credits
-- `GET /api/credits/profile` - Get user profile
-- `POST /api/credits/purchase` - Purchase credits
-- `GET /api/credits/purchases` - Get purchase history
+---
 
-All endpoints require Bearer token authentication.
+## 🐛 Troubleshooting
 
-## 🎨 Color Theme
+### Frontend Issues
+- Check `frontend/README.md`
+- Verify Supabase credentials in `.env`
+- Clear browser cache and cookies
 
-The application uses an olive green and beige color palette:
-- **Primary**: Olive Green (#5f6d42)
-- **Secondary**: Beige (#f5f3ef)
-- **Accents**: Various shades of olive and beige
+### Backend Issues
+- Check `backend/README.md`
+- Verify all environment variables
+- Check Railway logs: `railway logs`
+
+### Database Issues
+- Verify migrations ran successfully
+- Check Supabase dashboard for errors
+- Ensure RLS policies are correct
+
+### Deployment Issues
+- See [Deployment Guide](./docs/DEPLOYMENT.md)
+- Check [Vercel Deployment](./docs/VERCEL_DEPLOYMENT.md)
+- Review [Quick Deploy](./docs/QUICK_DEPLOY.md)
+
+---
 
 ## 📄 License
 
-ISC
+MIT License - See LICENSE file for details
 
-## 👤 Author
+---
 
-Richardson2512
+## 📞 Support & Contact
 
-## 🔗 Links
+- **Website**: [https://howmuchshouldiprice.com](https://howmuchshouldiprice.com)
+- **Email**: support@howmuchshouldiprice.com
+- **Sales**: sales@howmuchshouldiprice.com
+- **Partnerships**: partners@howmuchshouldiprice.com
+- **GitHub**: [Richardson2512/Pricing](https://github.com/Richardson2512/Pricing)
 
-- [GitHub Repository](https://github.com/Richardson2512/Pricing)
-- [Supabase](https://supabase.com)
+---
+
+## 🎉 Acknowledgments
+
+Built with:
+- [React](https://react.dev/)
+- [Vite](https://vitejs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Supabase](https://supabase.com/)
+- [DeepSeek](https://www.deepseek.com/)
+- [Scrapy](https://scrapy.org/)
+- [Vercel](https://vercel.com/)
+- [Railway](https://railway.app/)
+
+---
+
+**Built with ❤️ for entrepreneurs, freelancers, and businesses worldwide**
+
+*Stop guessing. Start pricing with confidence.*

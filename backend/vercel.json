@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "pricewise-backend",
+  "name": "howmuchshouldiprice-backend",
   "builds": [
     {
       "src": "src/server.ts",
