@@ -3,8 +3,10 @@ import { z } from 'zod';
 import { supabaseAdmin } from '../config/supabase.js';
 import { authenticateUser, AuthRequest } from '../middleware/auth.js';
 import { generatePricingRecommendation } from '../services/deepseek.js';
-import { parseDocument } from '../services/documentParser.js';
+import { parseDocument, detectScrapingSources } from '../services/documentParser.js';
 import { scrapeMarketData, cleanMarketData, enrichMarketData } from '../services/marketScraper.js';
+import * as pdfParse from 'pdf-parse';
+import mammoth from 'mammoth';
 
 const router = Router();
 
@@ -131,6 +133,178 @@ router.post('/', authenticateUser, async (req: AuthRequest, res) => {
     }
     console.error('Error creating consultation:', error);
     res.status(500).json({ error: 'Failed to create consultation' });
+  }
+});
+
+// Document-based consultation (Upload & Parse)
+router.post('/document', authenticateUser, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id;
+    const { filePaths } = req.body;
+
+    if (!filePaths || !Array.isArray(filePaths) || filePaths.length === 0) {
+      return res.status(400).json({ error: 'No file paths provided' });
+    }
+
+    // Check user credits
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('credits')
+      .eq('id', userId)
+      .single();
+
+    if (profileError) throw profileError;
+
+    if (!profile || profile.credits < 1) {
+      return res.status(400).json({ error: 'Insufficient credits' });
+    }
+
+    console.log('Step 1: Downloading and extracting text from documents...');
+    
+    // Extract text from all uploaded documents
+    const documentTexts: string[] = [];
+    
+    for (const filePath of filePaths) {
+      try {
+        // Download file from Supabase storage
+        const { data: fileData, error: downloadError } = await supabaseAdmin.storage
+          .from('documents')
+          .download(filePath);
+
+        if (downloadError) {
+          console.error(`Error downloading file ${filePath}:`, downloadError);
+          continue;
+        }
+
+        // Convert Blob to Buffer
+        const buffer = Buffer.from(await fileData.arrayBuffer());
+        
+        // Extract text based on file type
+        let text = '';
+        const fileExt = filePath.split('.').pop()?.toLowerCase();
+
+        if (fileExt === 'pdf') {
+          const pdfData = await pdfParse(buffer);
+          text = pdfData.text;
+        } else if (fileExt === 'docx' || fileExt === 'doc') {
+          const result = await mammoth.extractRawText({ buffer });
+          text = result.value;
+        } else if (fileExt === 'txt' || fileExt === 'csv') {
+          text = buffer.toString('utf-8');
+        }
+
+        if (text.trim()) {
+          documentTexts.push(text);
+        }
+      } catch (err) {
+        console.error(`Error processing file ${filePath}:`, err);
+      }
+    }
+
+    if (documentTexts.length === 0) {
+      return res.status(400).json({ error: 'Could not extract text from any uploaded documents' });
+    }
+
+    // Combine all document texts
+    const combinedText = documentTexts.join('\n\n---\n\n');
+
+    console.log('Step 2: Parsing documents with DeepSeek V3...');
+    
+    // Parse combined document text
+    const parsedDoc = await parseDocument(combinedText);
+
+    if (!parsedDoc.offering_type || !parsedDoc.domain) {
+      return res.status(400).json({ 
+        error: 'Could not determine offering type and domain from documents. Please provide more detailed documents or use manual questionnaire.' 
+      });
+    }
+
+    console.log('Step 3: Detecting category and scraping sources...');
+    
+    // Detect which platforms to scrape from
+    const scrapingSources = detectScrapingSources(parsedDoc);
+    console.log('Scraping sources:', scrapingSources);
+
+    // Step 4: Scrape market data
+    console.log('Step 4: Scraping market data from detected sources...');
+    const rawMarketData = await scrapeMarketData({
+      businessType: parsedDoc.domain,
+      offeringType: parsedDoc.offering_type,
+      region: parsedDoc.region || 'Global',
+      niche: parsedDoc.category,
+      sources: scrapingSources,
+    });
+
+    // Step 5: Clean and enrich market data
+    console.log('Step 5: Cleaning and enriching market data...');
+    const cleanedData = cleanMarketData(rawMarketData);
+    const enrichedData = enrichMarketData(cleanedData);
+
+    // Step 6: Generate AI-powered pricing recommendation
+    console.log('Step 6: Generating AI pricing analysis with DeepSeek V3...');
+    const recommendation = await generatePricingRecommendation({
+      businessType: parsedDoc.domain,
+      offeringType: parsedDoc.offering_type,
+      experienceLevel: parsedDoc.complexity === 'high' ? 'expert' : parsedDoc.complexity === 'low' ? 'beginner' : 'intermediate',
+      region: parsedDoc.region || 'Global',
+      niche: parsedDoc.category,
+      pricingGoal: 'market_rate',
+      productDescription: `${parsedDoc.deliverables?.join(', ') || 'N/A'}\n\nMaterials: ${parsedDoc.materials?.join(', ') || 'N/A'}\n\nTools: ${parsedDoc.tools?.join(', ') || 'N/A'}`,
+      costToDeliver: `Quantity: ${parsedDoc.quantity || 'N/A'}\nTimeline: ${parsedDoc.timeline || 'N/A'}\nComplexity: ${parsedDoc.complexity || 'N/A'}`,
+      competitorPricing: parsedDoc.hints_of_budget || 'No budget hints found in documents',
+      valueProposition: `Keywords: ${parsedDoc.keywords?.join(', ') || 'N/A'}\nDependencies: ${parsedDoc.dependencies?.join(', ') || 'N/A'}`,
+      parsedDocuments: parsedDoc,
+      marketData: enrichedData,
+    });
+
+    // Step 7: Store consultation in database
+    console.log('Step 7: Storing consultation...');
+    const { data: consultation, error: consultationError } = await supabaseAdmin
+      .from('consultations')
+      .insert({
+        user_id: userId,
+        business_type: `${parsedDoc.domain}_${parsedDoc.offering_type}`,
+        target_market: `${parsedDoc.region || 'Global'}${parsedDoc.category ? ` - ${parsedDoc.category}` : ''}`,
+        product_description: parsedDoc.deliverables?.join(', ') || 'Extracted from documents',
+        cost_to_deliver: `${parsedDoc.quantity || 'N/A'} | ${parsedDoc.timeline || 'N/A'}`,
+        competitor_pricing: parsedDoc.hints_of_budget || 'No budget hints found',
+        value_proposition: parsedDoc.keywords?.join(', ') || 'N/A',
+        pricing_recommendation: recommendation,
+      })
+      .select()
+      .single();
+
+    if (consultationError) throw consultationError;
+
+    // Store parsed document data
+    for (const filePath of filePaths) {
+      await supabaseAdmin.from('uploaded_documents').insert({
+        user_id: userId,
+        file_name: filePath.split('/').pop(),
+        file_path: filePath,
+        parsed_deliverables: parsedDoc.deliverables,
+        parsed_timeline: parsedDoc.timeline,
+        parsed_tools: parsedDoc.tools,
+        parsed_complexity: parsedDoc.complexity,
+        parsed_dependencies: parsedDoc.dependencies,
+        parsing_status: 'completed',
+        parsed_at: new Date().toISOString(),
+      });
+    }
+
+    // Deduct credit
+    const { error: updateError } = await supabaseAdmin
+      .from('profiles')
+      .update({ credits: profile.credits - 1 })
+      .eq('id', userId);
+
+    if (updateError) throw updateError;
+
+    console.log('✅ Document-based consultation completed successfully!');
+    res.status(201).json({ consultation, parsedData: parsedDoc });
+  } catch (error) {
+    console.error('Error creating document-based consultation:', error);
+    res.status(500).json({ error: 'Failed to process documents and create consultation' });
   }
 });
 

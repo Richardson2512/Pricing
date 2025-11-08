@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { LogOut, Plus, History, Coins, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Consultation } from '../lib/supabase';
+import { PricingIntakeSelector } from './PricingIntakeSelector';
 import { MultiStepQuestionnaire } from './MultiStepQuestionnaire';
+import { DocumentUploadFlow } from './DocumentUploadFlow';
 import { CreditPurchase } from './CreditPurchase';
 import { PricingAnalysisResult } from './PricingAnalysisResult';
 import { Footer } from './Footer';
 
-type View = 'dashboard' | 'questionnaire' | 'result';
+type View = 'dashboard' | 'intake-selector' | 'questionnaire' | 'document-upload' | 'result';
 
 export function Dashboard() {
   const { profile, signOut, refreshProfile } = useAuth();
@@ -95,7 +97,71 @@ export function Dashboard() {
       setShowPurchase(true);
       return;
     }
-    setView('questionnaire');
+    setView('intake-selector');
+  };
+
+  const handleDocumentSubmit = async (files: File[]) => {
+    if (!profile || profile.credits < 1) {
+      setError('Insufficient credits');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('Not authenticated');
+      }
+
+      // Upload files to Supabase storage
+      const uploadedFilePaths: string[] = [];
+      
+      for (const file of files) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${profile.id}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+        
+        uploadedFilePaths.push(fileName);
+      }
+
+      // Call backend API to parse documents and generate pricing
+      const response = await fetch(`${API_URL}/api/consultations/document`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          filePaths: uploadedFilePaths,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to parse documents and generate pricing');
+      }
+
+      const { consultation } = await response.json();
+
+      await refreshProfile();
+      await fetchConsultations();
+
+      setSelectedConsultation(consultation);
+      setView('result');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (view === 'result' && selectedConsultation) {
@@ -112,12 +178,51 @@ export function Dashboard() {
     );
   }
 
+  if (view === 'intake-selector') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 p-4 py-8">
+        <PricingIntakeSelector
+          onSelect={(method) => {
+            if (method === 'manual') {
+              setView('questionnaire');
+            } else {
+              setView('document-upload');
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (view === 'document-upload') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 p-4 py-8">
+        <DocumentUploadFlow
+          onBack={() => setView('intake-selector')}
+          onSubmit={handleDocumentSubmit}
+          loading={loading}
+        />
+        {error && (
+          <div className="max-w-4xl mx-auto mt-4 bg-red-50 text-red-600 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (view === 'questionnaire') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 p-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 flex items-center justify-between">
             <div>
+              <button
+                onClick={() => setView('intake-selector')}
+                className="text-slate-600 hover:text-slate-800 mb-4 transition flex items-center gap-2"
+              >
+                ← Back to selection
+              </button>
               <h1 className="text-3xl font-bold text-slate-800 mb-2">Price Your Product</h1>
               <p className="text-slate-600">Answer these questions to get your AI-powered pricing recommendation</p>
             </div>
