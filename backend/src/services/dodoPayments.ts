@@ -1,7 +1,10 @@
 /**
  * Dodo Payments Integration Service
- * Handles product-based checkout and webhook processing
+ * Using official Dodo Payments SDK and Standard Webhooks
  */
+
+import DodoPayments from 'dodopayments';
+import { Webhook } from 'standardwebhooks';
 
 // Product IDs from Dodo Payments Dashboard
 const PRODUCT_IDS: { [key: number]: string } = {
@@ -10,75 +13,90 @@ const PRODUCT_IDS: { [key: number]: string } = {
   20: 'pdt_ViYh83fJgoA70GKJ76JXe',  // Business: 20 credits
 };
 
+// Initialize Dodo Payments client
+const dodoClient = new DodoPayments({
+  bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+});
+
+// Initialize Webhook verifier
+const webhookSecret = process.env.DODO_WEBHOOK_SECRET;
+let webhookVerifier: Webhook | null = null;
+
+if (webhookSecret && webhookSecret.startsWith('whsec_')) {
+  try {
+    // Remove whsec_ prefix for standardwebhooks library
+    const cleanSecret = webhookSecret.substring(6);
+    webhookVerifier = new Webhook(cleanSecret);
+    console.log('✅ Webhook verifier initialized successfully');
+  } catch (error: any) {
+    console.warn('⚠️ Invalid webhook secret format:', error.message);
+  }
+} else {
+  console.warn('⚠️ No valid webhook secret configured (must start with whsec_)');
+}
+
 interface CreateCheckoutParams {
   productId: string;
   quantity: number;
   metadata: {
     userId: string;
-    credits: number;
+    credits: string;
     packageType: string;
   };
   successUrl: string;
   cancelUrl: string;
   customerEmail?: string;
   allowDiscountCodes?: boolean;
-  discountCodeId?: string;
 }
-
-interface CheckoutResponse {
-  id: string;
-  url: string;
-  productId: string;
-  status: string;
-}
-
-const DODO_API_KEY = process.env.DODO_PAYMENTS_API_KEY;
-const DODO_BASE_URL = process.env.DODO_PAYMENTS_BASE_URL || 'https://api.dodopayments.com';
 
 /**
- * Create a checkout session for credit purchase using product ID
+ * Create a checkout session using Dodo Payments SDK
  */
-export async function createCheckoutSession(params: CreateCheckoutParams): Promise<CheckoutResponse> {
-  if (!DODO_API_KEY) {
-    throw new Error('Dodo Payments API key not configured');
+export async function createCheckoutSession(params: CreateCheckoutParams) {
+  try {
+    // Build checkout payload
+    const checkoutPayload: any = {
+      product_cart: [
+        {
+          product_id: params.productId,
+          quantity: params.quantity,
+        }
+      ],
+      feature_flags: {
+        allow_discount_code: params.allowDiscountCodes || true, // Enable discount codes
+      },
+      return_url: params.successUrl,
+      customer: {
+        email: params.customerEmail || '',
+        name: params.customerEmail?.split('@')[0] || 'Customer',
+      },
+      metadata: params.metadata, // Must be string key-value pairs
+    };
+
+    console.log('📤 Creating checkout session:', {
+      productId: params.productId,
+      credits: params.metadata.credits,
+      email: params.customerEmail,
+    });
+
+    // Create checkout using SDK
+    const checkoutResponse = await dodoClient.checkoutSessions.create(checkoutPayload);
+
+    console.log('✅ Checkout session created:', {
+      sessionId: checkoutResponse.session_id,
+      checkoutUrl: checkoutResponse.checkout_url,
+    });
+
+    return {
+      id: checkoutResponse.session_id,
+      url: checkoutResponse.checkout_url,
+      productId: params.productId,
+      status: 'created',
+    };
+  } catch (error: any) {
+    console.error('❌ Dodo Payments checkout error:', error);
+    throw new Error(`Failed to create checkout: ${error.message}`);
   }
-
-  // Build checkout session payload
-  const checkoutPayload: any = {
-    product_id: params.productId,
-    quantity: params.quantity,
-    metadata: params.metadata,
-    success_url: params.successUrl,
-    cancel_url: params.cancelUrl,
-    customer_email: params.customerEmail,
-  };
-
-  // Enable discount codes if specified
-  if (params.allowDiscountCodes) {
-    checkoutPayload.allow_discount_codes = true;
-  }
-
-  // Apply specific discount code if provided
-  if (params.discountCodeId) {
-    checkoutPayload.discount_code_id = params.discountCodeId;
-  }
-
-  const response = await fetch(`${DODO_BASE_URL}/v1/checkout-sessions`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${DODO_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(checkoutPayload),
-  });
-
-  if (!response.ok) {
-    const error: any = await response.json().catch(() => ({ message: response.statusText }));
-    throw new Error(`Dodo Payments API error: ${error.message || response.statusText}`);
-  }
-
-  const data: any = await response.json();
-  return data;
 }
 
 /**
@@ -89,89 +107,85 @@ export function getProductIdForCredits(credits: number): string | null {
 }
 
 /**
- * Verify Dodo Payments webhook signature
- * 
- * Dodo Payments webhook verification:
- * 1. Extract webhook-id, webhook-timestamp, webhook-signature from headers
- * 2. Concatenate: webhook-id.webhook-timestamp.raw_payload
- * 3. Compute HMAC SHA256 with webhook secret
- * 4. Compare with webhook-signature header
+ * Verify webhook signature using Standard Webhooks library
  */
-export function verifyDodoWebhookSignature(
-  webhookId: string,
-  webhookTimestamp: string,
-  rawPayload: string,
-  signature: string,
-  secret: string
-): boolean {
+export async function verifyWebhookSignature(
+  rawBody: string,
+  headers: any
+): Promise<boolean> {
+  if (!webhookVerifier) {
+    console.warn('⚠️ Webhook verification skipped - no verifier configured');
+    return true; // Allow webhook if no secret configured (for testing)
+  }
+
   try {
-    const crypto = require('crypto');
+    // Construct webhook headers for Standard Webhooks library
+    const webhookHeaders = {
+      'webhook-id': headers['webhook-id'] as string,
+      'webhook-timestamp': headers['webhook-timestamp'] as string,
+      'webhook-signature': headers['webhook-signature'] as string,
+    };
     
-    // Concatenate webhook-id, timestamp, and payload with periods
-    const signedPayload = `${webhookId}.${webhookTimestamp}.${rawPayload}`;
-    
-    // Compute HMAC SHA256
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(signedPayload)
-      .digest('hex');
-    
-    // Compare signatures (constant-time comparison to prevent timing attacks)
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    );
-  } catch (error) {
-    console.error('Webhook signature verification error:', error);
+    // Standard Webhooks library handles the verification
+    await webhookVerifier.verify(rawBody, webhookHeaders);
+    console.log('✅ Webhook signature verified');
+    return true;
+  } catch (error: any) {
+    console.error('❌ Webhook verification failed:', error.message);
     return false;
   }
 }
 
 /**
- * Process payment webhook
+ * Process payment webhook event
  */
-export async function processPaymentWebhook(event: any) {
-  const { type, data } = event;
+export async function processPaymentWebhook(payload: any) {
+  const eventType = payload.type;
+  const payloadType = payload.data?.payload_type; // 'Payment' or 'Subscription'
 
-  switch (type) {
-    case 'payment.succeeded':
-      return {
-        userId: data.metadata.userId,
-        credits: parseInt(data.metadata.credits),
-        amount: data.amount / 100, // Convert from cents
-        paymentId: data.id,
-      };
-    
-    case 'payment.failed':
-      console.error('Payment failed:', data);
-      return null;
-    
-    default:
-      console.log('Unhandled webhook event:', type);
-      return null;
+  console.log('📨 Processing webhook:', {
+    eventType,
+    payloadType,
+    paymentId: payload.data?.payment_id,
+  });
+
+  // Handle one-time payments
+  if (payloadType === 'Payment' && eventType === 'payment.succeeded') {
+    const metadata = payload.data?.metadata || {};
+    const paymentId = payload.data?.payment_id;
+    const amount = payload.data?.amount || 0;
+
+    return {
+      userId: metadata.userId || metadata.user_id,
+      credits: parseInt(metadata.credits || '0'),
+      amount: amount / 100, // Convert from cents to dollars
+      paymentId,
+    };
   }
+
+  // Handle payment failures
+  if (eventType === 'payment.failed' || eventType === 'payment.cancelled') {
+    console.warn('⚠️ Payment failed or cancelled:', payload.data?.payment_id);
+    return null;
+  }
+
+  console.log('❓ Unhandled webhook event:', eventType);
+  return null;
 }
 
 /**
- * Get payment status
+ * Get payment status using SDK
  */
 export async function getPaymentStatus(paymentId: string) {
-  if (!DODO_API_KEY) {
-    throw new Error('Dodo Payments API key not configured');
+  try {
+    const payment: any = await dodoClient.payments.retrieve(paymentId);
+    return {
+      status: payment.status,
+      amount: payment.total_amount || payment.amount || 0,
+      metadata: payment.metadata,
+    };
+  } catch (error: any) {
+    console.error('Failed to get payment status:', error);
+    throw new Error(`Failed to get payment status: ${error.message}`);
   }
-
-  const response = await fetch(`${DODO_BASE_URL}/v1/payments/${paymentId}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${DODO_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to get payment status: ${response.statusText}`);
-  }
-
-  return await response.json();
 }
-

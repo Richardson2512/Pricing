@@ -58,15 +58,9 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Body parser - with raw body for webhook verification
-app.use(express.json({
-  verify: (req: any, res, buf) => {
-    // Store raw body for webhook signature verification
-    if (req.originalUrl === '/api/payments/webhook') {
-      req.rawBody = buf.toString('utf8');
-    }
-  }
-}));
+// Body parser
+// Note: Webhook route uses express.raw() middleware directly
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
