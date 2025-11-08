@@ -40,7 +40,7 @@ BEGIN
 
 <p>Setting the right price for your product isn''t just about covering costs — it''s about psychology, positioning, and profit. Whether you''re selling digital tools, handmade items, or enterprise software, pricing is the bridge between what your product is worth and what customers are willing to pay.</p>
 
-<p>That''s exactly what <strong>HowMuchShouldIPrice.com</strong> helps you figure out — a smart, AI-driven platform that recommends realistic price ranges for products and services based on real-world data.</p>
+<p>That''s exactly what <strong><a href="https://howmuchshouldiprice.com" target="_blank">HowMuchShouldIPrice.com</a></strong> helps you figure out — a smart, AI-driven platform that recommends realistic price ranges for products and services based on real-world data.</p>
 
 <p>In 2025, data-driven pricing tools and AI recommendations make it easier than ever to find your sweet spot — if you know how to use them.</p>
 
