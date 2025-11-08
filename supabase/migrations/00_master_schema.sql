@@ -69,6 +69,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
+
 CREATE TRIGGER update_profiles_updated_at
   BEFORE UPDATE ON profiles
   FOR EACH ROW
@@ -575,6 +577,8 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS after_consultation_insert ON consultations;
 
 CREATE TRIGGER after_consultation_insert
   AFTER INSERT ON consultations
