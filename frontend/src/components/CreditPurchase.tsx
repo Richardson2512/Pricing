@@ -1,4 +1,5 @@
-import { Coins, X } from 'lucide-react';
+import { useState } from 'react';
+import { Coins, X, CreditCard, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 type CreditPackage = {
@@ -19,9 +20,47 @@ type CreditPurchaseProps = {
 };
 
 export function CreditPurchase({ onClose }: CreditPurchaseProps) {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Payment integration coming soon - show informational modal only
+  const handlePurchase = async (credits: number) => {
+    if (!user) {
+      setError('Please sign in to purchase credits');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/payments/create-checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          credits,
+          userId: user.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create checkout');
+      }
+
+      const { checkoutUrl } = await response.json();
+      
+      // Redirect to Dodo Payments checkout
+      window.location.href = checkoutUrl;
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      setError(err.message || 'Failed to initiate payment. Please try again.');
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -41,95 +80,95 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
           </button>
         </div>
 
-        <div className="p-8 text-center">
+        <div className="p-8">
           {/* Current Balance */}
-          <div className="bg-beige-100 border border-beige-200 rounded-xl p-6 mb-8">
+          <div className="bg-beige-100 border border-beige-200 rounded-xl p-6 mb-8 text-center">
             <p className="text-olive-800 text-lg">
               <span className="font-semibold">Current Balance:</span> {profile?.credits || 0} credits
             </p>
           </div>
 
-          {/* Coming Soon Message */}
-          <div className="mb-8">
-            <div className="w-20 h-20 bg-olive-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Coins className="w-10 h-10 text-olive-600" />
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-800 text-sm">{error}</p>
             </div>
-            
-            <h3 className="text-3xl font-bold text-slate-800 mb-4">
-              Credit Top-Up Coming Soon! 🚀
-            </h3>
-            
-            <p className="text-lg text-slate-600 mb-6">
-              We're currently integrating secure payment options to make purchasing credits seamless.
-            </p>
-            
-            <div className="bg-olive-50 border border-olive-200 rounded-xl p-6 text-left max-w-md mx-auto">
-              <p className="font-semibold text-olive-900 mb-3">What's coming:</p>
-              <ul className="space-y-2 text-sm text-olive-800">
-                <li className="flex items-start gap-2">
-                  <span className="text-olive-600 font-bold">✓</span>
-                  <span>Multiple payment options (Credit Card, PayPal, UPI)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-olive-600 font-bold">✓</span>
-                  <span>Flexible credit packages (5, 10, 20, 50 credits)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-olive-600 font-bold">✓</span>
-                  <span>Instant credit delivery</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-olive-600 font-bold">✓</span>
-                  <span>Secure payment processing</span>
-                </li>
-              </ul>
-            </div>
-          </div>
+          )}
 
-          {/* Preview Packages */}
+          {/* Credit Packages */}
           <div className="mb-8">
-            <h4 className="text-lg font-semibold text-slate-800 mb-4">
-              Planned Credit Packages:
-            </h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <h3 className="text-xl font-bold text-slate-800 mb-6 text-center">
+              Choose Your Credit Package
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {packages.map((pkg) => (
                 <div
                   key={pkg.credits}
-                  className="border-2 border-beige-200 rounded-xl p-4 bg-beige-50"
+                  className={`relative border-2 rounded-xl p-6 transition hover:shadow-lg ${
+                    pkg.popular
+                      ? 'border-olive-600 bg-olive-50'
+                      : 'border-beige-200 bg-white hover:border-olive-300'
+                  }`}
                 >
-                  <div className="text-2xl font-bold text-slate-800 mb-1">
-                    {pkg.credits}
+                  {pkg.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="bg-olive-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        POPULAR
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="text-center mb-4">
+                    <div className="text-4xl font-bold text-slate-800 mb-1">
+                      {pkg.credits}
+                    </div>
+                    <div className="text-sm text-slate-600 mb-3">Credits</div>
+                    <div className="text-3xl font-bold text-olive-600 mb-1">
+                      ${pkg.price}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      ${(pkg.price / pkg.credits).toFixed(2)} per credit
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-600 mb-2">Credits</div>
-                  <div className="text-xl font-bold text-olive-600">
-                    ${pkg.price}
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    ${(pkg.price / pkg.credits).toFixed(2)}/credit
-                  </div>
+
+                  <button
+                    onClick={() => handlePurchase(pkg.credits)}
+                    disabled={loading}
+                    className={`w-full py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 ${
+                      pkg.popular
+                        ? 'bg-olive-600 text-white hover:bg-olive-700'
+                        : 'bg-beige-100 text-olive-600 hover:bg-beige-200'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-5 h-5" />
+                        Purchase
+                      </>
+                    )}
+                  </button>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Contact for Early Access */}
-          <div className="bg-gradient-to-r from-olive-600 to-olive-700 rounded-xl p-6 text-white">
-            <p className="font-semibold mb-2">Need more credits now?</p>
-            <p className="text-sm text-beige-100 mb-4">
-              Contact us for early access to credit purchases or special arrangements.
+          {/* Info Box */}
+          <div className="bg-olive-50 border border-olive-200 rounded-xl p-6 mb-6">
+            <p className="text-sm text-olive-800 text-center">
+              <strong>✓ Secure Payment</strong> • <strong>✓ Instant Delivery</strong> • <strong>✓ Credits Never Expire</strong>
             </p>
-            <a
-              href="mailto:support@howmuchshouldiprice.com?subject=Credit Purchase Inquiry"
-              className="inline-block px-6 py-3 bg-white text-olive-600 rounded-lg font-semibold hover:bg-beige-50 transition"
-            >
-              Contact Support
-            </a>
           </div>
 
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="mt-8 px-8 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition"
+            disabled={loading}
+            className="w-full px-8 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition disabled:opacity-50"
           >
             Close
           </button>

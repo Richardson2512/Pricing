@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import consultationsRouter from './routes/consultations.js';
 import creditsRouter from './routes/credits.js';
+import paymentsRouter from './routes/payments.js';
 
 dotenv.config();
 
@@ -69,6 +70,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/consultations', consultationsRouter);
 app.use('/api/credits', creditsRouter);
+app.use('/api/payments', paymentsRouter);
 
 // 404 handler
 app.use((req, res) => {
