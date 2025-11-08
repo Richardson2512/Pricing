@@ -121,8 +121,11 @@ export function Pricing() {
                       ${pkg.price}
                     </span>
                   </div>
-                  <div className="text-lg font-semibold text-slate-700 mt-2">
+                  <div className="text-lg font-semibold text-slate-700">
                     {pkg.credits} Credits
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    Credits never expire
                   </div>
                 </div>
 
