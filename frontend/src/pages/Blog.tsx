@@ -283,10 +283,12 @@ export function Blog() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-medium text-olive-700">
-                              {post.author_name.charAt(0)}
-                            </span>
+                          <div className="w-10 h-10 rounded-full bg-white border-2 border-olive-600 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <img 
+                              src="/logo.png" 
+                              alt="HowMuchShouldIPrice Logo" 
+                              className="w-6 h-6 object-contain"
+                            />
                           </div>
                           <div className="flex flex-col">
                             <span className="text-sm font-medium text-slate-900">{post.author_name}</span>
@@ -333,10 +335,12 @@ export function Blog() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-medium text-olive-700">
-                              {post.author_name.charAt(0)}
-                            </span>
+                          <div className="w-10 h-10 rounded-full bg-white border-2 border-olive-600 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <img 
+                              src="/logo.png" 
+                              alt="HowMuchShouldIPrice Logo" 
+                              className="w-6 h-6 object-contain"
+                            />
                           </div>
                           <div className="flex flex-col">
                             <span className="text-sm font-medium text-slate-900">{post.author_name}</span>
@@ -383,10 +387,12 @@ export function Blog() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-medium text-olive-700">
-                              {post.author_name.charAt(0)}
-                            </span>
+                          <div className="w-10 h-10 rounded-full bg-white border-2 border-olive-600 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <img 
+                              src="/logo.png" 
+                              alt="HowMuchShouldIPrice Logo" 
+                              className="w-6 h-6 object-contain"
+                            />
                           </div>
                           <div className="flex flex-col">
                             <span className="text-sm font-medium text-slate-900">{post.author_name}</span>
