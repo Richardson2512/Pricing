@@ -1300,20 +1300,248 @@ function renderPhysicalServiceQuestions(substage: number, formData: Questionnair
   );
 }
 
+// ============================================================================
+// STAGE 3: EXPERIENCE & POSITIONING (6 questions - Universal)
+// ============================================================================
+
 function renderStage3Questions(substage: number, formData: QuestionnaireState, setFormData: any) {
-  return (
-    <div className="text-center py-12">
-      <h3 className="text-2xl font-bold text-slate-800 mb-4">
-        Stage 3: Experience & Positioning
-      </h3>
-      <p className="text-slate-600 mb-4">
-        Question {substage + 1}
-      </p>
-      <p className="text-sm text-slate-500">
-        (Experience questions will be implemented here)
-      </p>
-    </div>
-  );
+  switch (substage) {
+    case 0: // Q3.1: Years in field
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            How long have you been in this field?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Your experience level helps us adjust pricing recommendations
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            {[
+              { value: '0', label: 'Just Starting', desc: '< 1 year' },
+              { value: '1-3', label: '1-3 Years', desc: 'Early stage' },
+              { value: '3-5', label: '3-5 Years', desc: 'Established' },
+              { value: '5-10', label: '5-10 Years', desc: 'Experienced' },
+              { value: '10+', label: '10+ Years', desc: 'Expert' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, yearsInField: option.value })}
+                className={`p-4 rounded-lg border-2 transition ${
+                  formData.yearsInField === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800 text-sm">{option.label}</p>
+                <p className="text-xs text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Or enter specific years:
+            </label>
+            <input
+              type="text"
+              value={formData.yearsInField}
+              onChange={(e) => setFormData({ ...formData, yearsInField: e.target.value })}
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+              placeholder="e.g., 7 years"
+            />
+          </div>
+        </div>
+      );
+
+    case 1: // Q3.2: Skill level
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            How do you describe your skill level?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This affects the pricing multiplier we recommend
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { value: 'beginner', label: 'Beginner', desc: 'Learning and building portfolio', icon: '🌱' },
+              { value: 'intermediate', label: 'Intermediate', desc: 'Proven track record', icon: '📈' },
+              { value: 'expert', label: 'Expert', desc: 'Industry leader, specialized', icon: '⭐' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, skillLevel: option.value as any })}
+                className={`p-6 rounded-xl border-2 transition ${
+                  formData.skillLevel === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <div className="text-3xl mb-2">{option.icon}</div>
+                <p className="font-semibold text-slate-800">{option.label}</p>
+                <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 2: // Q3.3: Business stage
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What's your business stage?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This helps us understand your market position
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[
+              { value: 'idea', label: 'Idea', desc: 'Planning phase', icon: '💡' },
+              { value: 'launch', label: 'Launch', desc: 'Just started', icon: '🚀' },
+              { value: 'growth', label: 'Growth', desc: 'Scaling up', icon: '📈' },
+              { value: 'mature', label: 'Mature', desc: 'Established', icon: '🏆' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, businessStage: option.value as any })}
+                className={`p-6 rounded-xl border-2 transition ${
+                  formData.businessStage === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <div className="text-3xl mb-2">{option.icon}</div>
+                <p className="font-semibold text-slate-800">{option.label}</p>
+                <p className="text-xs text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 3: // Q3.4: Current pricing method
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What's your current pricing method (if any)?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            How do you currently determine your prices?
+          </p>
+          <textarea
+            value={formData.currentPricingMethod}
+            onChange={(e) => setFormData({ ...formData, currentPricingMethod: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={4}
+            placeholder="e.g., Cost + 30% margin, Match competitor prices, Hourly rate × estimated hours, No formal method yet"
+          />
+        </div>
+      );
+
+    case 4: // Q3.5: Portfolio/testimonials
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you have testimonials, case studies, or portfolio samples?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Social proof can justify premium pricing
+          </p>
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, hasPortfolio: true })}
+                className={`flex-1 p-4 rounded-lg border-2 transition ${
+                  formData.hasPortfolio
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">Yes</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, hasPortfolio: false })}
+                className={`flex-1 p-4 rounded-lg border-2 transition ${
+                  !formData.hasPortfolio
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">No</p>
+              </button>
+            </div>
+            {formData.hasPortfolio && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Portfolio/testimonial links (optional)
+                </label>
+                <textarea
+                  value={formData.biggestChallenge}
+                  onChange={(e) => setFormData({ ...formData, biggestChallenge: e.target.value })}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+                  rows={3}
+                  placeholder="Paste URLs to your portfolio, testimonials, or case studies"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      );
+
+    case 5: // Q3.6: Biggest pricing challenge
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What's your biggest challenge in pricing right now?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This helps us provide targeted recommendations
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {[
+              { value: 'competition', label: 'Too much competition', icon: '👥' },
+              { value: 'cost', label: 'Calculating costs accurately', icon: '💰' },
+              { value: 'perception', label: 'Perceived value vs price', icon: '🎯' },
+              { value: 'uncertainty', label: 'Market uncertainty', icon: '❓' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, biggestChallenge: option.value })}
+                className={`p-4 rounded-lg border-2 transition text-left ${
+                  formData.biggestChallenge === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <span className="text-2xl mr-2">{option.icon}</span>
+                <span className="font-medium text-slate-800">{option.label}</span>
+              </button>
+            ))}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Or describe your challenge:
+            </label>
+            <textarea
+              value={formData.biggestChallenge}
+              onChange={(e) => setFormData({ ...formData, biggestChallenge: e.target.value })}
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+              rows={3}
+              placeholder="Describe your specific pricing challenge..."
+            />
+          </div>
+        </div>
+      );
+
+    default:
+      return <div>Unknown question</div>;
+  }
 }
 
 function renderStage4Questions(substage: number, formData: QuestionnaireState, setFormData: any) {
