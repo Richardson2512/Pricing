@@ -196,15 +196,6 @@ export function BlogPost() {
 
         {/* Article Content */}
         <div className="max-w-4xl mx-auto px-6 md:px-8 py-12 md:py-16">
-          {/* Back Button */}
-          <button
-            onClick={() => navigate('/blog')}
-            className="flex items-center gap-2 text-olive-600 hover:text-olive-700 mb-8 transition font-medium text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Articles</span>
-          </button>
-
           {/* Article Body */}
           <article className="bg-white rounded-xl shadow-sm border border-[rgba(0,0,0,0.1)] p-8 md:p-12">
             <div 
@@ -259,6 +250,15 @@ export function BlogPost() {
               Get Started Free
             </button>
           </div>
+
+          {/* Back Button - Moved to bottom */}
+          <button
+            onClick={() => navigate('/blog')}
+            className="flex items-center gap-2 text-olive-600 hover:text-olive-700 mt-8 transition font-medium text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Articles</span>
+          </button>
         </div>
 
         {/* Related Posts */}
