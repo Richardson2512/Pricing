@@ -74,6 +74,7 @@ interface QuestionnaireState {
   nicheAudience: string;
   comparableProducts: string;
   uniqueValue: string;
+  mainFeatures: string; // NEW: For tiered pricing (Q2.11)
 
   // Stage 2C: Physical Service
   serviceType: string;
@@ -214,6 +215,7 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
     nicheAudience: '',
     comparableProducts: '',
     uniqueValue: '',
+    mainFeatures: '',
     serviceType: '',
     operatingRegion: '',
     pricingModel: '',
@@ -1348,8 +1350,8 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
             List the key features of your product (we'll help you organize them into pricing tiers)
           </p>
           <textarea
-            value={formData.comparableProducts}
-            onChange={(e) => setFormData({ ...formData, comparableProducts: e.target.value })}
+            value={formData.mainFeatures}
+            onChange={(e) => setFormData({ ...formData, mainFeatures: e.target.value })}
             className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
             rows={8}
             placeholder="Example for SaaS:&#10;- AI content generation&#10;- Schedule up to 100 posts/month&#10;- Analytics dashboard&#10;- Team collaboration (5 users)&#10;- Instagram, Twitter, LinkedIn integration&#10;- Custom branding&#10;- Priority support&#10;- API access&#10;&#10;List all features - we'll help you decide which go in Free, Starter, Pro, and Enterprise tiers."
@@ -1543,21 +1545,21 @@ function renderStage3Questions(substage: number, formData: QuestionnaireState, s
         </div>
       );
 
-    case 3: // Q3.4: Current pricing method
+    case 3: // Q3.4: Current pricing method (OPTIONAL)
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
-            What's your current pricing method (if any)?
+            What's your current pricing method? <span className="text-slate-500 font-normal text-lg">(Optional)</span>
           </h3>
           <p className="text-slate-600 mb-4">
-            How do you currently determine your prices?
+            How do you currently determine your prices? Skip if you don't have a formal method yet.
           </p>
           <textarea
             value={formData.currentPricingMethod}
             onChange={(e) => setFormData({ ...formData, currentPricingMethod: e.target.value })}
             className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
             rows={4}
-            placeholder="e.g., Cost + 30% margin, Match competitor prices, Hourly rate × estimated hours, No formal method yet"
+            placeholder="e.g., Cost + 30% margin, Match competitor prices, Hourly rate × estimated hours, or leave blank if no formal method yet"
           />
         </div>
       );
