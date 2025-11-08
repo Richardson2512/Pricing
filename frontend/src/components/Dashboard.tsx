@@ -39,7 +39,7 @@ export function Dashboard() {
   };
 
   // API endpoint for backend
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const API_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   const handleQuestionnaireSubmit = async (formData: any) => {
     if (!profile || profile.credits < 1) {
