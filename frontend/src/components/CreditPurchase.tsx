@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Coins, X, CreditCard, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Coins, X, CreditCard, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 type CreditPackage = {
@@ -19,9 +19,48 @@ type CreditPurchaseProps = {
 };
 
 export function CreditPurchase({ onClose }: CreditPurchaseProps) {
-  const { profile, user } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'cancelled' | 'checking'>('idle');
+
+  // Check for payment status on mount (after redirect back from Dodo Payments)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const payment = urlParams.get('payment');
+    const credits = urlParams.get('credits');
+
+    if (payment === 'success') {
+      setPaymentStatus('checking');
+      // Poll for credit update
+      const pollInterval = setInterval(async () => {
+        await refreshProfile();
+        // Credits should be updated by webhook
+        setPaymentStatus('success');
+        clearInterval(pollInterval);
+        
+        // Clean URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }, 2000);
+
+      // Stop polling after 30 seconds
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (paymentStatus === 'checking') {
+          setPaymentStatus('idle');
+        }
+      }, 30000);
+
+      return () => clearInterval(pollInterval);
+    } else if (payment === 'cancelled') {
+      setPaymentStatus('cancelled');
+      // Clean URL after 5 seconds
+      setTimeout(() => {
+        window.history.replaceState({}, '', window.location.pathname);
+        setPaymentStatus('idle');
+      }, 5000);
+    }
+  }, []);
 
   const handlePurchase = async (credits: number) => {
     if (!user) {
@@ -110,10 +149,47 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
             </p>
           </div>
 
+          {/* Payment Success Message */}
+          {paymentStatus === 'success' && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <div>
+                <p className="text-green-800 font-semibold">Payment Successful!</p>
+                <p className="text-green-700 text-sm">Your credits have been added to your account.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Payment Checking Message */}
+          {paymentStatus === 'checking' && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-3">
+              <Loader2 className="w-5 h-5 text-blue-600 animate-spin flex-shrink-0" />
+              <div>
+                <p className="text-blue-800 font-semibold">Processing Payment...</p>
+                <p className="text-blue-700 text-sm">Please wait while we confirm your payment.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Payment Cancelled Message */}
+          {paymentStatus === 'cancelled' && (
+            <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+              <div>
+                <p className="text-yellow-800 font-semibold">Payment Cancelled</p>
+                <p className="text-yellow-700 text-sm">Your payment was cancelled. No charges were made.</p>
+              </div>
+            </div>
+          )}
+
           {/* Error Message */}
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-800 text-sm">{error}</p>
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              <div>
+                <p className="text-red-800 font-semibold">Payment Error</p>
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
             </div>
           )}
 

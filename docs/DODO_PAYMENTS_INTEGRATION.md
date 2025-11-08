@@ -2,15 +2,36 @@
 
 ## Overview
 
-HowMuchShouldIPrice.com uses **Dodo Payments** for secure credit purchases. This guide covers setup, testing, and production deployment.
+This application uses **Dodo Payments** for secure credit card processing. The integration includes:
+
+- ✅ Official Dodo Payments SDK (`dodopayments`)
+- ✅ Standard Webhooks library for signature verification
+- ✅ Secure webhook handling with idempotency
+- ✅ Automatic credit addition via webhooks
+- ✅ Retry logic with exponential backoff
+- ✅ Payment status polling on frontend
+- ✅ Discount code support
 
 ---
 
-## 🔑 API Key Setup
+## Architecture
 
-### Backend Environment Variables
+```
+User → Frontend → Backend → Dodo Payments
+                     ↑
+                     |
+              Webhook (payment.succeeded)
+                     ↓
+              Add Credits to Profile
+```
 
-Add to `backend/.env`:
+---
+
+## Setup
+
+### 1. Environment Variables
+
+#### Backend (`backend/.env`):
 ```env
 DODO_PAYMENTS_API_KEY=FYvOjH2t4INibzvy.wToYMiSrH4P3-zlOrYCz_aEzXxFCrHcXnndLEyqkKnbvVsYb
 DODO_PAYMENTS_BASE_URL=https://api.dodopayments.com
@@ -18,341 +39,352 @@ DODO_WEBHOOK_SECRET=whsec_2+WDBN41Up36pUlQZg2SrMML7n9LCluM
 DODO_DISCOUNT_CODE_ID=dsc_96AppoW3xINGY23GpHNTm
 ```
 
-### Railway Environment Variables
-
-Add in **Railway Dashboard** → **Variables**:
-```
-DODO_PAYMENTS_API_KEY=FYvOjH2t4INibzvy.wToYMiSrH4P3-zlOrYCz_aEzXxFCrHcXnndLEyqkKnbvVsYb
-DODO_PAYMENTS_BASE_URL=https://api.dodopayments.com
-DODO_WEBHOOK_SECRET=whsec_2+WDBN41Up36pUlQZg2SrMML7n9LCluM
-DODO_DISCOUNT_CODE_ID=dsc_96AppoW3xINGY23GpHNTm
-FRONTEND_URL=https://howmuchshouldiprice.com
+#### Frontend (`frontend/.env`):
+```env
+VITE_BACKEND_URL=https://pricewise-backend-production.up.railway.app
 ```
 
-**Webhook Configuration:**
-- Webhook URL: `https://your-backend.railway.app/api/payments/webhook`
-- Webhook Secret: `whsec_2+WDBN41Up36pUlQZg2SrMML7n9LCluM`
-- Events: `payment.succeeded`, `payment.failed`
+### 2. Product Configuration
 
-**Discount Code:**
-- Discount Code ID: `dsc_96AppoW3xINGY23GpHNTm`
-- Enabled at checkout: Users can enter discount codes
-- Optional: Pre-apply discount code automatically
+Products are configured in `backend/src/services/dodoPayments.ts`:
 
----
-
-## 💳 Credit Packages & Product IDs
-
-Fixed packages (no custom amounts):
-
-| Credits | Price | Per Credit | Product ID | Name |
-|---------|-------|------------|------------|------|
-| 5 | $10 | $2.00 | `pdt_jAHaYI6bUNkXVdTd4tqJ6` | Starter |
-| 10 | $15 | $1.50 | `pdt_c4yyDCsXQsI6GXhJwtfW6` | Professional ⭐ |
-| 20 | $25 | $1.25 | `pdt_ViYh83fJgoA70GKJ76JXe` | Business |
-
-**Note:** Only 3 packages available. These match the products configured in Dodo Payments dashboard.
-
----
-
-## 🔄 Payment Flow
-
-### 1. User Clicks "Buy Credits"
-- Dashboard → "Buy Credits" button
-- Opens `CreditPurchase` modal
-
-### 2. User Selects Package
-- Chooses from 4 fixed packages
-- Clicks "Purchase" button
-
-### 3. Frontend Creates Checkout
 ```typescript
-POST /api/payments/create-checkout
-Body: { credits: 10, userId: "user-uuid" }
+const PRODUCT_IDS: { [key: number]: string } = {
+  5: 'pdt_jAHaYI6bUNkXVdTd4tqJ6',   // Starter: 5 credits ($10)
+  10: 'pdt_c4yyDCsXQsI6GXhJwtfW6',  // Professional: 10 credits ($15)
+  20: 'pdt_ViYh83fJgoA70GKJ76JXe',  // Business: 20 credits ($25)
+};
 ```
 
-### 4. Backend Creates Checkout Session
+### 3. Webhook Configuration
+
+**Dodo Payments Dashboard:**
+- Webhook URL: `https://pricewise-backend-production.up.railway.app/api/payments/webhook`
+- Events to subscribe: `payment.succeeded`, `payment.failed`, `payment.cancelled`
+- Signing Secret: `whsec_2+WDBN41Up36pUlQZg2SrMML7n9LCluM`
+
+---
+
+## Payment Flow
+
+### Step 1: User Clicks "Purchase"
+```typescript
+// frontend/src/components/CreditPurchase.tsx
+const handlePurchase = async (credits: number) => {
+  const response = await fetch(`${backendUrl}/api/payments/create-checkout`, {
+    method: 'POST',
+    body: JSON.stringify({ credits, userId: user.id }),
+  });
+  
+  const { checkoutUrl } = await response.json();
+  window.location.href = checkoutUrl; // Redirect to Dodo Payments
+};
+```
+
+### Step 2: Backend Creates Checkout Session
 ```typescript
 // backend/src/routes/payments.ts
-- Validates package (5, 10, 20, or 50 credits)
-- Gets Dodo Payments product ID for selected package
-- Gets user email from Supabase
-- Calls Dodo Payments API with product_id
-- Returns checkout URL
+router.post('/create-checkout', async (req, res) => {
+  const { credits, userId } = req.body;
+  
+  const checkout = await createCheckoutSession({
+    productId: getProductIdForCredits(credits),
+    quantity: 1,
+    metadata: { userId, credits: credits.toString() },
+    successUrl: `${frontendUrl}/dashboard?payment=success`,
+    cancelUrl: `${frontendUrl}/dashboard?payment=cancelled`,
+  });
+  
+  res.json({ checkoutUrl: checkout.url });
+});
 ```
 
-**Product ID Mapping:**
-- 5 credits → `pdt_jAHaYI6bUNkXVdTd4tqJ6`
-- 10 credits → `pdt_c4yyDCsXQsI6GXhJwtfW6`
-- 20 credits → `pdt_ViYh83fJgoA70GKJ76JXe`
-- 50 credits → `pdt_ViYh83fJgoA70GKJ76JXe`
-
-### 5. User Redirected to Dodo Payments
-```
-window.location.href = checkoutUrl
-```
-
-### 6. User Completes Payment
-- Enters card details on Dodo Payments page
+### Step 3: User Completes Payment on Dodo Payments
+- User enters card details on Dodo Payments hosted page
 - Dodo Payments processes payment
+- User redirected back to `successUrl` or `cancelUrl`
 
-### 7. Webhook Triggers
-```
-POST /api/payments/webhook
-- Dodo Payments sends webhook
-- Backend verifies signature
-- Updates user credits
-- Records purchase
+### Step 4: Webhook Adds Credits
+```typescript
+// backend/src/routes/payments.ts
+router.post('/webhook', async (req, res) => {
+  // 1. Verify signature
+  const isValid = await verifyWebhookSignature(rawBody, headers);
+  
+  // 2. Check for duplicate (idempotency)
+  const existing = await supabase
+    .from('webhook_events')
+    .select('id')
+    .eq('webhook_id', webhookId)
+    .single();
+  
+  if (existing) return res.json({ status: 'duplicate' });
+  
+  // 3. Process payment
+  const result = await processPaymentWebhook(payload);
+  
+  // 4. Add credits
+  await supabase
+    .from('profiles')
+    .update({ credits: oldCredits + result.credits })
+    .eq('id', result.userId);
+  
+  res.json({ received: true });
+});
 ```
 
-### 8. User Redirected Back
-```
-Success: /dashboard?payment=success
-Cancel: /dashboard?payment=cancelled
+### Step 5: Frontend Polls for Credit Update
+```typescript
+// frontend/src/components/CreditPurchase.tsx
+useEffect(() => {
+  if (payment === 'success') {
+    const pollInterval = setInterval(async () => {
+      await refreshProfile(); // Fetch updated credits
+      setPaymentStatus('success');
+      clearInterval(pollInterval);
+    }, 2000);
+  }
+}, []);
 ```
 
 ---
 
-## 🎯 API Endpoints
+## Webhook Events
 
-### Create Checkout Session
-```http
-POST /api/payments/create-checkout
-Content-Type: application/json
-
-{
-  "credits": 10,
-  "userId": "user-uuid"
-}
-
-Response:
-{
-  "checkoutUrl": "https://checkout.dodopayments.com/...",
-  "paymentId": "pay_..."
-}
-```
-
-### Webhook Handler
-```http
-POST /api/payments/webhook
-webhook-id: evt_abc123xyz
-webhook-timestamp: 1699564800
-webhook-signature: v1,abc123def456...
-
+### `payment.succeeded`
+```json
 {
   "type": "payment.succeeded",
   "data": {
-    "id": "pay_...",
-    "amount": 1500,
-    "metadata": {
-      "userId": "user-uuid",
-      "credits": "10",
-      "packageType": "professional"
+    "payload_type": "Payment",
+    "payment_id": "pay_xxx",
+    "status": "succeeded",
+    "total_amount": 1500,
+    "currency": "USD",
+    "customer": { "email": "user@example.com" },
+    "metadata": { "userId": "abc-123", "credits": "10" }
+  }
+}
+```
+**Action:** Add credits to user profile
+
+### `payment.failed`
+```json
+{
+  "type": "payment.failed",
+  "data": {
+    "payment_id": "pay_xxx",
+    "status": "failed",
+    "error_code": "PROCESSING_ERROR",
+    "error_message": "Card declined"
+  }
+}
+```
+**Action:** Log error, no credits added
+
+### `payment.cancelled`
+```json
+{
+  "type": "payment.cancelled",
+  "data": {
+    "payment_id": "pay_xxx"
+  }
+}
+```
+**Action:** Log cancellation, no credits added
+
+---
+
+## Security Features
+
+### 1. Webhook Signature Verification
+```typescript
+import { Webhook } from 'standardwebhooks';
+
+const webhookVerifier = new Webhook(cleanSecret);
+await webhookVerifier.verify(rawBody, webhookHeaders);
+```
+
+### 2. Idempotency
+```typescript
+// Store webhook ID to prevent duplicate processing
+await supabase.from('webhook_events').insert({
+  webhook_id: webhookId,
+  event_type: payload.type,
+  payload: payload,
+});
+```
+
+### 3. Metadata Validation
+```typescript
+const userId = metadata.userId || metadata.user_id;
+const credits = parseInt(metadata.credits);
+
+if (!userId || !credits || credits <= 0) {
+  return null; // Invalid webhook
+}
+```
+
+---
+
+## Error Handling
+
+### Retry Logic (Backend)
+```typescript
+export async function createCheckoutSession(params, retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await dodoClient.checkoutSessions.create(payload);
+    } catch (error) {
+      if (error.status >= 400 && error.status < 500) break; // Don't retry 4xx
+      
+      const waitTime = Math.pow(2, attempt) * 1000; // Exponential backoff
+      await new Promise(resolve => setTimeout(resolve, waitTime));
     }
   }
 }
 ```
 
-**Webhook Verification Process:**
-1. Extract headers: `webhook-id`, `webhook-timestamp`, `webhook-signature`
-2. Get raw request body (exact bytes received)
-3. Concatenate: `webhook-id.webhook-timestamp.raw_body`
-4. Compute HMAC SHA256 with webhook secret
-5. Compare with `webhook-signature` header
-6. If match → Process webhook
-7. If mismatch → Reject with 401
+### Payment Status Polling (Frontend)
+```typescript
+// Poll for 30 seconds after redirect
+const pollInterval = setInterval(async () => {
+  await refreshProfile();
+  if (creditsUpdated) {
+    clearInterval(pollInterval);
+    setPaymentStatus('success');
+  }
+}, 2000);
 
-**Idempotency:**
-- Each webhook has unique `webhook-id`
-- Stored in `webhook_events` table
-- Duplicate webhooks are ignored
-- Prevents double credit additions
-
-### Verify Payment
-```http
-GET /api/payments/verify/:paymentId?userId=user-uuid
-
-Response:
-{
-  "status": "completed",
-  "credits": 10,
-  "amount": 15
-}
+setTimeout(() => clearInterval(pollInterval), 30000);
 ```
 
 ---
 
-## 🔐 Security
+## Database Schema
 
-### API Key Storage
-- ✅ **Backend only** - Never expose in frontend
-- ✅ **Environment variables** - Not in code
-- ✅ **Railway secrets** - Encrypted storage
-
-### Webhook Verification
-- Verify `X-Dodo-Signature` header
-- Prevent replay attacks
-- Log all webhook events
-
-### User Validation
-- Check user exists before creating payment
-- Verify user owns the payment before adding credits
-- Prevent duplicate credit additions
-
----
-
-## 🧪 Testing
-
-### Test Mode (Development)
-```env
-# Use Dodo Payments test API key
-DODO_PAYMENTS_API_KEY=test_key_...
-```
-
-### Test Credit Purchase Flow
-1. Sign in to dashboard
-2. Click "Buy Credits"
-3. Select package (e.g., 10 credits)
-4. Click "Purchase"
-5. Use test card: `4242 4242 4242 4242`
-6. Complete checkout
-7. Verify credits added to account
-
-### Test Webhook Locally
-```bash
-# Use ngrok or similar to expose localhost
-ngrok http 3001
-
-# Update webhook URL in Dodo Payments dashboard:
-https://your-ngrok-url.ngrok.io/api/payments/webhook
-```
-
----
-
-## 🚀 Production Setup
-
-### 1. Dodo Payments Dashboard
-- Set webhook URL: `https://your-backend.railway.app/api/payments/webhook`
-- Enable webhook events: `payment.succeeded`, `payment.failed`
-- Copy webhook secret (if provided)
-
-### 2. Railway Environment Variables
-```
-DODO_PAYMENTS_API_KEY=FYvOjH2t4INibzvy.wToYMiSrH4P3-zlOrYCz_aEzXxFCrHcXnndLEyqkKnbvVsYb
-DODO_PAYMENTS_BASE_URL=https://api.dodopayments.com
-DODO_WEBHOOK_SECRET=whsec_... (if provided)
-```
-
-### 3. Frontend Environment Variables (Vercel)
-```
-# No Dodo Payments keys needed in frontend!
-# All payment logic is backend-only
-```
-
-### 4. Database Migration
-Run in Supabase:
+### `profiles` table
 ```sql
--- Add payment_id column
--- File: supabase/migrations/20251108_add_payment_id_to_purchases.sql
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 3;
 ```
 
----
-
-## 📊 Database Schema
-
-### credit_purchases Table
+### `credit_purchases` table
 ```sql
 CREATE TABLE credit_purchases (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES profiles(id),
-  credits_purchased integer NOT NULL,
-  amount_paid numeric(10,2) NOT NULL,
-  payment_id text UNIQUE,  -- Dodo Payments transaction ID
-  purchase_date timestamptz DEFAULT now()
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id),
+  credits_purchased INTEGER NOT NULL,
+  amount_paid DECIMAL(10,2) NOT NULL,
+  payment_id TEXT UNIQUE NOT NULL,
+  purchase_date TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### `webhook_events` table
+```sql
+CREATE TABLE webhook_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  webhook_id TEXT UNIQUE NOT NULL,
+  event_type TEXT NOT NULL,
+  payload JSONB NOT NULL,
+  processed_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
 
 ---
 
-## 🐛 Troubleshooting
+## Testing
 
-### Payment Link Creation Fails
-- Check: API key is correct
-- Check: Backend environment variables set
-- Check: User exists in database
-- Check: Package credits are valid (5, 10, 20, 50)
+### Test Cards (Dodo Payments)
 
-### Webhook Not Received
-- Check: Webhook URL is correct in Dodo dashboard
-- Check: Railway backend is running
-- Check: Webhook endpoint is accessible (test with curl)
-- Check: Webhook signature verification (if enabled)
-
-### Credits Not Added After Payment
-- Check: Webhook received (check backend logs)
-- Check: User ID in metadata matches
-- Check: No duplicate payment_id (unique constraint)
-- Check: Supabase RLS policies allow updates
-
----
-
-## 📝 Monitoring
-
-### Backend Logs to Watch
-```bash
-# Railway logs will show:
-✅ Credits added: 10 credits to user abc-123
-❌ Payment link creation error: ...
-❌ Webhook processing error: ...
+**Success:**
+```
+Card: 4242 4242 4242 4242
+Expiry: Any future date
+CVC: Any 3 digits
 ```
 
-### Supabase Queries
-```sql
--- Recent purchases
-SELECT * FROM credit_purchases 
-ORDER BY purchase_date DESC 
-LIMIT 10;
-
--- User credit balance
-SELECT email, credits FROM profiles 
-WHERE id = 'user-uuid';
+**Failure:**
+```
+Card: 4000 0000 0000 0119
+Expiry: Any future date
+CVC: Any 3 digits
 ```
 
+### Test Flow
+
+1. **Local Testing:**
+   ```bash
+   cd backend && npm run dev
+   cd frontend && npm run dev
+   ```
+
+2. **Purchase Credits:**
+   - Navigate to `/dashboard`
+   - Click "Buy Credits"
+   - Select package
+   - Use test card
+
+3. **Check Logs:**
+   - Railway logs: `railway logs`
+   - Look for: `✅ SUCCESS: Added X credits`
+
+4. **Verify Database:**
+   ```sql
+   SELECT * FROM profiles WHERE id = 'user-uuid';
+   SELECT * FROM credit_purchases WHERE user_id = 'user-uuid';
+   SELECT * FROM webhook_events ORDER BY processed_at DESC LIMIT 10;
+   ```
+
 ---
 
-## 🎯 Success Indicators
+## Troubleshooting
 
-When working correctly:
-1. ✅ User clicks "Purchase" → Redirected to Dodo Payments
-2. ✅ User completes payment → Redirected back to dashboard
-3. ✅ Credits appear in dashboard immediately
-4. ✅ Purchase recorded in `credit_purchases` table
-5. ✅ Backend logs show successful webhook processing
+### Issue: Webhook not received
+**Solution:**
+- Check webhook URL in Dodo dashboard
+- Verify Railway backend is running
+- Check Railway logs for incoming requests
+
+### Issue: Credits not added
+**Solution:**
+- Check Railway logs for webhook processing
+- Verify `metadata.userId` is correct
+- Check `webhook_events` table for duplicates
+
+### Issue: Payment fails immediately
+**Solution:**
+- Verify product IDs in `dodoPayments.ts`
+- Check Dodo Payments API key
+- Review backend logs for errors
+
+### Issue: Signature verification fails
+**Solution:**
+- Verify `DODO_WEBHOOK_SECRET` starts with `whsec_`
+- Check webhook headers are present
+- Ensure raw body is used for verification
 
 ---
 
-## 📞 Support
+## Production Checklist
 
-**Dodo Payments Issues:**
-- Documentation: https://docs.dodopayments.com
-- Support: Contact Dodo Payments support team
-
-**Integration Issues:**
-- Check backend logs in Railway
-- Test webhook with Postman
-- Verify API key is active
-- Check Supabase permissions
+- [ ] Environment variables set in Railway
+- [ ] Webhook URL configured in Dodo dashboard
+- [ ] Product IDs match Dodo dashboard
+- [ ] SSL certificate active (Railway provides)
+- [ ] Database migrations run
+- [ ] Test payment flow end-to-end
+- [ ] Monitor Railway logs for errors
+- [ ] Set up error alerting (optional)
 
 ---
 
-## 🔄 Future Enhancements
+## Support
 
-Potential improvements:
-- [ ] Add payment history page
-- [ ] Email receipts after purchase
-- [ ] Refund handling
-- [ ] Multiple currency support
-- [ ] Subscription plans (recurring payments)
-- [ ] Discount codes/coupons
-- [ ] Bulk purchase discounts
+- **Dodo Payments Docs:** https://docs.dodopayments.com
+- **Dodo Payments Support:** support@dodopayments.com
+- **Railway Docs:** https://docs.railway.app
 
+---
+
+**Last Updated:** November 8, 2025

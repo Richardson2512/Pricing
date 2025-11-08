@@ -10,44 +10,29 @@ import paymentsRouter from './routes/payments.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // Security middleware
 app.use(helmet());
 
-// CORS configuration - support multiple origins for Vercel deployments
-const allowedOrigins: (string | RegExp)[] = [
-  'http://localhost:5173', // Local development
-  'http://localhost:5174', // Alternative local port
-  FRONTEND_URL, // Production frontend
-];
-
-// Add Vercel preview deployments support
-if (process.env.NODE_ENV === 'production') {
-  allowedOrigins.push(/\.vercel\.app$/); // Allow all Vercel preview URLs
-}
-
+// CORS configuration - Allow all production domains
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    // Check if origin is in allowed list or matches Vercel pattern
-    const isAllowed = allowedOrigins.some(allowed => {
-      if (typeof allowed === 'string') return allowed === origin;
-      if (allowed instanceof RegExp) return allowed.test(origin);
-      return false;
-    });
-    
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'http://localhost:5173', // Local development
+    'http://localhost:5174', // Alternative local port
+    'https://howmuchshouldiprice.com', // Production (non-www)
+    'https://www.howmuchshouldiprice.com', // Production (www)
+  ],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+console.log('✅ CORS enabled for:', [
+  'https://howmuchshouldiprice.com',
+  'https://www.howmuchshouldiprice.com',
+]);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -85,10 +70,39 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 });
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 Frontend URL: ${FRONTEND_URL}`);
   console.log(`🏥 Health check: http://localhost:${PORT}/health`);
+  console.log(`🌍 Listening on 0.0.0.0:${PORT}`);
+});
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('⚠️ SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('⚠️ SIGINT received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
 });
 
 export default app;
