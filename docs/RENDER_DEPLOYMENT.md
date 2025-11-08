@@ -45,10 +45,12 @@ Root Directory: scrapers
 
 **Build & Deploy:**
 ```
-Runtime: Python 3.11
+Runtime: Python 3.11.9 (specified in runtime.txt)
 Build Command: pip install -r requirements.txt && playwright install chromium
 Start Command: python server.py
 ```
+
+**⚠️ Important**: Python 3.11 is required! The `runtime.txt` file specifies this.
 
 **Instance Type:**
 ```
