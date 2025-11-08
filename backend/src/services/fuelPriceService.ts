@@ -262,17 +262,6 @@ export function getVehicleEfficiency(location: string, vehicleType: 'bike' | 'ca
   return vehicleType === 'bike' ? 40 : 15; // km/L
 }
 
-// ============================================================================
-// EXPORT
-// ============================================================================
-
-export {
-  getFuelPricesByLocation,
-  getIndiaFuelPrices,
-  kmToMiles,
-  milesToKm,
-  formatDistance,
-  getVehicleEfficiency,
-  POPULAR_CURRENCIES,
-};
+// All functions are already exported above with 'export' keyword
+// No need for additional export statement
 

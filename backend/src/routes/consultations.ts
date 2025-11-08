@@ -5,7 +5,7 @@ import { authenticateUser, AuthRequest } from '../middleware/auth.js';
 import { generatePricingRecommendation } from '../services/deepseek.js';
 import { parseDocument, detectScrapingSources } from '../services/documentParser.js';
 import { scrapeMarketData, cleanMarketData, enrichMarketData } from '../services/marketScraper.js';
-import * as pdfParse from 'pdf-parse';
+import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
 
 const router = Router();
