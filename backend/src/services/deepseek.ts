@@ -105,97 +105,227 @@ ${input.valueProposition}`;
       prompt += `\n- Top 10% Price: ${stats.top10} ${input.marketData[0].currency}`;
     }
 
-    prompt += `\n\nIMPORTANT: You MUST provide SPECIFIC PRICING NUMBERS, not generic advice.
+    prompt += `\n\n=== CRITICAL INSTRUCTIONS ===
+You MUST provide SPECIFIC PRICING NUMBERS with EXACT dollar amounts. NO generic advice.
 
-PROVIDE A COMPREHENSIVE PRICING ANALYSIS WITH EXACT NUMBERS:
+Analyze the business type and provide appropriate pricing structure:
 
-1. RECOMMENDED PRICING STRUCTURE
-   ${input.offeringType === 'product' && input.niche?.toLowerCase().includes('saas') || input.niche?.toLowerCase().includes('subscription') || input.niche?.toLowerCase().includes('software') ? `
-   For SaaS/Subscription products, provide TIERED PRICING:
-   - Free Tier: What features to include (if any)
-   - Starter Tier: $X/month - List specific features and limits
-   - Professional Tier: $Y/month - List specific features and limits  
-   - Business/Enterprise Tier: $Z/month - List specific features and limits
+1. IDENTIFY THE BUSINESS MODEL:
+   - ${input.businessType} ${input.offeringType}
+   - Category: ${input.niche || 'General'}
+   - Sales model: ${input.productDescription.includes('subscription') ? 'Subscription' : input.productDescription.includes('one-time') ? 'One-time' : 'To be determined'}
+
+2. RECOMMENDED PRICING STRUCTURE:
+
+   ${input.businessType === 'digital' && input.offeringType === 'product' ? `
+   FOR DIGITAL PRODUCTS (Software, Apps, SaaS, Courses, Templates, etc.):
    
-   Explain WHY each tier is priced at that specific amount based on:
-   - Feature value
-   - Target customer segment
+   IF SUBSCRIPTION/SaaS MODEL:
+   Provide TIERED PRICING with EXACT amounts:
+   
+   FREE TIER:
+   - Price: $0
+   - Features: [List 3-5 basic features]
+   - Limits: [Specific limits like "10 items/month", "1 user"]
+   - Purpose: Lead generation, freemium conversion
+   
+   STARTER TIER:
+   - Price: $X/month (be specific!)
+   - Features: [List 5-7 features]
+   - Limits: [Specific limits]
+   - Target: Individual users, freelancers, hobbyists
+   - Why this price: [Calculate: costs + margin + market positioning]
+   
+   PROFESSIONAL TIER:
+   - Price: $Y/month (be specific!)
+   - Features: [List 8-10 features]
+   - Limits: [Higher limits]
+   - Target: Small businesses, growing teams
+   - Why this price: [2-3x value of Starter, competitor comparison]
+   
+   BUSINESS/ENTERPRISE TIER:
+   - Price: $Z/month (be specific!)
+   - Features: [List 10+ features, unlimited access]
+   - Limits: Unlimited or very high
+   - Target: Large companies, enterprises
+   - Why this price: [Premium positioning, full value, enterprise support]
+   
+   IF ONE-TIME PURCHASE (Ebooks, Templates, Courses, Apps):
+   - Basic Version: $X (specific number)
+   - Standard Version: $Y (specific number)
+   - Premium/Pro Version: $Z (specific number)
+   Explain what each version includes and why that specific price.
+   ` : ''}
+   
+   ${input.businessType === 'physical' && input.offeringType === 'product' ? `
+   FOR PHYSICAL PRODUCTS (Crafts, Electronics, Food, Apparel, etc.):
+   
+   Calculate UNIT PRICING:
+   - Material Cost per unit: $X
+   - Labor Cost per unit: $Y
+   - Overhead per unit: $Z
+   - Total Cost: $A
+   - Recommended Retail Price: $B (specific number!)
+   - Wholesale Price (if applicable): $C
+   - Bulk Pricing: $D per unit for 10+, $E per unit for 50+, $F per unit for 100+
+   
+   Explain:
+   - Why this specific retail price
+   - Profit margin percentage
+   - How it compares to similar products
+   - Shipping cost considerations
+   ` : ''}
+   
+   ${input.businessType === 'digital' && input.offeringType === 'service' ? `
+   FOR DIGITAL SERVICES (Design, Development, Writing, Consulting, etc.):
+   
+   Provide SPECIFIC RATES:
+   
+   HOURLY RATE:
+   - Beginner: $X/hour
+   - Intermediate: $Y/hour
+   - Expert: $Z/hour
+   - Your recommended rate: $W/hour (based on ${input.experienceLevel} level)
+   
+   PROJECT-BASED PRICING:
+   - Small project (1-2 weeks): $A
+   - Medium project (3-4 weeks): $B
+   - Large project (1-3 months): $C
+   - Your typical project: $D (specific number based on description)
+   
+   RETAINER PRICING:
+   - Basic retainer (20 hours/month): $E/month
+   - Standard retainer (40 hours/month): $F/month
+   - Premium retainer (80 hours/month): $G/month
+   
+   Explain why these specific numbers based on:
+   - Your experience level
+   - Market rates in ${input.region}
    - Competitor pricing
-   - Market positioning
-   ` : `
-   Provide SPECIFIC PRICE POINTS:
-   - Minimum Price: $X (break-even + small margin)
-   - Recommended Price: $Y (market-aligned, profitable)
-   - Premium Price: $Z (high-value positioning)
+   - Value delivered
+   ` : ''}
    
-   For each price point, explain:
-   - Why this specific number
-   - What value justifies this price
-   - How it compares to competitors
-   `}
+   ${input.businessType === 'physical' && input.offeringType === 'service' ? `
+   FOR PHYSICAL SERVICES (Construction, Repair, Photography, Events, etc.):
+   
+   Provide SPECIFIC RATES:
+   
+   HOURLY RATE:
+   - Standard rate: $X/hour
+   - After-hours rate: $Y/hour
+   - Emergency rate: $Z/hour
+   
+   PROJECT-BASED:
+   - Small job: $A
+   - Medium job: $B
+   - Large job: $C
+   
+   ADDITIONAL COSTS:
+   - Travel/Transportation: $D per trip or $E per mile
+   - Materials markup: F% on top of cost
+   - Equipment rental: $G per day
+   
+   Calculate total for typical job:
+   - Labor: $X
+   - Materials: $Y
+   - Travel: $Z
+   - Total: $W (specific number!)
+   ` : ''}
 
-2. COST BREAKDOWN WITH NUMBERS
+3. COST BREAKDOWN WITH ACTUAL NUMBERS
    Based on: ${input.costToDeliver}
-   - Calculate monthly operational costs: $X
-   - Calculate per-customer/per-unit cost: $Y
-   - Recommended profit margin: Z%
-   - Break-even point: N customers/units
    
-3. COMPETITIVE ANALYSIS
+   Calculate and show:
+   - Monthly operational costs: $X (be specific!)
+   - Per-customer/per-unit cost: $Y
+   - Recommended profit margin: Z% (30-50% typical)
+   - Break-even point: N customers/units per month
+   - Annual revenue target: $W with M customers
+   
+4. COMPETITIVE ANALYSIS WITH SPECIFIC PRICES
    Based on: ${input.competitorPricing}
-   - Competitor A: $X for [features]
-   - Competitor B: $Y for [features]
-   - Your positioning: $Z because [specific reasons]
-   - Price gap analysis: You are X% higher/lower because [reasons]
    
-4. MARKET POSITIONING STRATEGY
-   - Your target segment: [specific customer type]
-   - Their willingness to pay: $X-Y range
-   - Your recommended price: $Z
-   - Reasoning: [why this specific number works]
+   List competitors with their EXACT prices:
+   - Competitor 1: $X/month for [features]
+   - Competitor 2: $Y/month for [features]  
+   - Competitor 3: $Z/month for [features]
    
-5. PRICING MODEL RECOMMENDATION
-   ${input.offeringType === 'product' && (input.niche?.toLowerCase().includes('saas') || input.niche?.toLowerCase().includes('subscription')) ? `
-   RECOMMENDED: Tiered Subscription Model
+   YOUR POSITIONING:
+   - Recommended price: $W (specific!)
+   - Position: X% lower/higher than average
+   - Reasoning: [why this specific price beats competitors]
    
-   FREE TIER (Lead Generation):
-   - Features: [list 3-5 basic features]
-   - Limits: [specific limits]
-   - Purpose: Acquire users, demonstrate value
-   
-   STARTER ($X/month):
-   - Features: [list 5-7 features]
-   - Limits: [specific limits]
-   - Target: Individual users, small teams
-   - Why $X: [specific reasoning]
-   
-   PROFESSIONAL ($Y/month):
-   - Features: [list 8-10 features]
-   - Limits: [specific limits]
-   - Target: Growing businesses, teams
-   - Why $Y: [specific reasoning]
-   
-   BUSINESS/ENTERPRISE ($Z/month):
-   - Features: [list 10+ features]
-   - Limits: Unlimited or high limits
-   - Target: Large teams, enterprises
-   - Why $Z: [specific reasoning]
-   ` : `
-   RECOMMENDED: [One-time/Hourly/Project-based] pricing
-   - Specific price: $X
-   - Reasoning: [why this exact number]
-   - Payment structure: [how to charge]
-   `}
+5. FINAL PRICING RECOMMENDATION
 
-6. ACTIONABLE IMPLEMENTATION
-   - Start with: $X for [specific tier/offering]
-   - Test for: [specific timeframe]
-   - Adjust if: [specific metrics]
-   - Expected revenue: $Y per month with Z customers
+   Based on ALL the above analysis, here's what you should charge:
+   
+   ${input.businessType === 'digital' && input.offeringType === 'product' ? `
+   IF SUBSCRIPTION MODEL:
+   - Free: $0 (features: ...)
+   - Starter: $X/month (features: ...)
+   - Pro: $Y/month (features: ...)
+   - Business: $Z/month (features: ...)
+   
+   IF ONE-TIME:
+   - Basic: $X
+   - Pro: $Y
+   - Enterprise: $Z
+   ` : ''}
+   
+   ${input.businessType === 'physical' && input.offeringType === 'product' ? `
+   - Retail Price: $X per unit
+   - Wholesale: $Y per unit (for 10+)
+   - Bulk: $Z per unit (for 100+)
+   - Profit margin: W%
+   ` : ''}
+   
+   ${input.offeringType === 'service' ? `
+   - Hourly Rate: $X/hour
+   - Day Rate: $Y/day
+   - Project Rate: $Z for typical project
+   - Retainer: $W/month
+   ` : ''}
 
-CRITICAL: Every price must be a SPECIFIC NUMBER in ${input.region} market context. 
-Do NOT give ranges without specific recommendations. 
-Do NOT give generic advice - give EXACT pricing numbers with clear reasoning.`;
+6. FEATURE DISTRIBUTION (for tiered products)
+   ${input.businessType === 'digital' && input.offeringType === 'product' ? `
+   Based on the features provided, organize them:
+   
+   FREE TIER gets:
+   - [List specific features]
+   
+   STARTER ($X) gets:
+   - Everything in Free
+   - [List additional features]
+   
+   PRO ($Y) gets:
+   - Everything in Starter
+   - [List additional features]
+   
+   BUSINESS ($Z) gets:
+   - Everything in Pro
+   - [List additional features]
+   ` : ''}
+
+7. IMPLEMENTATION PLAN
+   - Launch price: $X for [specific tier/product]
+   - Introductory offer: $Y for first Z customers (if applicable)
+   - Price testing strategy: Start at $A, test for B weeks
+   - Expected conversion rate: C%
+   - Monthly revenue projection: $D with E customers
+
+=== CRITICAL RULES ===
+1. EVERY price must be a SPECIFIC DOLLAR AMOUNT (e.g., $49, not "$40-60")
+2. Provide EXACT numbers for ALL tiers/options
+3. Base prices on ${input.region} market context
+4. Use market data provided to justify prices
+5. Calculate break-even and profit margins
+6. Compare to specific competitors with their exact prices
+7. NO generic advice like "test and iterate" - give EXACT starting prices
+8. For SaaS: MUST provide Free, Starter, Pro, Business tiers with specific prices
+9. For services: MUST provide hourly, project, and retainer rates
+10. For physical products: MUST provide unit, wholesale, and bulk prices
+
+Your response must be actionable and specific enough that the user can implement pricing IMMEDIATELY.`;
 
     const response = await fetch(DEEPSEEK_API_URL, {
       method: 'POST',
