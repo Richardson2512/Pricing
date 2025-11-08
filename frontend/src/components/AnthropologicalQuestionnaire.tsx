@@ -306,8 +306,11 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       
+      // Import supabase from lib
+      const { supabase } = await import('../lib/supabase');
+      
       // Get auth token
-      const { data: { session } } = await (window as any).supabase?.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.access_token) {
         console.warn('No auth token for background analysis');

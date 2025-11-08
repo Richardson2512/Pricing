@@ -89,15 +89,7 @@ export function Dashboard() {
       };
 
       console.log('📤 Submitting consultation request');
-      console.log('📊 Transformed data:', {
-        businessType: transformedData.businessType,
-        offeringType: transformedData.offeringType,
-        experienceLevel: transformedData.experienceLevel,
-        region: transformedData.region,
-        niche: transformedData.niche,
-        preferredCurrency: transformedData.preferredCurrency,
-        usePreAnalyzedData: transformedData.usePreAnalyzedData,
-      });
+      console.log('📊 Full transformed data:', transformedData);
       console.log('🔄 Pre-analysis data available:', formData.preAnalysisData ? 'YES ✅' : 'NO - will scrape now');
 
       // Call backend API to generate pricing with DeepSeek
@@ -112,6 +104,15 @@ export function Dashboard() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ Backend error:', errorData);
+        
+        // Show detailed validation errors if available
+        if (errorData.details) {
+          console.error('Validation errors:', errorData.details);
+          const validationErrors = errorData.details.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ');
+          throw new Error(`Validation failed: ${validationErrors}`);
+        }
+        
         throw new Error(errorData.error || 'Failed to generate pricing');
       }
 
@@ -133,8 +134,11 @@ export function Dashboard() {
   const buildProductDescription = (data: any): string => {
     let desc = '';
     
+    // Add offering type and medium
+    desc += `${data.medium || 'Digital'} ${data.offeringType || 'product'}. `;
+    
     if (data.digitalCategory) {
-      desc += `Digital ${data.digitalCategory}. `;
+      desc += `Category: ${data.digitalCategory}. `;
     }
     if (data.platform) {
       desc += `Selling on: ${data.platform}. `;
@@ -151,8 +155,16 @@ export function Dashboard() {
     if (data.positioning) {
       desc += `Positioning: ${data.positioning}. `;
     }
+    if (data.businessEntity) {
+      desc += `Business type: ${data.businessEntity}. `;
+    }
     
-    return desc || 'Product details to be analyzed';
+    // Ensure we always return something meaningful
+    if (!desc || desc.length < 20) {
+      desc = `${data.medium || 'Digital'} ${data.offeringType || 'product'} in ${data.location || 'global market'}. Business stage: ${data.businessStage || 'launch'}. Experience level: ${data.skillLevel || 'intermediate'}.`;
+    }
+    
+    return desc;
   };
 
   // Helper function to build cost breakdown
@@ -171,8 +183,16 @@ export function Dashboard() {
     if (data.yearsInField) {
       cost += `Experience: ${data.yearsInField} years. `;
     }
+    if (data.currentPricingMethod) {
+      cost += `Current method: ${data.currentPricingMethod}. `;
+    }
     
-    return cost || 'Cost structure to be analyzed';
+    // Ensure we always return something meaningful
+    if (!cost || cost.length < 10) {
+      cost = `Experience level: ${data.skillLevel || 'intermediate'}. Business stage: ${data.businessStage || 'launch'}. Pricing goal: ${data.pricingStrategy || 'market_rate'}.`;
+    }
+    
+    return cost;
   };
 
   const handleViewConsultation = (consultation: Consultation) => {
