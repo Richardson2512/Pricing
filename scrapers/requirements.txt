@@ -20,7 +20,7 @@ python-multipart==0.0.20
 
 # Data Processing
 pandas==2.2.3
-pydantic==2.10.6
+pydantic==2.11.7
 
 # Database
 psycopg2-binary==2.9.9
