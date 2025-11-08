@@ -8,7 +8,7 @@ lxml==4.9.3
 
 # HTTP Requests
 requests==2.31.0
-httpx==0.25.2
+httpx==0.24.1
 
 # Async Support
 aiohttp==3.9.1
@@ -24,7 +24,7 @@ pydantic==2.10.6
 
 # Database
 psycopg2-binary==2.9.9
-supabase==2.3.0
+supabase==2.13.2
 
 # Proxy & Anti-Detection
 scrapy-rotating-proxies==0.6.2
