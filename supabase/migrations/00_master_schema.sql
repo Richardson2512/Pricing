@@ -279,26 +279,7 @@ EXCEPTION
   WHEN OTHERS THEN NULL;
 END $$;
 
-ALTER TABLE consultations ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users can view own consultations" ON consultations;
-DROP POLICY IF EXISTS "Users can insert own consultations" ON consultations;
-
-CREATE POLICY "Users can view own consultations"
-  ON consultations FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own consultations"
-  ON consultations FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE INDEX IF NOT EXISTS idx_consultations_user ON consultations(user_id);
-CREATE INDEX IF NOT EXISTS idx_consultations_created ON consultations(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_consultations_status ON consultations(status);
-
--- Add new columns to existing consultations table
+-- Add new columns to existing consultations table FIRST
 DO $$ 
 BEGIN
   -- Add questionnaire_id if it doesn't exist
@@ -374,6 +355,25 @@ BEGIN
   END IF;
 END $$;
 
+ALTER TABLE consultations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own consultations" ON consultations;
+DROP POLICY IF EXISTS "Users can insert own consultations" ON consultations;
+
+CREATE POLICY "Users can view own consultations"
+  ON consultations FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own consultations"
+  ON consultations FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE INDEX IF NOT EXISTS idx_consultations_user ON consultations(user_id);
+CREATE INDEX IF NOT EXISTS idx_consultations_created ON consultations(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_consultations_status ON consultations(status);
+
 COMMENT ON TABLE consultations IS 'Pricing analysis requests and AI-generated recommendations';
 
 -- ============================================================================
@@ -420,26 +420,7 @@ EXCEPTION
   WHEN OTHERS THEN NULL;
 END $$;
 
-ALTER TABLE credit_purchases ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users can view own purchases" ON credit_purchases;
-DROP POLICY IF EXISTS "Users can insert own purchases" ON credit_purchases;
-
-CREATE POLICY "Users can view own purchases"
-  ON credit_purchases FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own purchases"
-  ON credit_purchases FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE INDEX IF NOT EXISTS idx_purchases_user ON credit_purchases(user_id);
-CREATE INDEX IF NOT EXISTS idx_purchases_date ON credit_purchases(purchase_date DESC);
-CREATE INDEX IF NOT EXISTS idx_purchases_status ON credit_purchases(payment_status);
-
--- Add new columns to existing credit_purchases table
+-- Add new columns to existing credit_purchases table FIRST
 DO $$ 
 BEGIN
   -- Add currency if it doesn't exist
@@ -474,6 +455,25 @@ BEGIN
     ALTER TABLE credit_purchases ADD COLUMN payment_id text;
   END IF;
 END $$;
+
+ALTER TABLE credit_purchases ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own purchases" ON credit_purchases;
+DROP POLICY IF EXISTS "Users can insert own purchases" ON credit_purchases;
+
+CREATE POLICY "Users can view own purchases"
+  ON credit_purchases FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own purchases"
+  ON credit_purchases FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE INDEX IF NOT EXISTS idx_purchases_user ON credit_purchases(user_id);
+CREATE INDEX IF NOT EXISTS idx_purchases_date ON credit_purchases(purchase_date DESC);
+CREATE INDEX IF NOT EXISTS idx_purchases_status ON credit_purchases(payment_status);
 
 COMMENT ON TABLE credit_purchases IS 'Credit purchase transactions and payment history';
 
@@ -541,14 +541,7 @@ CREATE POLICY "Service role can manage market listings"
   USING (true)
   WITH CHECK (true);
 
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_market_source ON market_listings(source);
-CREATE INDEX IF NOT EXISTS idx_market_category ON market_listings(category);
-CREATE INDEX IF NOT EXISTS idx_market_price ON market_listings(price);
-CREATE INDEX IF NOT EXISTS idx_market_scraped ON market_listings(scraped_at DESC);
-CREATE INDEX IF NOT EXISTS idx_market_business_type ON market_listings(business_type, offering_type);
-
--- Add new columns to existing market_listings table
+-- Add new columns to existing market_listings table FIRST
 DO $$ 
 BEGIN
   -- Add business_type if it doesn't exist
@@ -615,6 +608,13 @@ BEGIN
     ALTER TABLE market_listings ADD COLUMN seller_country text;
   END IF;
 END $$;
+
+-- Create indexes AFTER columns are added
+CREATE INDEX IF NOT EXISTS idx_market_source ON market_listings(source);
+CREATE INDEX IF NOT EXISTS idx_market_category ON market_listings(category);
+CREATE INDEX IF NOT EXISTS idx_market_price ON market_listings(price);
+CREATE INDEX IF NOT EXISTS idx_market_scraped ON market_listings(scraped_at DESC);
+CREATE INDEX IF NOT EXISTS idx_market_business_type ON market_listings(business_type, offering_type);
 
 COMMENT ON TABLE market_listings IS 'Scraped pricing data from various marketplaces';
 
