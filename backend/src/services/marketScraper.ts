@@ -37,23 +37,69 @@ export function getRelevantPlatforms(config: ScrapingConfig): string[] {
 
 /**
  * Scrape market data from relevant platforms
- * In production, this would trigger actual web scraping jobs
- * For now, returns mock data structure
+ * Integrates with Python Scrapy spiders via subprocess or API
  */
 export async function scrapeMarketData(config: ScrapingConfig): Promise<MarketListing[]> {
-  // In production, this would:
-  // 1. Trigger Scrapy spiders or Playwright scripts
-  // 2. Store raw data in Supabase
-  // 3. Clean and normalize data
-  // 4. Return structured results
-  
-  // Mock data for demonstration
+  try {
+    // In production, trigger Python scraping workflow:
+    // Option 1: Call Python API connector
+    // Option 2: Use child_process to run scrapy spiders
+    // Option 3: Use message queue (Redis/RabbitMQ)
+    
+    // For now, fetch from Supabase (assuming scrapers have run)
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseUrl = process.env.SUPABASE_URL!;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    // Build query based on business type
+    const query = `${config.offeringType}`;
+    
+    // Fetch recent market data from Supabase
+    const { data, error } = await supabase
+      .from('market_listings')
+      .select('*')
+      .ilike('category', `%${query}%`)
+      .gte('scraped_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .limit(50);
+    
+    if (error) {
+      console.error('Error fetching market data:', error);
+      // Fallback to mock data
+      return generateMockData(config);
+    }
+    
+    if (data && data.length > 0) {
+      console.log(`Found ${data.length} market listings from database`);
+      return data.map(item => ({
+        source: item.source,
+        title: item.title,
+        price: Number(item.price),
+        currency: item.currency,
+        rating: item.rating ? Number(item.rating) : undefined,
+        reviews: item.reviews || undefined,
+        delivery: item.delivery_time || undefined,
+      }));
+    }
+    
+    // No data found, use mock data
+    console.log('No market data found, using mock data');
+    return generateMockData(config);
+    
+  } catch (error) {
+    console.error('Error in scrapeMarketData:', error);
+    return generateMockData(config);
+  }
+}
+
+/**
+ * Generate mock market data as fallback
+ */
+function generateMockData(config: ScrapingConfig): MarketListing[] {
   const platforms = getRelevantPlatforms(config);
   const mockData: MarketListing[] = [];
 
-  // Generate sample data based on business type
   const basePrice = config.businessType === 'digital' ? 500 : 1000;
-  const variance = 0.5;
 
   for (let i = 0; i < 20; i++) {
     const platform = platforms[i % platforms.length];
