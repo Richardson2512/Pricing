@@ -41,7 +41,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/auth" className="text-sm hover:text-olive-400 transition">
+                <Link to="/signin" className="text-sm hover:text-olive-400 transition">
                   Sign In
                 </Link>
               </li>

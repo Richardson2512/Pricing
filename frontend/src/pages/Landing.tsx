@@ -68,7 +68,7 @@ export function Landing() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/signup')}
                 className="px-8 py-4 bg-olive-600 text-white rounded-xl hover:bg-olive-700 transition font-semibold text-lg shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
                 Get Started Free
@@ -233,7 +233,7 @@ export function Landing() {
                 </li>
               </ul>
               <button
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/signup')}
                 className="w-full px-6 py-3 bg-white text-olive-600 rounded-lg hover:bg-beige-50 transition font-semibold"
               >
                 Start Free Trial
@@ -253,7 +253,7 @@ export function Landing() {
             Get your personalized pricing strategy today and start maximizing your revenue.
           </p>
           <button
-            onClick={() => navigate('/auth')}
+            onClick={() => navigate('/signup')}
             className="px-8 py-4 bg-white text-olive-600 rounded-xl hover:bg-beige-50 transition font-semibold text-lg shadow-lg"
           >
             Get Started Now

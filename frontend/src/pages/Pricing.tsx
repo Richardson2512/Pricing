@@ -139,7 +139,7 @@ export function Pricing() {
                 </ul>
 
                 <button
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate('/signup')}
                   className={`w-full py-3 rounded-lg font-semibold transition mt-auto ${
                     pkg.popular
                       ? 'bg-olive-600 text-white hover:bg-olive-700'

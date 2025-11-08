@@ -12,7 +12,7 @@ export function Header() {
     if (user) {
       navigate('/dashboard');
     } else {
-      navigate('/auth');
+      navigate('/signup');
     }
   };
 
