@@ -974,20 +974,327 @@ function renderStage1Questions(
 }
 
 // ============================================================================
-// STAGE 2, 3, 4: PLACEHOLDER (TO BE IMPLEMENTED)
+// STAGE 2: CATEGORY-SPECIFIC QUESTIONS
 // ============================================================================
 
 function renderStage2Questions(substage: number, formData: QuestionnaireState, setFormData: any) {
+  // Route to appropriate category questions
+  switch (formData.category) {
+    case 'digital_product':
+      return renderDigitalProductQuestions(substage, formData, setFormData);
+    case 'physical_product':
+      return renderPhysicalProductQuestions(substage, formData, setFormData);
+    case 'digital_service':
+      return renderDigitalServiceQuestions(substage, formData, setFormData);
+    case 'physical_service':
+      return renderPhysicalServiceQuestions(substage, formData, setFormData);
+    default:
+      return (
+        <div className="text-center py-12">
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Category-specific questions
+          </h3>
+          <p className="text-slate-600">
+            Questions for {formData.category} will appear here
+          </p>
+        </div>
+      );
+  }
+}
+
+// ============================================================================
+// DIGITAL PRODUCT QUESTIONS (10 questions)
+// ============================================================================
+
+function renderDigitalProductQuestions(substage: number, formData: QuestionnaireState, setFormData: any) {
+  switch (substage) {
+    case 0: // What category?
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What category is your digital product?
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {['Software', 'App', 'Plugin', 'Template', 'Course', 'Design Asset', 'Dataset', 'Ebook', 'Other'].map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setFormData({ ...formData, digitalCategory: cat })}
+                className={`p-4 rounded-lg border-2 transition ${
+                  formData.digitalCategory === cat
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">{cat}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 1: // Platform/Marketplace
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Where do you plan to sell it?
+          </h3>
+          <p className="text-slate-600 mb-4">Select all that apply</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {['AppSumo', 'Gumroad', 'Shopify', 'ProductHunt', 'Own Website', 'App Store', 'Play Store', 'Etsy', 'Other'].map((plat) => (
+              <button
+                key={plat}
+                type="button"
+                onClick={() => {
+                  const current = formData.platform || '';
+                  const platforms = current.split(',').filter(p => p.trim());
+                  if (platforms.includes(plat)) {
+                    setFormData({ ...formData, platform: platforms.filter(p => p !== plat).join(', ') });
+                  } else {
+                    setFormData({ ...formData, platform: [...platforms, plat].join(', ') });
+                  }
+                }}
+                className={`p-3 rounded-lg border-2 transition ${
+                  formData.platform?.includes(plat)
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="text-sm font-medium text-slate-800">{plat}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 2: // Development time
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            How long did it take to develop/build?
+          </h3>
+          <div className="flex gap-4">
+            <input
+              type="number"
+              value={formData.developmentTime.split(' ')[0] || ''}
+              onChange={(e) => setFormData({ ...formData, developmentTime: `${e.target.value} ${formData.developmentTime.split(' ')[1] || 'months'}` })}
+              className="w-32 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+              placeholder="6"
+            />
+            <select
+              value={formData.developmentTime.split(' ')[1] || 'months'}
+              onChange={(e) => setFormData({ ...formData, developmentTime: `${formData.developmentTime.split(' ')[0] || '1'} ${e.target.value}` })}
+              className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            >
+              <option value="days">Days</option>
+              <option value="weeks">Weeks</option>
+              <option value="months">Months</option>
+              <option value="years">Years</option>
+            </select>
+          </div>
+        </div>
+      );
+
+    case 3: // Sales model
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What's your sales model?
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { value: 'one_time', label: 'One-time Purchase', desc: 'Single payment, lifetime access' },
+              { value: 'subscription', label: 'Subscription', desc: 'Recurring monthly/yearly payment' },
+              { value: 'license', label: 'License', desc: 'Per-seat or usage-based licensing' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, salesModel: option.value as any })}
+                className={`p-6 rounded-xl border-2 transition text-left ${
+                  formData.salesModel === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">{option.label}</p>
+                <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 4: // Updates & support
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you offer updates, support, or version control?
+          </h3>
+          <div className="space-y-3">
+            <label className="flex items-center gap-3 p-4 bg-beige-50 rounded-lg border border-beige-200 cursor-pointer hover:bg-beige-100">
+              <input
+                type="checkbox"
+                checked={formData.providesUpdates}
+                onChange={(e) => setFormData({ ...formData, providesUpdates: e.target.checked })}
+                className="w-5 h-5 text-olive-600 rounded focus:ring-olive-500"
+              />
+              <span className="text-slate-700 font-medium">Yes, I provide regular updates and support</span>
+            </label>
+          </div>
+        </div>
+      );
+
+    case 5: // Recurring costs
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you incur any recurring costs?
+          </h3>
+          <p className="text-slate-600 mb-4">List servers, APIs, design tools, etc.</p>
+          <textarea
+            value={formData.recurringCosts}
+            onChange={(e) => setFormData({ ...formData, recurringCosts: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={4}
+            placeholder="e.g., AWS hosting $50/month, Stripe fees 2.9%, Design tools $30/month"
+          />
+        </div>
+      );
+
+    case 6: // Positioning
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            How do you position your product?
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { value: 'budget', label: 'Budget', desc: 'Affordable, accessible' },
+              { value: 'mid_tier', label: 'Mid-Tier', desc: 'Balanced value' },
+              { value: 'premium', label: 'Premium', desc: 'High-end, exclusive' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, positioning: option.value as any })}
+                className={`p-6 rounded-xl border-2 transition ${
+                  formData.positioning === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">{option.label}</p>
+                <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 7: // Niche audience
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Who is your niche audience?
+          </h3>
+          <input
+            type="text"
+            value={formData.nicheAudience}
+            onChange={(e) => setFormData({ ...formData, nicheAudience: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., SaaS founders, Marketers, Designers, Students"
+          />
+        </div>
+      );
+
+    case 8: // Comparable products
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you have comparable products in the market?
+          </h3>
+          <p className="text-slate-600 mb-4">Provide URLs or product names for benchmarking</p>
+          <textarea
+            value={formData.comparableProducts}
+            onChange={(e) => setFormData({ ...formData, comparableProducts: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={4}
+            placeholder="e.g., https://competitor1.com/product, Similar Product Name"
+          />
+        </div>
+      );
+
+    case 9: // Unique value
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What's the unique value or feature that differentiates yours?
+          </h3>
+          <textarea
+            value={formData.uniqueValue}
+            onChange={(e) => setFormData({ ...formData, uniqueValue: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={5}
+            placeholder="What makes your product stand out from competitors? What problem does it solve better?"
+          />
+        </div>
+      );
+
+    default:
+      return <div>Unknown question</div>;
+  }
+}
+
+// ============================================================================
+// PHYSICAL PRODUCT QUESTIONS (12 questions)
+// ============================================================================
+
+function renderPhysicalProductQuestions(substage: number, formData: QuestionnaireState, setFormData: any) {
+  // Placeholder for now - will implement next
   return (
     <div className="text-center py-12">
       <h3 className="text-2xl font-bold text-slate-800 mb-4">
-        Stage 2: {formData.category?.replace(/_/g, ' ').toUpperCase()}
+        Physical Product Question {substage + 1}
       </h3>
-      <p className="text-slate-600 mb-4">
-        Question {substage + 1} for this category
-      </p>
       <p className="text-sm text-slate-500">
-        (Category-specific questions will be implemented here)
+        (Physical product questions will be implemented here)
+      </p>
+    </div>
+  );
+}
+
+// ============================================================================
+// DIGITAL SERVICE QUESTIONS (12 questions)
+// ============================================================================
+
+function renderDigitalServiceQuestions(substage: number, formData: QuestionnaireState, setFormData: any) {
+  // Placeholder for now
+  return (
+    <div className="text-center py-12">
+      <h3 className="text-2xl font-bold text-slate-800 mb-4">
+        Digital Service Question {substage + 1}
+      </h3>
+      <p className="text-sm text-slate-500">
+        (Digital service questions will be implemented here)
+      </p>
+    </div>
+  );
+}
+
+// ============================================================================
+// PHYSICAL SERVICE QUESTIONS (10 questions)
+// ============================================================================
+
+function renderPhysicalServiceQuestions(substage: number, formData: QuestionnaireState, setFormData: any) {
+  // Placeholder for now
+  return (
+    <div className="text-center py-12">
+      <h3 className="text-2xl font-bold text-slate-800 mb-4">
+        Physical Service Question {substage + 1}
+      </h3>
+      <p className="text-sm text-slate-500">
+        (Physical service questions will be implemented here)
       </p>
     </div>
   );
