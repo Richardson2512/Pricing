@@ -82,7 +82,13 @@ export function Dashboard() {
         pricingPriority: formData.pricingPriority,
         outputDetail: formData.outputDetail,
         wantsComparison: formData.wantsComparison,
+        
+        // Include pre-analyzed data if available (from background analysis)
+        usePreAnalyzedData: formData.preAnalysisData ? true : false,
+        preAnalyzedMarketData: formData.preAnalysisData?.marketData || null,
       };
+
+      console.log('📤 Submitting with pre-analysis:', formData.preAnalysisData ? 'YES ✅' : 'NO - will scrape now');
 
       // Call backend API to generate pricing with DeepSeek
       const response = await fetch(`${API_URL}/api/consultations`, {
@@ -312,7 +318,10 @@ export function Dashboard() {
             </div>
           )}
 
-          <AnthropologicalQuestionnaire onSubmit={handleQuestionnaireSubmit} loading={loading} />
+          <AnthropologicalQuestionnaire 
+            onSubmit={handleQuestionnaireSubmit} 
+            loading={loading}
+          />
         </div>
       </div>
     );

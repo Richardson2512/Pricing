@@ -27,6 +27,66 @@ const consultationSchema = z.object({
 
 // Note: generatePricingRecommendation is now imported from deepseek.ts service
 
+// Pre-analyze endpoint (background scraping after Stage 1)
+router.post('/pre-analyze', authenticateUser, async (req: AuthRequest, res) => {
+  try {
+    const { businessType, offeringType, region, niche, targetMarket } = req.body;
+
+    console.log('🔄 Pre-analysis triggered:', { businessType, offeringType, region, niche });
+
+    // Start scraping market data in background (don't wait for full completion)
+    const startTime = Date.now();
+    
+    // Quick scrape with timeout (max 10 seconds)
+    const scrapingPromise = scrapeMarketData({
+      businessType,
+      offeringType,
+      region,
+      niche,
+    });
+
+    // Race against timeout
+    const timeoutPromise = new Promise((resolve) => 
+      setTimeout(() => resolve({ timeout: true }), 10000)
+    );
+
+    const rawMarketData = await Promise.race([scrapingPromise, timeoutPromise]) as any;
+    
+    if (rawMarketData.timeout) {
+      // Timeout - return partial data
+      return res.json({
+        status: 'partial',
+        message: 'Market data collection in progress',
+        processingTime: Date.now() - startTime,
+      });
+    }
+
+    // Clean and enrich data
+    const cleanedData = cleanMarketData(rawMarketData);
+    const enrichedData = enrichMarketData(cleanedData);
+
+    console.log('✅ Pre-analysis completed:', {
+      dataPoints: enrichedData.length,
+      processingTime: Date.now() - startTime,
+    });
+
+    // Return cached market data
+    res.json({
+      status: 'ready',
+      marketData: enrichedData,
+      dataPoints: enrichedData.length,
+      processingTime: Date.now() - startTime,
+    });
+  } catch (error) {
+    console.error('Pre-analysis error:', error);
+    // Don't fail - this is non-critical
+    res.json({
+      status: 'error',
+      message: 'Pre-analysis failed, will scrape on final submission',
+    });
+  }
+});
+
 // Get all consultations for authenticated user
 router.get('/', authenticateUser, async (req: AuthRequest, res) => {
   try {
@@ -79,18 +139,25 @@ router.post('/', authenticateUser, async (req: AuthRequest, res) => {
       };
     }
 
-    // Step 2: Scrape market data based on business type
-    console.log('Scraping market data...');
-    const rawMarketData = await scrapeMarketData({
-      businessType: validatedData.businessType,
-      offeringType: validatedData.offeringType,
-      region: validatedData.region,
-      niche: validatedData.niche,
-    });
+    // Step 2: Use pre-analyzed data if available, otherwise scrape
+    let enrichedData;
+    
+    if ((req.body as any).usePreAnalyzedData && (req.body as any).preAnalyzedMarketData) {
+      console.log('✅ Using pre-analyzed market data (instant!)');
+      enrichedData = (req.body as any).preAnalyzedMarketData;
+    } else {
+      console.log('🔄 Scraping market data now...');
+      const rawMarketData = await scrapeMarketData({
+        businessType: validatedData.businessType,
+        offeringType: validatedData.offeringType,
+        region: validatedData.region,
+        niche: validatedData.niche,
+      });
 
-    // Step 3: Clean and enrich market data
-    const cleanedData = cleanMarketData(rawMarketData);
-    const enrichedData = enrichMarketData(cleanedData);
+      // Step 3: Clean and enrich market data
+      const cleanedData = cleanMarketData(rawMarketData);
+      enrichedData = enrichMarketData(cleanedData);
+    }
 
     // Step 4: Generate AI-powered recommendation with all context
     console.log('Generating AI pricing analysis with DeepSeek V3...');

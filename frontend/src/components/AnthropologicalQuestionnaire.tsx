@@ -180,6 +180,8 @@ interface AnthropologicalQuestionnaireProps {
 export function AnthropologicalQuestionnaire({ onSubmit, loading }: AnthropologicalQuestionnaireProps) {
   const [stage, setStage] = useState(1);
   const [substage, setSubstage] = useState(0);
+  const [backgroundAnalysisStarted, setBackgroundAnalysisStarted] = useState(false);
+  const [preAnalysisData, setPreAnalysisData] = useState<any>(null);
   const [formData, setFormData] = useState<QuestionnaireState>({
     offeringType: '',
     medium: '',
@@ -288,6 +290,58 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
     wantsComparison: false,
   });
 
+  // Trigger background analysis after Stage 1 completion
+  React.useEffect(() => {
+    if (stage === 2 && !backgroundAnalysisStarted && formData.category) {
+      triggerBackgroundAnalysis();
+    }
+  }, [stage, formData.category]);
+
+  const triggerBackgroundAnalysis = async () => {
+    setBackgroundAnalysisStarted(true);
+    
+    console.log('🔄 Starting background market data scraping...');
+    
+    // Start pre-scraping market data based on Stage 1 answers
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      
+      // Get auth token
+      const { data: { session } } = await (window as any).supabase?.auth.getSession();
+      
+      if (!session?.access_token) {
+        console.warn('No auth token for background analysis');
+        return;
+      }
+
+      // Trigger background scraping (fire and forget)
+      fetch(`${API_URL}/api/consultations/pre-analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          businessType: formData.medium,
+          offeringType: formData.offeringType,
+          region: formData.location,
+          niche: formData.category,
+          targetMarket: formData.targetMarket,
+        }),
+      }).then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
+          setPreAnalysisData(data);
+          console.log('✅ Background market data ready!', data);
+        }
+      }).catch((err) => {
+        console.warn('Background analysis failed (non-critical):', err);
+      });
+    } catch (error) {
+      console.warn('Background analysis error (non-critical):', error);
+    }
+  };
+
   // Determine category based on offering type and medium
   const determineCategory = (): OfferingCategory | '' => {
     const { offeringType, medium } = formData;
@@ -363,7 +417,12 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
   };
 
   const handleSubmit = () => {
-    onSubmit(formData);
+    // Include pre-analysis data in submission
+    const submissionData = {
+      ...formData,
+      preAnalysisData: preAnalysisData,
+    };
+    onSubmit(submissionData);
   };
 
   const getMaxSubstagesForCategory = (): number => {
@@ -431,16 +490,37 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
 
       {/* Category Badge (if determined) */}
       {formData.category && (
-        <div className="mb-6 flex items-center justify-center gap-3 bg-olive-50 border border-olive-200 rounded-xl p-4">
-          <div className="text-olive-600">
-            {getCategoryIcon()}
+        <div className="mb-6">
+          <div className="flex items-center justify-center gap-3 bg-olive-50 border border-olive-200 rounded-xl p-4">
+            <div className="text-olive-600">
+              {getCategoryIcon()}
+            </div>
+            <div>
+              <p className="text-sm text-olive-600 font-medium">Detected Category</p>
+              <p className="text-lg font-bold text-olive-800">
+                {formData.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm text-olive-600 font-medium">Detected Category</p>
-            <p className="text-lg font-bold text-olive-800">
-              {formData.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-            </p>
-          </div>
+          
+          {/* Background Analysis Indicator */}
+          {backgroundAnalysisStarted && (
+            <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-blue-800">
+                    {preAnalysisData ? '✅ Market data ready!' : '🔄 Analyzing market data in background...'}
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    {preAnalysisData 
+                      ? 'Your pricing will be ready instantly when you submit!' 
+                      : 'Continue answering questions while we gather pricing data'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
