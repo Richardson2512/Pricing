@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { supabase } from '../config/supabase';
-import { createCheckoutSession, getProductIdForCredits, processPaymentWebhook, verifyWebhookSignature } from '../services/dodoPayments';
+import { supabaseAdmin } from '../config/supabase';
+import { createCheckoutSession, getProductIdForCredits, processPaymentWebhook, verifyDodoWebhookSignature } from '../services/dodoPayments';
 
 const router = Router();
 
@@ -33,7 +33,7 @@ router.post('/create-checkout', async (req, res) => {
     }
 
     // Get user email for receipt
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('email, first_name')
       .eq('id', userId)
@@ -114,7 +114,7 @@ router.post('/webhook', async (req, res) => {
     }
 
     // Check for duplicate webhook (idempotency)
-    const { data: existingWebhook } = await supabase
+    const { data: existingWebhook } = await supabaseAdmin
       .from('webhook_events')
       .select('id')
       .eq('webhook_id', webhookId)
@@ -126,7 +126,7 @@ router.post('/webhook', async (req, res) => {
     }
 
     // Log webhook event for tracking
-    await supabase
+    await supabaseAdmin
       .from('webhook_events')
       .insert({
         webhook_id: webhookId,
@@ -140,7 +140,7 @@ router.post('/webhook', async (req, res) => {
 
     if (result) {
       // Update user credits in database
-      const { data: profile } = await supabase
+      const { data: profile } = await supabaseAdmin
         .from('profiles')
         .select('credits')
         .eq('id', result.userId)
@@ -150,13 +150,13 @@ router.post('/webhook', async (req, res) => {
         const newCredits = (profile.credits || 0) + result.credits;
 
         // Update credits
-        await supabase
+        await supabaseAdmin
           .from('profiles')
           .update({ credits: newCredits })
           .eq('id', result.userId);
 
         // Record purchase
-        await supabase
+        await supabaseAdmin
           .from('credit_purchases')
           .insert({
             user_id: result.userId,
@@ -189,7 +189,7 @@ router.get('/verify/:paymentId', async (req, res) => {
     const { userId } = req.query;
 
     // Check if payment was already processed
-    const { data: purchase } = await supabase
+    const { data: purchase } = await supabaseAdmin
       .from('credit_purchases')
       .select('*')
       .eq('payment_id', paymentId)
