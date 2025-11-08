@@ -224,22 +224,23 @@ export function BlogPost() {
             </div>
           )}
 
-          {/* CTA Box */}
-          <div className="mt-12 bg-gradient-to-r from-olive-600 to-olive-700 rounded-2xl p-8 text-white text-center">
-            <h3 className="text-2xl font-bold mb-4">
-              Ready to Price Your Project?
-            </h3>
-            <p className="text-beige-100 mb-6">
-              Get AI-powered pricing recommendations tailored to your specific project.
-            </p>
-            <button
-              onClick={() => navigate('/signup')}
-              className="px-8 py-3 bg-white text-olive-600 rounded-lg hover:bg-beige-50 transition font-semibold"
-            >
-              Get Started Free
-            </button>
-          </div>
-        </article>
+            {/* CTA Box */}
+            <div className="mt-12 bg-gradient-to-r from-olive-600 to-olive-700 rounded-2xl p-8 text-white text-center">
+              <h3 className="text-2xl font-bold mb-4">
+                Ready to Price Your Project?
+              </h3>
+              <p className="text-beige-100 mb-6">
+                Get AI-powered pricing recommendations tailored to your specific project.
+              </p>
+              <button
+                onClick={() => navigate('/signup')}
+                className="px-8 py-3 bg-white text-olive-600 rounded-lg hover:bg-beige-50 transition font-semibold"
+              >
+                Get Started Free
+              </button>
+            </div>
+          </article>
+        </div>
 
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
