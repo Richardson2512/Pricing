@@ -334,6 +334,22 @@ export function Dashboard() {
   if (view === 'questionnaire') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 p-4 py-8">
+        {/* Logo button at top left */}
+        <div className="max-w-4xl mx-auto mb-4">
+          <button
+            onClick={() => setView('dashboard')}
+            className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition border border-beige-200 hover:border-olive-300"
+            title="Return to Dashboard"
+          >
+            <img 
+              src="/logo.png" 
+              alt="HowMuchShouldIPrice Logo" 
+              className="w-6 h-6 object-contain"
+            />
+            <span className="text-sm font-medium text-slate-700">Dashboard</span>
+          </button>
+        </div>
+        
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 flex items-center justify-between">
             <div>
@@ -374,11 +390,13 @@ export function Dashboard() {
       <nav className="bg-white shadow-sm border-b border-beige-200">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-olive-600 p-2 rounded-lg">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="HowMuchShouldIPrice Logo" 
+              className="w-10 h-10 object-contain"
+            />
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">PriceWise</h1>
+              <h1 className="text-2xl font-bold text-slate-800">HowMuchShouldIPrice</h1>
               {profile?.first_name && (
                 <p className="text-sm text-slate-600">
                   Welcome, {profile.first_name}!
