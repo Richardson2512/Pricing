@@ -58,8 +58,15 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Body parser
-app.use(express.json());
+// Body parser - with raw body for webhook verification
+app.use(express.json({
+  verify: (req: any, res, buf) => {
+    // Store raw body for webhook signature verification
+    if (req.originalUrl === '/api/payments/webhook') {
+      req.rawBody = buf.toString('utf8');
+    }
+  }
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint

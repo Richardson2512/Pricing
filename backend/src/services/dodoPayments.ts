@@ -75,18 +75,42 @@ export function getProductIdForCredits(credits: number): string | null {
 }
 
 /**
- * Verify payment webhook signature
+ * Verify Dodo Payments webhook signature
+ * 
+ * Dodo Payments webhook verification:
+ * 1. Extract webhook-id, webhook-timestamp, webhook-signature from headers
+ * 2. Concatenate: webhook-id.webhook-timestamp.raw_payload
+ * 3. Compute HMAC SHA256 with webhook secret
+ * 4. Compare with webhook-signature header
  */
-export function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
-  // Implement webhook signature verification based on Dodo Payments documentation
-  // This is a placeholder - update based on actual Dodo Payments webhook verification method
-  const crypto = require('crypto');
-  const expectedSignature = crypto
-    .createHmac('sha256', secret)
-    .update(payload)
-    .digest('hex');
-  
-  return signature === expectedSignature;
+export function verifyDodoWebhookSignature(
+  webhookId: string,
+  webhookTimestamp: string,
+  rawPayload: string,
+  signature: string,
+  secret: string
+): boolean {
+  try {
+    const crypto = require('crypto');
+    
+    // Concatenate webhook-id, timestamp, and payload with periods
+    const signedPayload = `${webhookId}.${webhookTimestamp}.${rawPayload}`;
+    
+    // Compute HMAC SHA256
+    const expectedSignature = crypto
+      .createHmac('sha256', secret)
+      .update(signedPayload)
+      .digest('hex');
+    
+    // Compare signatures (constant-time comparison to prevent timing attacks)
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    );
+  } catch (error) {
+    console.error('Webhook signature verification error:', error);
+    return false;
+  }
 }
 
 /**

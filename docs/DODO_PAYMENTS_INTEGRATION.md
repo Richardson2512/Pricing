@@ -14,6 +14,7 @@ Add to `backend/.env`:
 ```env
 DODO_PAYMENTS_API_KEY=FYvOjH2t4INibzvy.wToYMiSrH4P3-zlOrYCz_aEzXxFCrHcXnndLEyqkKnbvVsYb
 DODO_PAYMENTS_BASE_URL=https://api.dodopayments.com
+DODO_WEBHOOK_SECRET=whsec_your-webhook-secret-from-dodo-dashboard
 ```
 
 ### Railway Environment Variables
@@ -22,7 +23,11 @@ Add in **Railway Dashboard** → **Variables**:
 ```
 DODO_PAYMENTS_API_KEY=FYvOjH2t4INibzvy.wToYMiSrH4P3-zlOrYCz_aEzXxFCrHcXnndLEyqkKnbvVsYb
 DODO_PAYMENTS_BASE_URL=https://api.dodopayments.com
+DODO_WEBHOOK_SECRET=whsec_your-webhook-secret-from-dodo-dashboard
+FRONTEND_URL=https://howmuchshouldiprice.com
 ```
+
+**Important:** Get the webhook secret from Dodo Payments Dashboard → Webhooks → Your Endpoint → Secret
 
 ---
 
@@ -121,7 +126,9 @@ Response:
 ### Webhook Handler
 ```http
 POST /api/payments/webhook
-X-Dodo-Signature: signature-hash
+webhook-id: evt_abc123xyz
+webhook-timestamp: 1699564800
+webhook-signature: v1,abc123def456...
 
 {
   "type": "payment.succeeded",
@@ -130,11 +137,27 @@ X-Dodo-Signature: signature-hash
     "amount": 1500,
     "metadata": {
       "userId": "user-uuid",
-      "credits": "10"
+      "credits": "10",
+      "packageType": "professional"
     }
   }
 }
 ```
+
+**Webhook Verification Process:**
+1. Extract headers: `webhook-id`, `webhook-timestamp`, `webhook-signature`
+2. Get raw request body (exact bytes received)
+3. Concatenate: `webhook-id.webhook-timestamp.raw_body`
+4. Compute HMAC SHA256 with webhook secret
+5. Compare with `webhook-signature` header
+6. If match → Process webhook
+7. If mismatch → Reject with 401
+
+**Idempotency:**
+- Each webhook has unique `webhook-id`
+- Stored in `webhook_events` table
+- Duplicate webhooks are ignored
+- Prevents double credit additions
 
 ### Verify Payment
 ```http

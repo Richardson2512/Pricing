@@ -77,20 +77,63 @@ router.post('/create-checkout', async (req, res) => {
 
 /**
  * POST /api/payments/webhook
- * Handle Dodo Payments webhooks
+ * Handle Dodo Payments webhooks with signature verification
  */
 router.post('/webhook', async (req, res) => {
   try {
-    const signature = req.headers['x-dodo-signature'] as string;
-    const payload = JSON.stringify(req.body);
+    // Extract webhook headers
+    const webhookId = req.headers['webhook-id'] as string;
+    const webhookTimestamp = req.headers['webhook-timestamp'] as string;
+    const webhookSignature = req.headers['webhook-signature'] as string;
+    
+    // Get raw payload (important: must be exact string sent by Dodo)
+    const rawPayload = (req as any).rawBody || JSON.stringify(req.body);
 
-    // Verify webhook signature (if Dodo Payments provides this)
-    // const isValid = verifyWebhookSignature(payload, signature, process.env.DODO_WEBHOOK_SECRET!);
-    // if (!isValid) {
-    //   return res.status(401).json({ error: 'Invalid webhook signature' });
-    // }
+    // Verify webhook signature
+    const webhookSecret = process.env.DODO_WEBHOOK_SECRET;
+    if (webhookSecret && webhookSignature) {
+      const { verifyDodoWebhookSignature } = await import('../services/dodoPayments.js');
+      const isValid = verifyDodoWebhookSignature(
+        webhookId,
+        webhookTimestamp,
+        rawPayload,
+        webhookSignature,
+        webhookSecret
+      );
 
-    // Process webhook
+      if (!isValid) {
+        console.error('❌ Invalid webhook signature');
+        return res.status(401).json({ error: 'Invalid webhook signature' });
+      }
+      
+      console.log('✅ Webhook signature verified');
+    } else {
+      console.warn('⚠️ Webhook signature verification skipped (no secret configured)');
+    }
+
+    // Check for duplicate webhook (idempotency)
+    const { data: existingWebhook } = await supabase
+      .from('webhook_events')
+      .select('id')
+      .eq('webhook_id', webhookId)
+      .single();
+
+    if (existingWebhook) {
+      console.log(`⚠️ Duplicate webhook ignored: ${webhookId}`);
+      return res.json({ received: true, status: 'duplicate' });
+    }
+
+    // Log webhook event for tracking
+    await supabase
+      .from('webhook_events')
+      .insert({
+        webhook_id: webhookId,
+        event_type: req.body.type,
+        payload: req.body,
+        processed_at: new Date().toISOString(),
+      });
+
+    // Process webhook based on event type
     const result = await processPaymentWebhook(req.body);
 
     if (result) {
@@ -121,14 +164,16 @@ router.post('/webhook', async (req, res) => {
             purchase_date: new Date().toISOString(),
           });
 
-        console.log(`✅ Credits added: ${result.credits} credits to user ${result.userId}`);
+        console.log(`✅ Credits added: ${result.credits} credits to user ${result.userId} (Payment: ${result.paymentId})`);
       }
     }
 
-    res.json({ received: true });
+    // Always respond with 200 OK to acknowledge receipt
+    res.status(200).json({ received: true });
   } catch (error: any) {
-    console.error('Webhook processing error:', error);
-    res.status(500).json({ error: 'Webhook processing failed' });
+    console.error('❌ Webhook processing error:', error);
+    // Still return 200 to prevent retries for unrecoverable errors
+    res.status(200).json({ received: true, error: error.message });
   }
 });
 
