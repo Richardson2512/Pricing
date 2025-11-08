@@ -107,66 +107,56 @@ export function Blog() {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-olive-600 to-olive-700 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Pricing Guides & Resources
-            </h1>
-            <p className="text-xl text-beige-100 mb-8">
-              Expert advice on how to price your products, services, and freelance work. 
-              Learn pricing strategies that actually work.
-            </p>
-            
-            {/* Search Bar */}
-            <div className="relative max-w-2xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search articles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-beige-200 focus:border-olive-500 focus:ring-2 focus:ring-olive-500 focus:outline-none text-slate-800"
-              />
+      <section className="bg-[#F5F1E8] pt-24 pb-0">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="flex flex-col items-center gap-10">
+            {/* Heading and supporting text */}
+            <div className="flex flex-col items-center gap-6 max-w-4xl">
+              {/* Badge */}
+              <div className="flex items-center justify-center px-3 py-1 bg-[#F5F1E8] border border-olive-600 rounded-2xl">
+                <span className="text-sm font-medium text-olive-700">Our blog</span>
+              </div>
+              
+              {/* Heading */}
+              <h1 className="text-5xl font-semibold text-slate-900 text-center leading-tight tracking-tight">
+                Pricing Guides & Resources
+              </h1>
+              
+              {/* Supporting text */}
+              <p className="text-xl text-olive-700 text-center">
+                Expert advice on how to price your products, services, and freelance work.
+              </p>
+            </div>
+
+            {/* Search Input */}
+            <div className="w-80">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search articles..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-white border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-olive-600 focus:border-transparent text-slate-700 placeholder:text-slate-500"
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Categories Filter */}
-      <section className="bg-white border-b border-beige-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex gap-3 overflow-x-auto">
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
-                selectedCategory === 'all'
-                  ? 'bg-olive-600 text-white'
-                  : 'bg-beige-100 text-slate-700 hover:bg-beige-200'
-              }`}
-            >
-              All Articles
-            </button>
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.slug)}
-                className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
-                  selectedCategory === category.slug
-                    ? 'bg-olive-600 text-white'
-                    : 'bg-beige-100 text-slate-700 hover:bg-beige-200'
-                }`}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Categories Filter - Hidden, using design without filters */}
+      <div className="hidden">
+        {categories.map((category) => (
+          <button key={category.id} onClick={() => setSelectedCategory(category.slug)}>
+            {category.name}
+          </button>
+        ))}
+      </div>
 
       {/* Blog Posts Grid */}
-      <section className="flex-1 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-[#F5F1E8] pb-24">
+        <div className="max-w-7xl mx-auto px-8">
           {loading ? (
             <div className="text-center py-20">
               <div className="w-16 h-16 border-4 border-olive-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -175,66 +165,135 @@ export function Blog() {
           ) : filteredPosts.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-xl text-slate-600 mb-4">No articles found</p>
-              <p className="text-slate-500">Try adjusting your search or category filter</p>
+              <p className="text-slate-500">Try adjusting your search</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPosts.map((post) => (
-                <article
-                  key={post.id}
-                  className="bg-white rounded-xl shadow-sm hover:shadow-lg transition border border-beige-200 overflow-hidden cursor-pointer group"
-                  onClick={() => navigate(`/blog/${post.slug}`)}
-                >
-                  {/* Featured Image */}
-                  {post.featured_image_url ? (
-                    <div className="aspect-video bg-gradient-to-br from-olive-100 to-beige-100 overflow-hidden">
-                      <img
-                        src={post.featured_image_url}
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                      />
+            <div className="flex flex-col gap-12">
+              {/* Row 1 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {filteredPosts.slice(0, 3).map((post) => (
+                  <article
+                    key={post.id}
+                    className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
+                    onClick={() => navigate(`/blog/${post.slug}`)}
+                  >
+                    {/* Image */}
+                    <div className="w-full h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
+                      {post.featured_image_url ? (
+                        <img
+                          src={post.featured_image_url}
+                          alt={post.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-6xl">📊</span>
+                      )}
                     </div>
-                  ) : (
-                    <div className="aspect-video bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
-                      <span className="text-4xl">📊</span>
-                    </div>
-                  )}
 
-                  <div className="p-6">
-                    {/* Category Badge */}
-                    {post.category && (
-                      <span className="inline-block px-3 py-1 bg-olive-100 text-olive-700 text-xs font-semibold rounded-full mb-3">
-                        {post.category.name}
-                      </span>
-                    )}
-
-                    {/* Title */}
-                    <h2 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-olive-600 transition line-clamp-2">
-                      {post.title}
-                    </h2>
-
-                    {/* Excerpt */}
-                    <p className="text-slate-600 mb-4 line-clamp-3">
-                      {post.excerpt}
-                    </p>
-
-                    {/* Meta Info */}
-                    <div className="flex items-center justify-between text-sm text-slate-500">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>{formatDate(post.published_at)}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{post.reading_time_minutes} min read</span>
+                    {/* Content */}
+                    <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
+                      {/* Heading and subheading */}
+                      <div className="flex flex-col gap-3">
+                        {/* Category */}
+                        {post.category && (
+                          <span className="text-sm font-semibold text-olive-700">
+                            {post.category.name}
+                          </span>
+                        )}
+                        
+                        {/* Heading and text */}
+                        <div className="flex flex-col gap-3">
+                          {/* Title */}
+                          <h2 className="text-2xl font-semibold text-slate-900 leading-8 line-clamp-2">
+                            {post.title}
+                          </h2>
+                          
+                          {/* Excerpt */}
+                          <p className="text-base text-slate-500 leading-6 line-clamp-3">
+                            {post.excerpt}
+                          </p>
                         </div>
                       </div>
-                      <ArrowRight className="w-5 h-5 text-olive-600 group-hover:translate-x-1 transition" />
+
+                      {/* Author info */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center">
+                          <span className="text-sm font-medium text-olive-700">
+                            {post.author_name.charAt(0)}
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-slate-900">{post.author_name}</span>
+                          <span className="text-sm text-slate-500">{formatDate(post.published_at)}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                ))}
+              </div>
+
+              {/* Row 2 */}
+              {filteredPosts.length > 3 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {filteredPosts.slice(3, 6).map((post) => (
+                    <article
+                      key={post.id}
+                      className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
+                      onClick={() => navigate(`/blog/${post.slug}`)}
+                    >
+                      <div className="w-full h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
+                        {post.featured_image_url ? (
+                          <img
+                            src={post.featured_image_url}
+                            alt={post.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-6xl">📊</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
+                        <div className="flex flex-col gap-3">
+                          {post.category && (
+                            <span className="text-sm font-semibold text-olive-700">
+                              {post.category.name}
+                            </span>
+                          )}
+                          <div className="flex flex-col gap-3">
+                            <h2 className="text-2xl font-semibold text-slate-900 leading-8 line-clamp-2">
+                              {post.title}
+                            </h2>
+                            <p className="text-base text-slate-500 leading-6 line-clamp-3">
+                              {post.excerpt}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center">
+                            <span className="text-sm font-medium text-olive-700">
+                              {post.author_name.charAt(0)}
+                            </span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-slate-900">{post.author_name}</span>
+                            <span className="text-sm text-slate-500">{formatDate(post.published_at)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+
+              {/* Load More Button */}
+              {filteredPosts.length > 6 && (
+                <div className="flex justify-center">
+                  <button className="flex items-center justify-center gap-2 px-5 py-3 bg-[#F5F1E8] border border-olive-600 rounded-lg shadow-sm hover:bg-beige-100 transition">
+                    <ArrowRight className="w-5 h-5 text-olive-700 rotate-90" />
+                    <span className="text-base font-medium text-olive-700">Load more</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
