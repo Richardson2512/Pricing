@@ -436,6 +436,74 @@ CREATE INDEX IF NOT EXISTS idx_market_price ON market_listings(price);
 CREATE INDEX IF NOT EXISTS idx_market_scraped ON market_listings(scraped_at DESC);
 CREATE INDEX IF NOT EXISTS idx_market_business_type ON market_listings(business_type, offering_type);
 
+-- Add new columns to existing market_listings table
+DO $$ 
+BEGIN
+  -- Add business_type if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'market_listings' AND column_name = 'business_type'
+  ) THEN
+    ALTER TABLE market_listings ADD COLUMN business_type text;
+  END IF;
+  
+  -- Add offering_type if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'market_listings' AND column_name = 'offering_type'
+  ) THEN
+    ALTER TABLE market_listings ADD COLUMN offering_type text;
+  END IF;
+  
+  -- Add platform_category if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'market_listings' AND column_name = 'platform_category'
+  ) THEN
+    ALTER TABLE market_listings ADD COLUMN platform_category text;
+  END IF;
+  
+  -- Add tags if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'market_listings' AND column_name = 'tags'
+  ) THEN
+    ALTER TABLE market_listings ADD COLUMN tags text[];
+  END IF;
+  
+  -- Add quality_score if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'market_listings' AND column_name = 'quality_score'
+  ) THEN
+    ALTER TABLE market_listings ADD COLUMN quality_score numeric;
+  END IF;
+  
+  -- Add price_usd if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'market_listings' AND column_name = 'price_usd'
+  ) THEN
+    ALTER TABLE market_listings ADD COLUMN price_usd numeric;
+  END IF;
+  
+  -- Add is_active if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'market_listings' AND column_name = 'is_active'
+  ) THEN
+    ALTER TABLE market_listings ADD COLUMN is_active boolean DEFAULT true;
+  END IF;
+  
+  -- Add seller_country if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'market_listings' AND column_name = 'seller_country'
+  ) THEN
+    ALTER TABLE market_listings ADD COLUMN seller_country text;
+  END IF;
+END $$;
+
 COMMENT ON TABLE market_listings IS 'Scraped pricing data from various marketplaces';
 
 -- ============================================================================
