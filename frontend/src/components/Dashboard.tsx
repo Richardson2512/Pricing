@@ -58,6 +58,32 @@ export function Dashboard() {
         throw new Error('Not authenticated');
       }
 
+      // Transform anthropological questionnaire data to backend format
+      const transformedData = {
+        businessType: formData.medium || 'digital', // 'physical' or 'digital'
+        offeringType: formData.offeringType || 'product', // 'product' or 'service'
+        experienceLevel: formData.skillLevel || 'intermediate', // 'beginner', 'intermediate', 'expert'
+        region: formData.location || 'Global',
+        niche: formData.digitalCategory || formData.serviceType || formData.productType || '',
+        pricingGoal: formData.pricingStrategy || 'market_rate', // 'cost_plus', 'market_rate', 'premium'
+        
+        // Construct detailed descriptions from questionnaire data
+        productDescription: buildProductDescription(formData),
+        costToDeliver: buildCostToDeliver(formData),
+        competitorPricing: formData.comparableProducts || formData.competitorLinks || 'No specific competitors mentioned',
+        valueProposition: formData.uniqueValue || 'To be determined',
+        
+        // Additional metadata
+        preferredCurrency: formData.preferredCurrency || 'USD',
+        businessEntity: formData.businessEntity,
+        targetMarket: formData.targetMarket,
+        yearsInField: formData.yearsInField,
+        businessStage: formData.businessStage,
+        pricingPriority: formData.pricingPriority,
+        outputDetail: formData.outputDetail,
+        wantsComparison: formData.wantsComparison,
+      };
+
       // Call backend API to generate pricing with DeepSeek
       const response = await fetch(`${API_URL}/api/consultations`, {
         method: 'POST',
@@ -65,7 +91,7 @@ export function Dashboard() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(transformedData),
       });
 
       if (!response.ok) {
@@ -85,6 +111,52 @@ export function Dashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to build product description from questionnaire
+  const buildProductDescription = (data: any): string => {
+    let desc = '';
+    
+    if (data.digitalCategory) {
+      desc += `Digital ${data.digitalCategory}. `;
+    }
+    if (data.platform) {
+      desc += `Selling on: ${data.platform}. `;
+    }
+    if (data.developmentTime) {
+      desc += `Development time: ${data.developmentTime}. `;
+    }
+    if (data.salesModel) {
+      desc += `Sales model: ${data.salesModel}. `;
+    }
+    if (data.nicheAudience) {
+      desc += `Target audience: ${data.nicheAudience}. `;
+    }
+    if (data.positioning) {
+      desc += `Positioning: ${data.positioning}. `;
+    }
+    
+    return desc || 'Product details to be analyzed';
+  };
+
+  // Helper function to build cost breakdown
+  const buildCostToDeliver = (data: any): string => {
+    let cost = '';
+    
+    if (data.recurringCosts) {
+      cost += `Recurring costs: ${data.recurringCosts}. `;
+    }
+    if (data.developmentTime) {
+      cost += `Development investment: ${data.developmentTime}. `;
+    }
+    if (data.providesUpdates) {
+      cost += `Includes ongoing updates and support. `;
+    }
+    if (data.yearsInField) {
+      cost += `Experience: ${data.yearsInField} years. `;
+    }
+    
+    return cost || 'Cost structure to be analyzed';
   };
 
   const handleViewConsultation = (consultation: Consultation) => {
