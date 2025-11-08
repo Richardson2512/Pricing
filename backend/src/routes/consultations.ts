@@ -3,17 +3,24 @@ import { z } from 'zod';
 import { supabaseAdmin } from '../config/supabase.js';
 import { authenticateUser, AuthRequest } from '../middleware/auth.js';
 import { generatePricingRecommendation } from '../services/deepseek.js';
+import { parseDocument } from '../services/documentParser.js';
+import { scrapeMarketData, cleanMarketData, enrichMarketData } from '../services/marketScraper.js';
 
 const router = Router();
 
 // Validation schema
 const consultationSchema = z.object({
-  businessType: z.string().min(1),
-  targetMarket: z.string().min(1),
+  businessType: z.enum(['digital', 'physical']),
+  offeringType: z.enum(['product', 'service']),
+  experienceLevel: z.enum(['beginner', 'intermediate', 'expert']),
+  region: z.string().min(1),
+  niche: z.string().optional(),
+  pricingGoal: z.enum(['cost_plus', 'market_rate', 'premium']),
   productDescription: z.string().min(1),
   costToDeliver: z.string().min(1),
   competitorPricing: z.string().min(1),
   valueProposition: z.string().min(1),
+  files: z.array(z.any()).optional(),
 });
 
 // Note: generatePricingRecommendation is now imported from deepseek.ts service
@@ -59,16 +66,45 @@ router.post('/', authenticateUser, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Insufficient credits' });
     }
 
-    // Generate recommendation using DeepSeek AI
-    const recommendation = await generatePricingRecommendation(validatedData);
+    // Step 1: Parse documents if provided (for digital services)
+    let parsedDocuments;
+    if (validatedData.files && validatedData.files.length > 0) {
+      console.log('Parsing uploaded documents...');
+      // In production, extract text from uploaded files and parse
+      parsedDocuments = {
+        deliverables: ['Extracted from uploaded documents'],
+        complexity: 'medium',
+      };
+    }
 
-    // Create consultation
+    // Step 2: Scrape market data based on business type
+    console.log('Scraping market data...');
+    const rawMarketData = await scrapeMarketData({
+      businessType: validatedData.businessType,
+      offeringType: validatedData.offeringType,
+      region: validatedData.region,
+      niche: validatedData.niche,
+    });
+
+    // Step 3: Clean and enrich market data
+    const cleanedData = cleanMarketData(rawMarketData);
+    const enrichedData = enrichMarketData(cleanedData);
+
+    // Step 4: Generate AI-powered recommendation with all context
+    console.log('Generating AI pricing analysis with DeepSeek V3...');
+    const recommendation = await generatePricingRecommendation({
+      ...validatedData,
+      parsedDocuments,
+      marketData: enrichedData,
+    });
+
+    // Step 5: Store consultation in database
     const { data: consultation, error: consultationError } = await supabaseAdmin
       .from('consultations')
       .insert({
         user_id: userId,
-        business_type: validatedData.businessType,
-        target_market: validatedData.targetMarket,
+        business_type: `${validatedData.businessType}_${validatedData.offeringType}`,
+        target_market: `${validatedData.region}${validatedData.niche ? ` - ${validatedData.niche}` : ''}`,
         product_description: validatedData.productDescription,
         cost_to_deliver: validatedData.costToDeliver,
         competitor_pricing: validatedData.competitorPricing,

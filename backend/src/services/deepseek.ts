@@ -9,36 +9,130 @@ if (!DEEPSEEK_API_KEY) {
   throw new Error('DEEPSEEK_API_KEY is required');
 }
 
+// Helper function to calculate market statistics
+function calculateMarketStats(marketData: Array<{ price: number }>) {
+  const prices = marketData.map(d => d.price).sort((a, b) => a - b);
+  const sum = prices.reduce((acc, price) => acc + price, 0);
+  
+  return {
+    min: Math.min(...prices),
+    max: Math.max(...prices),
+    average: Math.round(sum / prices.length),
+    median: prices[Math.floor(prices.length / 2)],
+    top10: prices[Math.floor(prices.length * 0.9)],
+  };
+}
+
 export interface PricingInput {
-  businessType: string;
-  targetMarket: string;
+  businessType: 'digital' | 'physical';
+  offeringType: 'product' | 'service';
+  experienceLevel: 'beginner' | 'intermediate' | 'expert';
+  region: string;
+  niche?: string;
+  pricingGoal: 'cost_plus' | 'market_rate' | 'premium';
   productDescription: string;
   costToDeliver: string;
   competitorPricing: string;
   valueProposition: string;
+  parsedDocuments?: {
+    deliverables?: string[];
+    timeline?: string;
+    tools?: string[];
+    complexity?: string;
+    dependencies?: string[];
+  };
+  marketData?: Array<{
+    source: string;
+    title: string;
+    price: number;
+    currency: string;
+    rating?: number;
+    reviews?: number;
+    delivery?: number;
+  }>;
 }
 
 export async function generatePricingRecommendation(
   input: PricingInput
 ): Promise<string> {
   try {
-    const prompt = `You are an expert pricing consultant. Based on the following information, provide a detailed, actionable pricing recommendation:
+    // Build comprehensive prompt with all available data
+    let prompt = `You are an expert pricing consultant analyzing a ${input.businessType} ${input.offeringType}.
 
-Business Type: ${input.businessType}
-Target Market: ${input.targetMarket}
-Product/Service Description: ${input.productDescription}
-Cost to Deliver: ${input.costToDeliver}
-Competitor Pricing: ${input.competitorPricing}
-Unique Value Proposition: ${input.valueProposition}
+BUSINESS CONTEXT:
+- Type: ${input.businessType} ${input.offeringType}
+- Experience Level: ${input.experienceLevel}
+- Region/Market: ${input.region}
+${input.niche ? `- Niche/Industry: ${input.niche}` : ''}
+- Pricing Goal: ${input.pricingGoal.replace('_', ' ')}
 
-Please provide:
-1. A recommended pricing strategy (value-based, cost-plus, competitive, or penetration)
-2. A specific price range or pricing model
-3. Key considerations for this pricing decision
-4. Potential pricing models to consider (tiered, freemium, usage-based, etc.)
-5. Next steps for implementation
+OFFERING DETAILS:
+${input.productDescription}
 
-Format your response in a clear, structured way that's easy to read and actionable.`;
+COST STRUCTURE:
+${input.costToDeliver}
+
+COMPETITIVE LANDSCAPE:
+${input.competitorPricing}
+
+UNIQUE VALUE PROPOSITION:
+${input.valueProposition}`;
+
+    // Add parsed document data if available
+    if (input.parsedDocuments) {
+      prompt += `\n\nPARSED FROM DOCUMENTS:`;
+      if (input.parsedDocuments.deliverables) {
+        prompt += `\n- Deliverables: ${input.parsedDocuments.deliverables.join(', ')}`;
+      }
+      if (input.parsedDocuments.timeline) {
+        prompt += `\n- Timeline: ${input.parsedDocuments.timeline}`;
+      }
+      if (input.parsedDocuments.tools) {
+        prompt += `\n- Tools Required: ${input.parsedDocuments.tools.join(', ')}`;
+      }
+      if (input.parsedDocuments.complexity) {
+        prompt += `\n- Complexity: ${input.parsedDocuments.complexity}`;
+      }
+    }
+
+    // Add market data if available
+    if (input.marketData && input.marketData.length > 0) {
+      prompt += `\n\nMARKET DATA (${input.marketData.length} comparable listings):`;
+      const stats = calculateMarketStats(input.marketData);
+      prompt += `\n- Price Range: ${stats.min} - ${stats.max} ${input.marketData[0].currency}`;
+      prompt += `\n- Median Price: ${stats.median} ${input.marketData[0].currency}`;
+      prompt += `\n- Average Price: ${stats.average} ${input.marketData[0].currency}`;
+      prompt += `\n- Top 10% Price: ${stats.top10} ${input.marketData[0].currency}`;
+    }
+
+    prompt += `\n\nPROVIDE A COMPREHENSIVE PRICING ANALYSIS INCLUDING:
+
+1. RECOMMENDED PRICE RANGE
+   - Low (entry/competitive): $X
+   - Average (market-aligned): $Y
+   - High (premium): $Z
+   
+2. COST BREAKDOWN & JUSTIFICATION
+   - Operational costs
+   - Time/labor costs
+   - Tool/material costs
+   - Profit margin recommendation
+   
+3. MARKET POSITIONING
+   - Where you fit in the competitive landscape
+   - Pricing strategy recommendation (cost-plus, market-rate, or premium)
+   - Regional adjustments for ${input.region}
+   
+4. EXPERIENCE MULTIPLIER
+   - How ${input.experienceLevel} level affects pricing
+   - Recommended adjustments based on expertise
+   
+5. ACTIONABLE NEXT STEPS
+   - Specific pricing to start with
+   - A/B testing recommendations
+   - When to adjust pricing
+
+Format your response clearly with sections and bullet points. Be specific with numbers and reasoning.`;
 
     const response = await fetch(DEEPSEEK_API_URL, {
       method: 'POST',

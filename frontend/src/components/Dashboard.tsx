@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { LogOut, Plus, History, Coins, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Consultation } from '../lib/supabase';
-import { QuestionnaireForm } from './QuestionnaireForm';
+import { MultiStepQuestionnaire } from './MultiStepQuestionnaire';
 import { CreditPurchase } from './CreditPurchase';
-import { ConsultationResult } from './ConsultationResult';
+import { PricingAnalysisResult } from './PricingAnalysisResult';
 
 type View = 'dashboard' | 'questionnaire' | 'result';
 
@@ -38,14 +38,7 @@ export function Dashboard() {
   // API endpoint for backend
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-  const handleQuestionnaireSubmit = async (formData: {
-    businessType: string;
-    targetMarket: string;
-    productDescription: string;
-    costToDeliver: string;
-    competitorPricing: string;
-    valueProposition: string;
-  }) => {
+  const handleQuestionnaireSubmit = async (formData: any) => {
     if (!profile || profile.credits < 1) {
       setError('Insufficient credits');
       return;
@@ -107,7 +100,7 @@ export function Dashboard() {
   if (view === 'result' && selectedConsultation) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 p-4 py-8">
-        <ConsultationResult
+        <PricingAnalysisResult
           consultation={selectedConsultation}
           onBack={() => {
             setView('dashboard');
@@ -141,7 +134,7 @@ export function Dashboard() {
             </div>
           )}
 
-          <QuestionnaireForm onSubmit={handleQuestionnaireSubmit} loading={loading} />
+          <MultiStepQuestionnaire onSubmit={handleQuestionnaireSubmit} loading={loading} />
         </div>
       </div>
     );
