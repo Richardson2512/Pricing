@@ -431,7 +431,7 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
   const getMaxSubstagesForCategory = (): number => {
     switch (formData.category) {
       case 'physical_product': return 11;
-      case 'digital_product': return 9;
+      case 'digital_product': return 10; // Added feature list question
       case 'physical_service': return 9;
       case 'digital_service': return 11;
       case 'education_coaching': return 9;
@@ -1116,7 +1116,31 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
         </div>
       );
 
-    case 1: // Platform/Marketplace
+    case 1: // Detailed product description
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What does your {formData.digitalCategory || 'product'} do?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Describe the main features, functionality, and what problem it solves
+          </p>
+          <textarea
+            value={formData.uniqueValue}
+            onChange={(e) => setFormData({ ...formData, uniqueValue: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={6}
+            placeholder="Example for SaaS: 'Social media scheduling tool that helps businesses plan and automate posts across Twitter, LinkedIn, and Instagram. Key features: AI content suggestions, analytics dashboard, team collaboration, bulk scheduling. Solves the problem of time-consuming manual posting and inconsistent social media presence.'"
+          />
+          <div className="mt-4 bg-olive-50 border border-olive-200 rounded-lg p-4">
+            <p className="text-sm text-olive-800">
+              💡 <strong>Be specific!</strong> Include main features, target users, and the core problem you solve. This helps us understand your product's value.
+            </p>
+          </div>
+        </div>
+      );
+
+    case 2: // Platform/Marketplace
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -1150,7 +1174,7 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
         </div>
       );
 
-    case 2: // Development time
+    case 3: // Development time
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -1178,7 +1202,7 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
         </div>
       );
 
-    case 3: // Sales model
+    case 4: // Sales model
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -1208,7 +1232,7 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
         </div>
       );
 
-    case 4: // Updates & support
+    case 5: // Updates & support
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -1228,7 +1252,7 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
         </div>
       );
 
-    case 5: // Recurring costs
+    case 6: // Recurring costs
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -1245,7 +1269,7 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
         </div>
       );
 
-    case 6: // Positioning
+    case 7: // Positioning
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -1275,7 +1299,7 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
         </div>
       );
 
-    case 7: // Niche audience
+    case 8: // Niche audience
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -1291,7 +1315,7 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
         </div>
       );
 
-    case 8: // Comparable products
+    case 9: // Comparable products
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -1308,19 +1332,27 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
         </div>
       );
 
-    case 9: // Unique value
+    case 10: // Features for tiered pricing (NEW - specific for SaaS)
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
-            What's the unique value or feature that differentiates yours?
+            What are your main features?
           </h3>
+          <p className="text-slate-600 mb-4">
+            List the key features of your product (we'll help you organize them into pricing tiers)
+          </p>
           <textarea
-            value={formData.uniqueValue}
-            onChange={(e) => setFormData({ ...formData, uniqueValue: e.target.value })}
+            value={formData.comparableProducts}
+            onChange={(e) => setFormData({ ...formData, comparableProducts: e.target.value })}
             className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
-            rows={5}
-            placeholder="What makes your product stand out from competitors? What problem does it solve better?"
+            rows={8}
+            placeholder="Example for SaaS:&#10;- AI content generation&#10;- Schedule up to 100 posts/month&#10;- Analytics dashboard&#10;- Team collaboration (5 users)&#10;- Instagram, Twitter, LinkedIn integration&#10;- Custom branding&#10;- Priority support&#10;- API access&#10;&#10;List all features - we'll help you decide which go in Free, Starter, Pro, and Enterprise tiers."
           />
+          <div className="mt-4 bg-olive-50 border border-olive-200 rounded-lg p-4">
+            <p className="text-sm text-olive-800">
+              💡 <strong>Tip:</strong> List ALL features. We'll use AI to suggest which features belong in which pricing tier and what to charge for each tier.
+            </p>
+          </div>
         </div>
       );
 

@@ -135,14 +135,25 @@ export function Dashboard() {
   const buildProductDescription = (data: any): string => {
     let desc = '';
     
-    // Add offering type and medium
-    desc += `${data.medium || 'Digital'} ${data.offeringType || 'product'}. `;
+    // Start with the actual product description (most important!)
+    if (data.uniqueValue) {
+      desc += `PRODUCT DESCRIPTION:\n${data.uniqueValue}\n\n`;
+    }
+    
+    // Add category and type
+    desc += `TYPE: ${data.medium || 'Digital'} ${data.offeringType || 'product'}. `;
     
     if (data.digitalCategory) {
       desc += `Category: ${data.digitalCategory}. `;
     }
+    
+    // Add features list if provided
+    if (data.comparableProducts && data.comparableProducts.includes('-')) {
+      desc += `\n\nFEATURES:\n${data.comparableProducts}\n\n`;
+    }
+    
     if (data.platform) {
-      desc += `Selling on: ${data.platform}. `;
+      desc += `Platforms: ${data.platform}. `;
     }
     if (data.developmentTime) {
       desc += `Development time: ${data.developmentTime}. `;
@@ -154,15 +165,15 @@ export function Dashboard() {
       desc += `Target audience: ${data.nicheAudience}. `;
     }
     if (data.positioning) {
-      desc += `Positioning: ${data.positioning}. `;
+      desc += `Market positioning: ${data.positioning}. `;
     }
     if (data.businessEntity) {
       desc += `Business type: ${data.businessEntity}. `;
     }
     
     // Ensure we always return something meaningful
-    if (!desc || desc.length < 20) {
-      desc = `${data.medium || 'Digital'} ${data.offeringType || 'product'} in ${data.location || 'global market'}. Business stage: ${data.businessStage || 'launch'}. Experience level: ${data.skillLevel || 'intermediate'}.`;
+    if (!desc || desc.length < 50) {
+      desc = `${data.medium || 'Digital'} ${data.offeringType || 'product'} in ${data.location || 'global market'}. Business stage: ${data.businessStage || 'launch'}. Experience level: ${data.skillLevel || 'intermediate'}. Category: ${data.digitalCategory || 'General'}.`;
     }
     
     return desc;

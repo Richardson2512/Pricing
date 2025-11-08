@@ -105,34 +105,97 @@ ${input.valueProposition}`;
       prompt += `\n- Top 10% Price: ${stats.top10} ${input.marketData[0].currency}`;
     }
 
-    prompt += `\n\nPROVIDE A COMPREHENSIVE PRICING ANALYSIS INCLUDING:
+    prompt += `\n\nIMPORTANT: You MUST provide SPECIFIC PRICING NUMBERS, not generic advice.
 
-1. RECOMMENDED PRICE RANGE
-   - Low (entry/competitive): $X
-   - Average (market-aligned): $Y
-   - High (premium): $Z
-   
-2. COST BREAKDOWN & JUSTIFICATION
-   - Operational costs
-   - Time/labor costs
-   - Tool/material costs
-   - Profit margin recommendation
-   
-3. MARKET POSITIONING
-   - Where you fit in the competitive landscape
-   - Pricing strategy recommendation (cost-plus, market-rate, or premium)
-   - Regional adjustments for ${input.region}
-   
-4. EXPERIENCE MULTIPLIER
-   - How ${input.experienceLevel} level affects pricing
-   - Recommended adjustments based on expertise
-   
-5. ACTIONABLE NEXT STEPS
-   - Specific pricing to start with
-   - A/B testing recommendations
-   - When to adjust pricing
+PROVIDE A COMPREHENSIVE PRICING ANALYSIS WITH EXACT NUMBERS:
 
-Format your response clearly with sections and bullet points. Be specific with numbers and reasoning.`;
+1. RECOMMENDED PRICING STRUCTURE
+   ${input.offeringType === 'product' && input.niche?.toLowerCase().includes('saas') || input.niche?.toLowerCase().includes('subscription') || input.niche?.toLowerCase().includes('software') ? `
+   For SaaS/Subscription products, provide TIERED PRICING:
+   - Free Tier: What features to include (if any)
+   - Starter Tier: $X/month - List specific features and limits
+   - Professional Tier: $Y/month - List specific features and limits  
+   - Business/Enterprise Tier: $Z/month - List specific features and limits
+   
+   Explain WHY each tier is priced at that specific amount based on:
+   - Feature value
+   - Target customer segment
+   - Competitor pricing
+   - Market positioning
+   ` : `
+   Provide SPECIFIC PRICE POINTS:
+   - Minimum Price: $X (break-even + small margin)
+   - Recommended Price: $Y (market-aligned, profitable)
+   - Premium Price: $Z (high-value positioning)
+   
+   For each price point, explain:
+   - Why this specific number
+   - What value justifies this price
+   - How it compares to competitors
+   `}
+
+2. COST BREAKDOWN WITH NUMBERS
+   Based on: ${input.costToDeliver}
+   - Calculate monthly operational costs: $X
+   - Calculate per-customer/per-unit cost: $Y
+   - Recommended profit margin: Z%
+   - Break-even point: N customers/units
+   
+3. COMPETITIVE ANALYSIS
+   Based on: ${input.competitorPricing}
+   - Competitor A: $X for [features]
+   - Competitor B: $Y for [features]
+   - Your positioning: $Z because [specific reasons]
+   - Price gap analysis: You are X% higher/lower because [reasons]
+   
+4. MARKET POSITIONING STRATEGY
+   - Your target segment: [specific customer type]
+   - Their willingness to pay: $X-Y range
+   - Your recommended price: $Z
+   - Reasoning: [why this specific number works]
+   
+5. PRICING MODEL RECOMMENDATION
+   ${input.offeringType === 'product' && (input.niche?.toLowerCase().includes('saas') || input.niche?.toLowerCase().includes('subscription')) ? `
+   RECOMMENDED: Tiered Subscription Model
+   
+   FREE TIER (Lead Generation):
+   - Features: [list 3-5 basic features]
+   - Limits: [specific limits]
+   - Purpose: Acquire users, demonstrate value
+   
+   STARTER ($X/month):
+   - Features: [list 5-7 features]
+   - Limits: [specific limits]
+   - Target: Individual users, small teams
+   - Why $X: [specific reasoning]
+   
+   PROFESSIONAL ($Y/month):
+   - Features: [list 8-10 features]
+   - Limits: [specific limits]
+   - Target: Growing businesses, teams
+   - Why $Y: [specific reasoning]
+   
+   BUSINESS/ENTERPRISE ($Z/month):
+   - Features: [list 10+ features]
+   - Limits: Unlimited or high limits
+   - Target: Large teams, enterprises
+   - Why $Z: [specific reasoning]
+   ` : `
+   RECOMMENDED: [One-time/Hourly/Project-based] pricing
+   - Specific price: $X
+   - Reasoning: [why this exact number]
+   - Payment structure: [how to charge]
+   `}
+
+6. ACTIONABLE IMPLEMENTATION
+   - Start with: $X for [specific tier/offering]
+   - Test for: [specific timeframe]
+   - Adjust if: [specific metrics]
+   - Expected revenue: $Y per month with Z customers
+
+CRITICAL: Every price must be a SPECIFIC NUMBER in ${input.region} market context. 
+Do NOT give ranges without specific recommendations. 
+Do NOT give generic advice - give EXACT pricing numbers with clear reasoning.`;
 
     const response = await fetch(DEEPSEEK_API_URL, {
       method: 'POST',
