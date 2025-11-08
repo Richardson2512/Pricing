@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Target, Zap, Shield, Users, BarChart3, ArrowRight, CheckCircle } from 'lucide-react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { SEO } from '../components/SEO';
 
 export function Landing() {
   const navigate = useNavigate();
@@ -50,6 +51,12 @@ export function Landing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 flex flex-col">
+      <SEO
+        title="How Much Should I Price for My Project? | Free AI Pricing Calculator"
+        description="Wondering how much should I charge for my project? Get instant AI-powered pricing recommendations for products, services, and freelance work. Free pricing calculator for entrepreneurs, freelancers, and businesses. Start with 3 free pricing checks!"
+        keywords="how much should i charge for my project, how much should i price for my project, pricing calculator, freelance pricing tool, product pricing calculator, service pricing, AI pricing recommendations, price my work, pricing strategy, freelance rates calculator, project pricing tool"
+        canonicalUrl="https://howmuchshouldiprice.com"
+      />
       <Header />
 
       {/* Hero Section */}
@@ -58,13 +65,13 @@ export function Landing() {
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-slate-800 mb-6">
               How Much Should I{' '}
-              <span className="text-olive-600">Charge</span>
+              <span className="text-olive-600">Price</span>
               <br />
-              for My Product?
+              for My Project?
             </h1>
             <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-              AI-powered price provider that helps you price your product or service.
-              Get instant pricing recommendations in minutes.
+              Wondering <strong>"how much should I charge for my project"</strong>? 
+              Get AI-powered pricing recommendations for your product, service, or freelance work in minutes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -109,10 +116,11 @@ export function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-slate-800 mb-4">
-              Why Choose PriceWise?
+              How Much Should I Charge for My Project?
             </h2>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Powerful features designed to help you price with confidence
+              Powerful AI features to help you determine exactly <strong>how much to price for your project</strong>, 
+              whether it's a product, service, or freelance work.
             </p>
           </div>
 
@@ -196,11 +204,11 @@ export function Landing() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl font-bold text-slate-800 mb-6">
-                Transform Your Pricing Strategy
+                How Much Should I Price for My Project?
               </h2>
               <p className="text-lg text-slate-600 mb-8">
-                Join thousands of businesses that have optimized their pricing
-                and increased revenue with PriceWise.
+                Stop asking <strong>"how much should I charge for my project"</strong> and get data-driven answers. 
+                Join thousands of freelancers, entrepreneurs, and businesses who've optimized their pricing with our AI-powered tool.
               </p>
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
@@ -247,10 +255,11 @@ export function Landing() {
       <section className="py-20 bg-gradient-to-r from-olive-600 to-olive-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
-            Stop Leaving Money on the Table
+            How Much Should I Charge for My Project? Get Your Answer Now.
           </h2>
           <p className="text-xl text-beige-100 mb-8">
-            Get your personalized pricing strategy today and start maximizing your revenue.
+            Stop guessing and start earning what you're worth. Get AI-powered pricing recommendations 
+            for your project in minutes—whether you're pricing a product, service, or freelance work.
           </p>
           <button
             onClick={() => navigate('/signup')}

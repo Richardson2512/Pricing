@@ -1,0 +1,13 @@
+# robots.txt for howmuchshouldiprice.com
+
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /api/
+
+# Sitemaps
+Sitemap: https://howmuchshouldiprice.com/sitemap.xml
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1
+
