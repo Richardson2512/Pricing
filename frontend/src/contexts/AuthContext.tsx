@@ -32,9 +32,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Profile doesn't exist, create it (for OAuth users)
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Extract name from user metadata (Google OAuth provides this)
+        const firstName = user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.name?.split(' ')[0] || '';
+        const lastName = user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.name?.split(' ').slice(1).join(' ') || '';
+        
         const { error: insertError } = await supabase.from('profiles').insert({
           id: user.id,
           email: user.email!,
+          first_name: firstName,
+          last_name: lastName,
           credits: 3,
         });
         

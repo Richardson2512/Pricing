@@ -149,7 +149,14 @@ export function Dashboard() {
             <div className="bg-olive-600 p-2 rounded-lg">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-800">PriceWise</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">PriceWise</h1>
+              {profile?.first_name && (
+                <p className="text-sm text-slate-600">
+                  Welcome, {profile.first_name}!
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
