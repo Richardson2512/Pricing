@@ -1,12 +1,19 @@
 /**
  * Dodo Payments Integration Service
- * Handles payment link creation and webhook processing
+ * Handles product-based checkout and webhook processing
  */
 
-interface CreatePaymentLinkParams {
-  amount: number;
-  currency: string;
-  description: string;
+// Product IDs from Dodo Payments Dashboard
+const PRODUCT_IDS: { [key: number]: string } = {
+  5: 'pdt_jAHaYI6bUNkXVdTd4tqJ6',   // Starter: 5 credits
+  10: 'pdt_c4yyDCsXQsI6GXhJwtfW6',  // Professional: 10 credits
+  20: 'pdt_ViYh83fJgoA70GKJ76JXe',  // Business: 20 credits
+  50: 'pdt_ViYh83fJgoA70GKJ76JXe',  // Using Business ID for 50 credits (update if you create separate product)
+};
+
+interface CreateCheckoutParams {
+  productId: string;
+  quantity: number;
   metadata: {
     userId: string;
     credits: number;
@@ -14,13 +21,13 @@ interface CreatePaymentLinkParams {
   };
   successUrl: string;
   cancelUrl: string;
+  customerEmail?: string;
 }
 
-interface PaymentLinkResponse {
+interface CheckoutResponse {
   id: string;
   url: string;
-  amount: number;
-  currency: string;
+  productId: string;
   status: string;
 }
 
@@ -28,36 +35,43 @@ const DODO_API_KEY = process.env.DODO_PAYMENTS_API_KEY;
 const DODO_BASE_URL = process.env.DODO_PAYMENTS_BASE_URL || 'https://api.dodopayments.com';
 
 /**
- * Create a payment link for credit purchase
+ * Create a checkout session for credit purchase using product ID
  */
-export async function createPaymentLink(params: CreatePaymentLinkParams): Promise<PaymentLinkResponse> {
+export async function createCheckoutSession(params: CreateCheckoutParams): Promise<CheckoutResponse> {
   if (!DODO_API_KEY) {
     throw new Error('Dodo Payments API key not configured');
   }
 
-  const response = await fetch(`${DODO_BASE_URL}/v1/payment-links`, {
+  const response = await fetch(`${DODO_BASE_URL}/v1/checkout-sessions`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${DODO_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      amount: params.amount * 100, // Convert to cents
-      currency: params.currency,
-      description: params.description,
+      product_id: params.productId,
+      quantity: params.quantity,
       metadata: params.metadata,
       success_url: params.successUrl,
       cancel_url: params.cancelUrl,
+      customer_email: params.customerEmail,
     }),
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error: any = await response.json().catch(() => ({ message: response.statusText }));
     throw new Error(`Dodo Payments API error: ${error.message || response.statusText}`);
   }
 
-  const data = await response.json();
+  const data: any = await response.json();
   return data;
+}
+
+/**
+ * Get product ID for credit amount
+ */
+export function getProductIdForCredits(credits: number): string | null {
+  return PRODUCT_IDS[credits] || null;
 }
 
 /**

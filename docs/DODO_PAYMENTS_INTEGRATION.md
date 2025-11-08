@@ -26,16 +26,18 @@ DODO_PAYMENTS_BASE_URL=https://api.dodopayments.com
 
 ---
 
-## 💳 Credit Packages
+## 💳 Credit Packages & Product IDs
 
 Fixed packages (no custom amounts):
 
-| Credits | Price | Per Credit | Badge |
-|---------|-------|------------|-------|
-| 5 | $10 | $2.00 | - |
-| 10 | $15 | $1.50 | ⭐ Popular |
-| 20 | $25 | $1.25 | - |
-| 50 | $50 | $1.00 | - |
+| Credits | Price | Per Credit | Product ID | Name |
+|---------|-------|------------|------------|------|
+| 5 | $10 | $2.00 | `pdt_jAHaYI6bUNkXVdTd4tqJ6` | Starter |
+| 10 | $15 | $1.50 | `pdt_c4yyDCsXQsI6GXhJwtfW6` | Professional ⭐ |
+| 20 | $25 | $1.25 | `pdt_ViYh83fJgoA70GKJ76JXe` | Business |
+| 50 | $50 | $1.00 | `pdt_ViYh83fJgoA70GKJ76JXe` | Enterprise |
+
+**Note:** 50-credit package currently uses Business product ID. Create a separate product in Dodo Payments dashboard if you want a dedicated 50-credit product.
 
 ---
 
@@ -55,14 +57,21 @@ POST /api/payments/create-checkout
 Body: { credits: 10, userId: "user-uuid" }
 ```
 
-### 4. Backend Creates Payment Link
+### 4. Backend Creates Checkout Session
 ```typescript
 // backend/src/routes/payments.ts
-- Validates package
-- Gets user email
-- Calls Dodo Payments API
+- Validates package (5, 10, 20, or 50 credits)
+- Gets Dodo Payments product ID for selected package
+- Gets user email from Supabase
+- Calls Dodo Payments API with product_id
 - Returns checkout URL
 ```
+
+**Product ID Mapping:**
+- 5 credits → `pdt_jAHaYI6bUNkXVdTd4tqJ6`
+- 10 credits → `pdt_c4yyDCsXQsI6GXhJwtfW6`
+- 20 credits → `pdt_ViYh83fJgoA70GKJ76JXe`
+- 50 credits → `pdt_ViYh83fJgoA70GKJ76JXe`
 
 ### 5. User Redirected to Dodo Payments
 ```

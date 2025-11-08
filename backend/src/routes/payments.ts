@@ -1,20 +1,20 @@
 import { Router } from 'express';
 import { supabase } from '../config/supabase';
-import { createPaymentLink, processPaymentWebhook, verifyWebhookSignature } from '../services/dodoPayments';
+import { createCheckoutSession, getProductIdForCredits, processPaymentWebhook, verifyWebhookSignature } from '../services/dodoPayments';
 
 const router = Router();
 
-// Credit packages
+// Credit packages (must match Dodo Payments products)
 const CREDIT_PACKAGES = [
-  { credits: 5, price: 10 },
-  { credits: 10, price: 15 },
-  { credits: 20, price: 25 },
-  { credits: 50, price: 50 },
+  { credits: 5, price: 10, name: 'Starter' },
+  { credits: 10, price: 15, name: 'Professional' },
+  { credits: 20, price: 25, name: 'Business' },
+  { credits: 50, price: 50, name: 'Enterprise' },
 ];
 
 /**
  * POST /api/payments/create-checkout
- * Create a payment link for credit purchase
+ * Create a checkout session using Dodo Payments product ID
  */
 router.post('/create-checkout', async (req, res) => {
   try {
@@ -24,6 +24,12 @@ router.post('/create-checkout', async (req, res) => {
     const selectedPackage = CREDIT_PACKAGES.find(pkg => pkg.credits === credits);
     if (!selectedPackage) {
       return res.status(400).json({ error: 'Invalid credit package' });
+    }
+
+    // Get product ID for this credit amount
+    const productId = getProductIdForCredits(credits);
+    if (!productId) {
+      return res.status(400).json({ error: 'Product not configured for this credit amount' });
     }
 
     // Get user email for receipt
@@ -37,28 +43,33 @@ router.post('/create-checkout', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Create payment link
-    const paymentLink = await createPaymentLink({
-      amount: selectedPackage.price,
-      currency: 'USD',
-      description: `${selectedPackage.credits} Credits - HowMuchShouldIPrice.com`,
+    // Determine frontend URL based on environment
+    const frontendUrl = process.env.FRONTEND_URL || 'https://howmuchshouldiprice.com';
+
+    // Create checkout session with product ID
+    const checkout = await createCheckoutSession({
+      productId,
+      quantity: 1,
       metadata: {
         userId,
-        credits: selectedPackage.credits.toString(),
-        packageType: `${selectedPackage.credits}_credits`,
+        credits: credits.toString(),
+        packageType: selectedPackage.name.toLowerCase(),
       },
-      successUrl: `${process.env.FRONTEND_URL}/dashboard?payment=success`,
-      cancelUrl: `${process.env.FRONTEND_URL}/dashboard?payment=cancelled`,
+      successUrl: `${frontendUrl}/dashboard?payment=success&credits=${credits}`,
+      cancelUrl: `${frontendUrl}/dashboard?payment=cancelled`,
+      customerEmail: profile.email,
     });
 
+    console.log(`✅ Checkout created for ${credits} credits (${selectedPackage.name}) - User: ${userId}`);
+
     res.json({
-      checkoutUrl: paymentLink.url,
-      paymentId: paymentLink.id,
+      checkoutUrl: checkout.url,
+      sessionId: checkout.id,
     });
   } catch (error: any) {
-    console.error('Payment link creation error:', error);
+    console.error('❌ Checkout creation error:', error);
     res.status(500).json({ 
-      error: 'Failed to create payment link',
+      error: 'Failed to create checkout session',
       details: error.message 
     });
   }
