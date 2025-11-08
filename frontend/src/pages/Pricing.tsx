@@ -13,12 +13,6 @@ export function Pricing() {
       price: 0,
       pricePerCredit: 0,
       description: 'Try it out for free',
-      features: [
-        '3 pricing checks',
-        'Basic recommendations',
-        'Email support',
-        'Pricing history',
-      ],
     },
     {
       name: 'Starter',
@@ -26,12 +20,6 @@ export function Pricing() {
       price: 10,
       pricePerCredit: 2.0,
       description: 'Perfect for testing the waters',
-      features: [
-        '5 pricing checks',
-        'Basic recommendations',
-        'Email support',
-        'Pricing history',
-      ],
     },
     {
       name: 'Professional',
@@ -40,13 +28,6 @@ export function Pricing() {
       pricePerCredit: 1.5,
       description: 'Most popular for small businesses',
       popular: true,
-      features: [
-        '10 pricing checks',
-        'Advanced recommendations',
-        'Priority email support',
-        'Pricing history',
-        'Export to PDF',
-      ],
     },
     {
       name: 'Business',
@@ -54,15 +35,19 @@ export function Pricing() {
       price: 25,
       pricePerCredit: 1.25,
       description: 'For growing businesses',
-      features: [
-        '20 pricing checks',
-        'Premium recommendations',
-        'Priority support',
-        'Pricing history',
-        'Export to PDF',
-        'Team collaboration',
-      ],
     },
+  ];
+
+  // All plans have the same features
+  const features = [
+    'AI-powered pricing analysis',
+    'Market data insights',
+    'Cost breakdown & justification',
+    'Experience-based adjustments',
+    'Regional market analysis',
+    'Downloadable reports',
+    'Pricing history access',
+    'Email support',
   ];
 
   return (
@@ -130,7 +115,7 @@ export function Pricing() {
                 </div>
 
                 <ul className="space-y-3 mb-6 flex-grow">
-                  {pkg.features.map((feature, idx) => (
+                  {features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm">
                       <Check className="w-5 h-5 text-olive-600 flex-shrink-0 mt-0.5" />
                       <span className="text-slate-700">{feature}</span>
