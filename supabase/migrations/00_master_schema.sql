@@ -215,12 +215,33 @@ CREATE TABLE IF NOT EXISTS consultations (
   market_avg_price numeric,
   
   -- Status
-  status text DEFAULT 'completed' CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
+  status text DEFAULT 'completed',
   processing_time_seconds integer,
   
   -- Metadata
   created_at timestamptz DEFAULT now()
 );
+
+-- Add status column if it doesn't exist (for existing tables)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'consultations' AND column_name = 'status'
+  ) THEN
+    ALTER TABLE consultations ADD COLUMN status text DEFAULT 'completed';
+  END IF;
+END $$;
+
+-- Add constraint after column exists
+DO $$
+BEGIN
+  ALTER TABLE consultations DROP CONSTRAINT IF EXISTS consultations_status_check;
+  ALTER TABLE consultations ADD CONSTRAINT consultations_status_check 
+    CHECK (status IN ('pending', 'processing', 'completed', 'failed'));
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END $$;
 
 ALTER TABLE consultations ENABLE ROW LEVEL SECURITY;
 
