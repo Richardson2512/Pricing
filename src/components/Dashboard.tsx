@@ -142,7 +142,7 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
 
   if (view === 'result' && selectedConsultation) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 p-4 py-8">
         <ConsultationResult
           consultation={selectedConsultation}
           onBack={() => {
@@ -156,7 +156,7 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
 
   if (view === 'questionnaire') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 p-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 flex items-center justify-between">
             <div>
@@ -184,24 +184,24 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <nav className="bg-white shadow-sm border-b border-slate-200">
+    <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100">
+      <nav className="bg-white shadow-sm border-b border-beige-200">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2 rounded-lg">
+            <div className="bg-olive-600 p-2 rounded-lg">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-800">PriceWise</h1>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg">
-              <Coins className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold text-blue-900">{profile?.credits || 0} credits</span>
+            <div className="flex items-center gap-2 bg-beige-100 px-4 py-2 rounded-lg border border-beige-200">
+              <Coins className="w-5 h-5 text-olive-600" />
+              <span className="font-semibold text-olive-900">{profile?.credits || 0} credits</span>
             </div>
             <button
               onClick={() => setShowPurchase(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+              className="px-4 py-2 bg-olive-600 text-white rounded-lg hover:bg-olive-700 transition font-medium"
             >
               Buy Credits
             </button>
@@ -220,7 +220,7 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
         <div className="mb-8">
           <button
             onClick={handleStartNewConsultation}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition group"
+            className="w-full bg-gradient-to-r from-olive-600 to-olive-700 text-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition group"
           >
             <div className="flex items-center justify-center gap-4">
               <div className="bg-white bg-opacity-20 p-4 rounded-xl group-hover:scale-110 transition">
@@ -228,7 +228,7 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
               </div>
               <div className="text-left">
                 <h2 className="text-2xl font-bold mb-1">Start New Pricing Consultation</h2>
-                <p className="text-blue-100">Get expert pricing recommendations for your product or service</p>
+                <p className="text-beige-100">Get expert pricing recommendations for your product or service</p>
               </div>
             </div>
           </button>
@@ -269,7 +269,7 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
                         year: 'numeric',
                       })}
                     </span>
-                    <span className="text-blue-600 font-medium">View details →</span>
+                    <span className="text-olive-600 font-medium">View details →</span>
                   </div>
                 </div>
               ))}

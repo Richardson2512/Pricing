@@ -84,8 +84,8 @@ export function QuestionnaireForm({ onSubmit, loading }: QuestionnaireFormProps)
         return (
           <div key={question.id} className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
             <div className="flex items-start gap-4">
-              <div className="bg-blue-100 p-3 rounded-lg flex-shrink-0">
-                <Icon className="w-5 h-5 text-blue-600" />
+              <div className="bg-beige-100 p-3 rounded-lg flex-shrink-0">
+                <Icon className="w-5 h-5 text-olive-600" />
               </div>
               <div className="flex-1">
                 <label className="block text-lg font-semibold text-slate-800 mb-1">
@@ -98,7 +98,7 @@ export function QuestionnaireForm({ onSubmit, loading }: QuestionnaireFormProps)
                     onChange={(e) => setFormData({ ...formData, [question.id]: e.target.value })}
                     placeholder={question.placeholder}
                     rows={4}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 focus:border-transparent transition resize-none"
                     required
                   />
                 ) : (
@@ -107,7 +107,7 @@ export function QuestionnaireForm({ onSubmit, loading }: QuestionnaireFormProps)
                     value={formData[question.id as keyof QuestionnaireData]}
                     onChange={(e) => setFormData({ ...formData, [question.id]: e.target.value })}
                     placeholder={question.placeholder}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 focus:border-transparent transition"
                     required
                   />
                 )}
@@ -120,7 +120,7 @@ export function QuestionnaireForm({ onSubmit, loading }: QuestionnaireFormProps)
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+        className="w-full bg-olive-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-olive-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
       >
         {loading ? 'Analyzing...' : 'Get Pricing Recommendation'}
       </button>

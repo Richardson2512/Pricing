@@ -70,10 +70,10 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
+        <div className="sticky top-0 bg-white border-b border-beige-200 p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-100 p-2 rounded-lg">
-              <Coins className="w-6 h-6 text-blue-600" />
+            <div className="bg-beige-100 p-2 rounded-lg">
+              <Coins className="w-6 h-6 text-olive-600" />
             </div>
             <h2 className="text-2xl font-bold text-slate-800">Purchase Credits</h2>
           </div>
@@ -86,8 +86,8 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
         </div>
 
         <div className="p-6">
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-            <p className="text-blue-800 text-center">
+          <div className="bg-beige-100 border border-beige-200 rounded-xl p-4 mb-6">
+            <p className="text-olive-800 text-center">
               <span className="font-semibold">Current Balance:</span> {profile?.credits || 0} credits
             </p>
           </div>
@@ -98,13 +98,13 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
                 key={pkg.credits}
                 className={`relative border-2 rounded-xl p-6 transition hover:shadow-lg ${
                   pkg.popular
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-slate-200 bg-white hover:border-blue-300'
+                    ? 'border-olive-500 bg-beige-50'
+                    : 'border-slate-200 bg-white hover:border-olive-300'
                 }`}
               >
                 {pkg.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                    <span className="bg-olive-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
                       Popular
                     </span>
                   </div>
@@ -116,7 +116,7 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
                   <div className="text-slate-600">Credits</div>
                 </div>
                 <div className="text-center mb-4">
-                  <div className="text-3xl font-bold text-blue-600">
+                  <div className="text-3xl font-bold text-olive-600">
                     ${pkg.price}
                   </div>
                   <div className="text-sm text-slate-500 mt-1">
@@ -126,7 +126,7 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
                 <button
                   onClick={() => handlePurchase(pkg.credits, pkg.price)}
                   disabled={loading}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+                  className="w-full bg-olive-600 text-white py-3 rounded-lg font-semibold hover:bg-olive-700 transition disabled:opacity-50"
                 >
                   Purchase
                 </button>
@@ -146,7 +146,7 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
                   value={customCredits}
                   onChange={(e) => setCustomCredits(e.target.value)}
                   placeholder="Enter number of credits"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 focus:border-transparent"
                 />
                 {customCredits && parseInt(customCredits) > 0 && (
                   <p className="text-sm text-slate-600 mt-2">
