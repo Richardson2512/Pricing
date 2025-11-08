@@ -1,8 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { LogIn } from 'lucide-react';
+import { Header } from './Header';
+import { Footer } from './Footer';
 
 export function Auth() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,8 +22,10 @@ export function Auth() {
     try {
       if (isLogin) {
         await signIn(email, password);
+        navigate('/dashboard');
       } else {
         await signUp(email, password);
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -29,7 +35,9 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 flex flex-col">
+      <Header />
+      <div className="flex-1 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
         <div className="flex items-center justify-center mb-8">
           <div className="bg-olive-600 p-3 rounded-xl">
@@ -104,6 +112,8 @@ export function Auth() {
           </div>
         )}
       </div>
+      </div>
+      <Footer />
     </div>
   );
 }
