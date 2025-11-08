@@ -322,7 +322,7 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
   };
 
   const handleNext = () => {
-    // Determine category after Stage 1
+    // Determine category after Stage 1 (now has 7 substages: 0-6)
     if (stage === 1 && substage === 6) {
       const category = determineCategory();
       setFormData({ ...formData, category });
@@ -346,7 +346,7 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
     } else if (stage === 3 && substage === 5) {
       setStage(4);
       setSubstage(0);
-    } else if (stage === 4 && substage < 3) {
+    } else if (stage === 4 && substage < 2) { // Stage 4 now has 3 questions (0-2)
       setSubstage(substage + 1);
     } else if (stage === 1 && substage < 6) {
       setSubstage(substage + 1);
@@ -381,10 +381,10 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
   };
 
   const getTotalProgress = (): number => {
-    const stage1Questions = 7;
+    const stage1Questions = 7; // Currency + 6 business context questions
     const stage2Questions = getMaxSubstagesForCategory() + 1;
     const stage3Questions = 6;
-    const stage4Questions = 4;
+    const stage4Questions = 3; // Reduced from 4 (currency moved to Stage 1)
     const totalQuestions = stage1Questions + stage2Questions + stage3Questions + stage4Questions;
     
     let answeredQuestions = 0;
@@ -462,7 +462,7 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
             </button>
           )}
 
-          {stage === 4 && substage === 3 ? (
+          {stage === 4 && substage === 2 ? (
             <button
               onClick={handleSubmit}
               disabled={loading}
@@ -530,7 +530,53 @@ function renderStage1Questions(
   setFormData: React.Dispatch<React.SetStateAction<QuestionnaireState>>
 ) {
   switch (substage) {
-    case 0: // Q1.1: What do you want to price?
+    case 0: // Q1.0: Preferred Currency (FIRST QUESTION)
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What currency would you like your pricing in?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            All calculations, fuel costs, and recommendations will be shown in your preferred currency
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+            {[
+              { code: 'USD', name: 'US Dollar', symbol: '$' },
+              { code: 'EUR', name: 'Euro', symbol: '€' },
+              { code: 'GBP', name: 'British Pound', symbol: '£' },
+              { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
+              { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
+              { code: 'CNY', name: 'Chinese Yuan', symbol: '¥' },
+              { code: 'AUD', name: 'Australian Dollar', symbol: 'A$' },
+              { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
+              { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$' },
+              { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ' },
+            ].map((curr) => (
+              <button
+                key={curr.code}
+                type="button"
+                onClick={() => setFormData({ ...formData, preferredCurrency: curr.code })}
+                className={`p-4 rounded-lg border-2 transition ${
+                  formData.preferredCurrency === curr.code
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="text-2xl mb-1">{curr.symbol}</p>
+                <p className="font-semibold text-slate-800 text-sm">{curr.code}</p>
+                <p className="text-xs text-slate-600">{curr.name}</p>
+              </button>
+            ))}
+          </div>
+          <div className="bg-olive-50 border border-olive-200 rounded-lg p-4">
+            <p className="text-sm text-olive-800">
+              💡 <strong>Smart Tip:</strong> We'll automatically detect fuel prices and costs based on your location and convert everything to your chosen currency.
+            </p>
+          </div>
+        </div>
+      );
+
+    case 1: // Q1.1: What do you want to price?
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -921,18 +967,142 @@ function renderStage3Questions(substage: number, formData: QuestionnaireState, s
 }
 
 function renderStage4Questions(substage: number, formData: QuestionnaireState, setFormData: any) {
-  return (
-    <div className="text-center py-12">
-      <h3 className="text-2xl font-bold text-slate-800 mb-4">
-        Stage 4: Output Preferences
-      </h3>
-      <p className="text-slate-600 mb-4">
-        Question {substage + 1}
-      </p>
-      <p className="text-sm text-slate-500">
-        (Output preference questions will be implemented here)
-      </p>
-    </div>
-  );
+  switch (substage) {
+    case 0: // Q4.1: Pricing priority
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What should the system prioritize?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This determines how we optimize your pricing recommendation
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, pricingPriority: 'affordable' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.pricingPriority === 'affordable'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <DollarSign className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Affordable</p>
+              <p className="text-sm text-slate-600 mt-1">Competitive, accessible pricing</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, pricingPriority: 'profit_optimized' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.pricingPriority === 'profit_optimized'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <TrendingUp className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Profit-Optimized</p>
+              <p className="text-sm text-slate-600 mt-1">Maximum profitability</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, pricingPriority: 'competitive' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.pricingPriority === 'competitive'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <Users className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Competitive</p>
+              <p className="text-sm text-slate-600 mt-1">Match market leaders</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 1: // Q4.2: Output detail level
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            How detailed should your pricing report be?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Choose the level of detail you need
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, outputDetail: 'detailed' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.outputDetail === 'detailed'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <FileText className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Detailed Breakdown</p>
+              <p className="text-sm text-slate-600 mt-1">Complete cost analysis with reasoning</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, outputDetail: 'summarized' })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.outputDetail === 'summarized'
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <CheckCircle className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Summarized</p>
+              <p className="text-sm text-slate-600 mt-1">Quick recommendation with key points</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 2: // Q4.3: Comparison preference
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Would you like to compare with similar profiles or top performers?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            See how your pricing compares to others in your field
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, wantsComparison: true })}
+              className={`p-6 rounded-xl border-2 transition ${
+                formData.wantsComparison
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <Users className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">Yes, show comparisons</p>
+              <p className="text-sm text-slate-600 mt-1">Benchmark against similar profiles</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, wantsComparison: false })}
+              className={`p-6 rounded-xl border-2 transition ${
+                !formData.wantsComparison
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <FileText className="w-8 h-8 text-olive-600 mx-auto mb-3" />
+              <p className="font-semibold text-slate-800">No, just my pricing</p>
+              <p className="text-sm text-slate-600 mt-1">Focus on my specific case</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    default:
+      return <div>Unknown question</div>;
+  }
 }
 

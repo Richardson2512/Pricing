@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
+import { getFuelPricesByLocation, getVehicleEfficiency, formatDistance, kmToMiles } from './fuelPriceService.js';
+import { convertCurrency, formatCurrency, getCurrencyByLocation } from './currencyConverter.js';
 
 dotenv.config();
 
@@ -25,10 +27,14 @@ export interface TravelCostBreakdown {
   fuel_cost: number;
   time_compensation: number;
   distance_km: number;
+  distance_miles: number;
   travel_time_hours: number;
   mode: string;
   frequency_multiplier: number;
+  currency: string;
   rationale: string;
+  fuel_price_per_liter: number;
+  vehicle_efficiency_kmpl: number;
 }
 
 // ============================================================================
@@ -181,12 +187,14 @@ function getFrequencyMultiplier(frequency: string): number {
 }
 
 /**
- * Main function to calculate travel costs
+ * Main function to calculate travel costs (location-aware, currency-aware)
  */
 export async function calculateTravelCost(
   travelReq: TravelRequirement,
   hourly_rate: number = 500, // Default hourly rate
-  project_duration_months: number = 1
+  project_duration_months: number = 1,
+  user_location: string = 'Global',
+  preferred_currency: string = 'USD'
 ): Promise<TravelCostBreakdown | null> {
   if (!travelReq.required) {
     return null;
@@ -225,39 +233,76 @@ export async function calculateTravelCost(
   const mode = travelReq.mode || 'car';
   const frequency = travelReq.frequency || 'one_time';
   
-  // Calculate costs
-  const fuel_cost = calculateFuelCost(distance_km, mode);
+  // Get location-specific fuel prices
+  const fuelPrices = await getFuelPricesByLocation(user_location);
+  const vehicleEfficiency = getVehicleEfficiency(user_location, mode === 'bike' ? 'bike' : 'car');
+  
+  // Calculate fuel cost with location-specific prices
+  let fuel_cost = 0;
+  if (mode === 'bike' || mode === 'car') {
+    const liters = distance_km / vehicleEfficiency;
+    fuel_cost = liters * (mode === 'bike' ? fuelPrices.petrol_per_liter : fuelPrices.petrol_per_liter);
+  } else if (mode === 'public_transport') {
+    fuel_cost = BASE_COSTS.public_transport;
+  } else if (mode === 'train') {
+    fuel_cost = distance_km * BASE_COSTS.train;
+  } else if (mode === 'flight') {
+    fuel_cost = BASE_COSTS.flight;
+  }
+  
+  // Calculate time compensation
   const time_compensation = calculateTimeCompensation(travel_time_hours, hourly_rate);
   const single_trip_cost = fuel_cost + time_compensation;
   
   // Apply frequency multiplier
   const frequency_multiplier = getFrequencyMultiplier(frequency);
-  const total_cost = single_trip_cost * frequency_multiplier * project_duration_months;
+  const total_cost_base_currency = single_trip_cost * frequency_multiplier * project_duration_months;
   
-  // Build rationale
+  // Convert to preferred currency if different
+  const localCurrency = fuelPrices.currency;
+  let total_cost = total_cost_base_currency;
+  let final_currency = localCurrency;
+  
+  if (preferred_currency !== localCurrency) {
+    const converted = await convertCurrency(total_cost_base_currency, localCurrency, preferred_currency);
+    total_cost = converted.amount;
+    final_currency = preferred_currency;
+  }
+  
+  // Convert distance to miles
+  const distance_miles = kmToMiles(distance_km);
+  
+  // Build rationale with both units
+  const currencySymbol = formatCurrency(0, final_currency).replace('0', '').trim();
   let rationale = `Travel required for ${travelReq.purpose || 'service delivery'}. `;
   rationale += `${frequency === 'one_time' ? 'One-time' : frequency.replace('_', ' ')} trip${frequency_multiplier > 1 ? 's' : ''} `;
-  rationale += `of ${distance_km.toFixed(0)} km (round trip) via ${mode}. `;
-  rationale += `Fuel/transport cost: ₹${fuel_cost.toFixed(0)}, `;
-  rationale += `Time compensation (${travel_time_hours.toFixed(1)} hrs @ ₹${hourly_rate}/hr × ${TRAVEL_TIME_FACTOR}): ₹${time_compensation.toFixed(0)}. `;
+  rationale += `of ${formatDistance(distance_km)} via ${mode}. `;
+  rationale += `Fuel/transport cost: ${formatCurrency(fuel_cost, localCurrency)}, `;
+  rationale += `Time compensation (${travel_time_hours.toFixed(1)} hrs @ ${formatCurrency(hourly_rate, localCurrency)}/hr × ${TRAVEL_TIME_FACTOR}): ${formatCurrency(time_compensation, localCurrency)}. `;
   
   if (frequency_multiplier > 1) {
-    rationale += `Total for ${frequency_multiplier} trips: ₹${total_cost.toFixed(0)}.`;
+    rationale += `Total for ${frequency_multiplier} trips: ${formatCurrency(total_cost, final_currency)}.`;
   }
   
   if (travelReq.client_bears_cost) {
     rationale += ' (Client bears travel costs - can be billed separately)';
   }
   
+  rationale += ` Fuel price: ${formatCurrency(fuelPrices.petrol_per_liter, localCurrency)}/L, Vehicle efficiency: ${vehicleEfficiency} km/L.`;
+  
   return {
     total_cost: Math.round(total_cost),
     fuel_cost: Math.round(fuel_cost * frequency_multiplier * project_duration_months),
     time_compensation: Math.round(time_compensation * frequency_multiplier * project_duration_months),
     distance_km,
+    distance_miles,
     travel_time_hours,
     mode,
     frequency_multiplier: frequency_multiplier * project_duration_months,
+    currency: final_currency,
     rationale,
+    fuel_price_per_liter: fuelPrices.petrol_per_liter,
+    vehicle_efficiency_kmpl: vehicleEfficiency,
   };
 }
 
