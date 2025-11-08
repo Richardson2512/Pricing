@@ -1,3 +1,60 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Blog Post Typography Enhancements */
+.prose {
+  @apply text-slate-700;
+}
+
+.prose h2 {
+  @apply scroll-mt-20;
+}
+
+.prose h3 {
+  @apply scroll-mt-20;
+}
+
+/* Better list spacing */
+.prose ul li,
+.prose ol li {
+  @apply mb-2;
+}
+
+/* Code blocks */
+.prose pre {
+  @apply bg-slate-900 text-slate-100 rounded-xl p-6 overflow-x-auto my-8;
+}
+
+/* Inline code */
+.prose :not(pre) > code {
+  @apply font-normal;
+}
+
+/* Links in content */
+.prose a {
+  @apply transition-colors duration-200;
+}
+
+/* Blockquotes */
+.prose blockquote {
+  @apply my-8 bg-beige-50 rounded-r-xl;
+}
+
+/* Tables (if used) */
+.prose table {
+  @apply border-collapse w-full my-8;
+}
+
+.prose th {
+  @apply bg-olive-100 text-olive-900 font-semibold p-3 text-left;
+}
+
+.prose td {
+  @apply border border-beige-200 p-3;
+}
+
+/* First paragraph larger */
+.prose > p:first-of-type {
+  @apply text-xl leading-relaxed text-slate-600;
+}
