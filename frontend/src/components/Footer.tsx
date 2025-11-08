@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, Mail, MapPin, Phone } from 'lucide-react';
+import { Sparkles, Mail, MapPin, Phone, Twitter, Linkedin, Github } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -99,30 +99,33 @@ export function Footer() {
           <p className="text-sm text-slate-400">
             © {currentYear} PriceWise. All rights reserved.
           </p>
-          <div className="flex gap-6">
+          <div className="flex gap-4">
             <a
               href="https://twitter.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-400 hover:text-olive-400 transition"
+              className="text-slate-400 hover:text-olive-400 transition p-2 hover:bg-slate-700 rounded-lg"
+              aria-label="Twitter"
             >
-              Twitter
+              <Twitter className="w-5 h-5" />
             </a>
             <a
               href="https://linkedin.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-400 hover:text-olive-400 transition"
+              className="text-slate-400 hover:text-olive-400 transition p-2 hover:bg-slate-700 rounded-lg"
+              aria-label="LinkedIn"
             >
-              LinkedIn
+              <Linkedin className="w-5 h-5" />
             </a>
             <a
               href="https://github.com/Richardson2512/Pricing"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-400 hover:text-olive-400 transition"
+              className="text-slate-400 hover:text-olive-400 transition p-2 hover:bg-slate-700 rounded-lg"
+              aria-label="GitHub"
             >
-              GitHub
+              <Github className="w-5 h-5" />
             </a>
           </div>
         </div>

@@ -57,14 +57,14 @@ export function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-slate-800 mb-6">
-              Discover the{' '}
-              <span className="text-olive-600">Perfect Price</span>
+              How Much Should I{' '}
+              <span className="text-olive-600">Charge</span>
               <br />
-              for Your Product
+              for My Product?
             </h1>
             <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-              Stop guessing. Start winning. Get AI-powered pricing recommendations
-              tailored to your business, market, and goals.
+              AI-powered price provider that helps you price your product or service.
+              Get instant pricing recommendations in minutes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -82,7 +82,7 @@ export function Landing() {
               </button>
             </div>
             <p className="text-sm text-slate-500 mt-4">
-              ✨ New users get 3 free consultations • No credit card required
+              ✨ New users get 3 free pricing checks • No credit card required
             </p>
           </div>
 
@@ -90,7 +90,7 @@ export function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 max-w-4xl mx-auto">
             <div className="text-center p-6 bg-white rounded-xl shadow-sm">
               <div className="text-4xl font-bold text-olive-600 mb-2">10,000+</div>
-              <div className="text-slate-600">Pricing Consultations</div>
+              <div className="text-slate-600">Products Priced</div>
             </div>
             <div className="text-center p-6 bg-white rounded-xl shadow-sm">
               <div className="text-4xl font-bold text-olive-600 mb-2">95%</div>
@@ -215,7 +215,7 @@ export function Landing() {
             <div className="bg-gradient-to-br from-olive-600 to-olive-700 rounded-2xl p-8 text-white">
               <h3 className="text-2xl font-bold mb-4">Ready to Get Started?</h3>
               <p className="text-beige-100 mb-6">
-                Sign up today and get 3 free pricing consultations. No credit
+                Sign up today and get 3 free pricing checks. No credit
                 card required.
               </p>
               <ul className="space-y-3 mb-8">
@@ -225,7 +225,7 @@ export function Landing() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5" />
-                  <span>3 free consultations included</span>
+                  <span>3 free pricing checks included</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5" />

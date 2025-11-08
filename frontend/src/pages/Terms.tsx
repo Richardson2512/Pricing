@@ -88,9 +88,9 @@ export function Terms() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-3">4. Credits and Consultations</h3>
+                <h3 className="text-xl font-semibold text-slate-800 mb-3">4. Credits and Pricing Checks</h3>
                 <p className="text-slate-600 leading-relaxed">
-                  Credits purchased on PriceWise never expire. Each pricing consultation costs 1 credit. New users receive 3 free credits upon registration. Additional credits can be purchased at any time.
+                  Credits purchased on PriceWise never expire. Each pricing check costs 1 credit. New users receive 3 free credits upon registration. Additional credits can be purchased at any time.
                 </p>
               </div>
 

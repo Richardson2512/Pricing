@@ -160,8 +160,8 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 mb-2">Pricing Consultation</h1>
-              <p className="text-slate-600">Answer these questions to get your personalized pricing recommendation</p>
+              <h1 className="text-3xl font-bold text-slate-800 mb-2">Price Your Product</h1>
+              <p className="text-slate-600">Answer these questions to get your AI-powered pricing recommendation</p>
             </div>
             <button
               onClick={() => setView('dashboard')}
@@ -227,8 +227,8 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
                 <Plus className="w-8 h-8" />
               </div>
               <div className="text-left">
-                <h2 className="text-2xl font-bold mb-1">Start New Pricing Consultation</h2>
-                <p className="text-beige-100">Get expert pricing recommendations for your product or service</p>
+                <h2 className="text-2xl font-bold mb-1">Check Your Product Pricing</h2>
+                <p className="text-beige-100">Get AI-powered pricing recommendations for your product or service</p>
               </div>
             </div>
           </button>
@@ -238,7 +238,7 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
           <div>
             <div className="flex items-center gap-3 mb-6">
               <History className="w-6 h-6 text-slate-600" />
-              <h2 className="text-2xl font-bold text-slate-800">Previous Consultations</h2>
+              <h2 className="text-2xl font-bold text-slate-800">Pricing History</h2>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -280,8 +280,8 @@ Remember: Pricing is not permanent. Start with a hypothesis and refine based on 
             <div className="bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <History className="w-8 h-8 text-slate-400" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">No consultations yet</h3>
-            <p className="text-slate-600">Start your first consultation to get personalized pricing recommendations</p>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">No pricing checks yet</h3>
+            <p className="text-slate-600">Check your first product pricing to get AI-powered recommendations</p>
           </div>
         )}
       </main>

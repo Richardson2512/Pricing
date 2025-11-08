@@ -8,16 +8,29 @@ export function Pricing() {
 
   const packages = [
     {
+      name: 'Free',
+      credits: 3,
+      price: 0,
+      pricePerCredit: 0,
+      description: 'Try it out for free',
+      features: [
+        '3 pricing checks',
+        'Basic recommendations',
+        'Email support',
+        'Pricing history',
+      ],
+    },
+    {
       name: 'Starter',
       credits: 5,
       price: 10,
       pricePerCredit: 2.0,
       description: 'Perfect for testing the waters',
       features: [
-        '5 pricing consultations',
+        '5 pricing checks',
         'Basic recommendations',
         'Email support',
-        'Consultation history',
+        'Pricing history',
       ],
     },
     {
@@ -28,10 +41,10 @@ export function Pricing() {
       description: 'Most popular for small businesses',
       popular: true,
       features: [
-        '10 pricing consultations',
+        '10 pricing checks',
         'Advanced recommendations',
         'Priority email support',
-        'Consultation history',
+        'Pricing history',
         'Export to PDF',
       ],
     },
@@ -42,29 +55,12 @@ export function Pricing() {
       pricePerCredit: 1.25,
       description: 'For growing businesses',
       features: [
-        '20 pricing consultations',
+        '20 pricing checks',
         'Premium recommendations',
         'Priority support',
-        'Consultation history',
+        'Pricing history',
         'Export to PDF',
         'Team collaboration',
-      ],
-    },
-    {
-      name: 'Enterprise',
-      credits: 50,
-      price: 50,
-      pricePerCredit: 1.0,
-      description: 'For large organizations',
-      features: [
-        '50 pricing consultations',
-        'Enterprise recommendations',
-        '24/7 dedicated support',
-        'Unlimited history',
-        'Export to PDF',
-        'Team collaboration',
-        'Custom integrations',
-        'API access',
       ],
     },
   ];
@@ -92,7 +88,7 @@ export function Pricing() {
               <h2 className="text-2xl font-bold">Start Free</h2>
             </div>
             <p className="text-beige-100">
-              New users get <span className="font-bold">3 free consultations</span> • No credit card required
+              New users get <span className="font-bold">3 free pricing checks</span> • No credit card required
             </p>
           </div>
 
@@ -147,10 +143,12 @@ export function Pricing() {
                   className={`w-full py-3 rounded-lg font-semibold transition ${
                     pkg.popular
                       ? 'bg-olive-600 text-white hover:bg-olive-700'
+                      : pkg.price === 0
+                      ? 'bg-olive-100 text-olive-700 hover:bg-olive-200'
                       : 'bg-beige-100 text-olive-600 hover:bg-beige-200'
                   }`}
                 >
-                  Get Started
+                  {pkg.price === 0 ? 'Start Free' : 'Get Your Credits'}
                 </button>
               </div>
             ))}
@@ -185,7 +183,7 @@ export function Pricing() {
                   Do credits expire?
                 </h3>
                 <p className="text-slate-600">
-                  No! Your credits never expire. Use them whenever you need pricing recommendations.
+                  No! Your credits never expire. Use them whenever you need to check pricing for your products.
                 </p>
               </div>
 
