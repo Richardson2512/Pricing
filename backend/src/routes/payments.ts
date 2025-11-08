@@ -46,7 +46,7 @@ router.post('/create-checkout', async (req, res) => {
     // Determine frontend URL based on environment
     const frontendUrl = process.env.FRONTEND_URL || 'https://howmuchshouldiprice.com';
 
-    // Create checkout session with product ID
+    // Create checkout session with product ID and discount code support
     const checkout = await createCheckoutSession({
       productId,
       quantity: 1,
@@ -58,6 +58,8 @@ router.post('/create-checkout', async (req, res) => {
       successUrl: `${frontendUrl}/dashboard?payment=success&credits=${credits}`,
       cancelUrl: `${frontendUrl}/dashboard?payment=cancelled`,
       customerEmail: profile.email,
+      allowDiscountCodes: true, // Enable discount code input at checkout
+      discountCodeId: process.env.DODO_DISCOUNT_CODE_ID, // Optional: Pre-apply discount code
     });
 
     console.log(`✅ Checkout created for ${credits} credits (${selectedPackage.name}) - User: ${userId}`);

@@ -22,6 +22,8 @@ interface CreateCheckoutParams {
   successUrl: string;
   cancelUrl: string;
   customerEmail?: string;
+  allowDiscountCodes?: boolean;
+  discountCodeId?: string;
 }
 
 interface CheckoutResponse {
@@ -42,20 +44,33 @@ export async function createCheckoutSession(params: CreateCheckoutParams): Promi
     throw new Error('Dodo Payments API key not configured');
   }
 
+  // Build checkout session payload
+  const checkoutPayload: any = {
+    product_id: params.productId,
+    quantity: params.quantity,
+    metadata: params.metadata,
+    success_url: params.successUrl,
+    cancel_url: params.cancelUrl,
+    customer_email: params.customerEmail,
+  };
+
+  // Enable discount codes if specified
+  if (params.allowDiscountCodes) {
+    checkoutPayload.allow_discount_codes = true;
+  }
+
+  // Apply specific discount code if provided
+  if (params.discountCodeId) {
+    checkoutPayload.discount_code_id = params.discountCodeId;
+  }
+
   const response = await fetch(`${DODO_BASE_URL}/v1/checkout-sessions`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${DODO_API_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      product_id: params.productId,
-      quantity: params.quantity,
-      metadata: params.metadata,
-      success_url: params.successUrl,
-      cancel_url: params.cancelUrl,
-      customer_email: params.customerEmail,
-    }),
+    body: JSON.stringify(checkoutPayload),
   });
 
   if (!response.ok) {

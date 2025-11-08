@@ -14,7 +14,8 @@ Add to `backend/.env`:
 ```env
 DODO_PAYMENTS_API_KEY=FYvOjH2t4INibzvy.wToYMiSrH4P3-zlOrYCz_aEzXxFCrHcXnndLEyqkKnbvVsYb
 DODO_PAYMENTS_BASE_URL=https://api.dodopayments.com
-DODO_WEBHOOK_SECRET=whsec_your-webhook-secret-from-dodo-dashboard
+DODO_WEBHOOK_SECRET=whsec_2+WDBN41Up36pUlQZg2SrMML7n9LCluM
+DODO_DISCOUNT_CODE_ID=dsc_96AppoW3xINGY23GpHNTm
 ```
 
 ### Railway Environment Variables
@@ -23,11 +24,20 @@ Add in **Railway Dashboard** → **Variables**:
 ```
 DODO_PAYMENTS_API_KEY=FYvOjH2t4INibzvy.wToYMiSrH4P3-zlOrYCz_aEzXxFCrHcXnndLEyqkKnbvVsYb
 DODO_PAYMENTS_BASE_URL=https://api.dodopayments.com
-DODO_WEBHOOK_SECRET=whsec_your-webhook-secret-from-dodo-dashboard
+DODO_WEBHOOK_SECRET=whsec_2+WDBN41Up36pUlQZg2SrMML7n9LCluM
+DODO_DISCOUNT_CODE_ID=dsc_96AppoW3xINGY23GpHNTm
 FRONTEND_URL=https://howmuchshouldiprice.com
 ```
 
-**Important:** Get the webhook secret from Dodo Payments Dashboard → Webhooks → Your Endpoint → Secret
+**Webhook Configuration:**
+- Webhook URL: `https://your-backend.railway.app/api/payments/webhook`
+- Webhook Secret: `whsec_2+WDBN41Up36pUlQZg2SrMML7n9LCluM`
+- Events: `payment.succeeded`, `payment.failed`
+
+**Discount Code:**
+- Discount Code ID: `dsc_96AppoW3xINGY23GpHNTm`
+- Enabled at checkout: Users can enter discount codes
+- Optional: Pre-apply discount code automatically
 
 ---
 
