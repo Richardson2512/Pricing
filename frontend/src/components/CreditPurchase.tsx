@@ -33,7 +33,13 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
     setError(null);
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      let backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      
+      // Ensure URL has protocol
+      if (!backendUrl.startsWith('http://') && !backendUrl.startsWith('https://')) {
+        backendUrl = `https://${backendUrl}`;
+      }
+      
       console.log('🔄 Creating checkout for', credits, 'credits');
       console.log('📡 Backend URL:', backendUrl);
       
