@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
+import axios from 'axios';
+import { getDistance } from 'geolib';
 import { getFuelPricesByLocation, getVehicleEfficiency, formatDistance, kmToMiles } from './fuelPriceService.js';
 import { convertCurrency, formatCurrency, getCurrencyByLocation } from './currencyConverter.js';
 
@@ -72,9 +74,15 @@ const TRAVEL_TIME_FACTOR = 0.5; // 50% of hourly rate for travel time
 
 /**
  * Get coordinates for a location using Nominatim (OpenStreetMap)
+ * Fallback 1: Nominatim (OSM) - Free, no API key
+ * Fallback 2: OpenCage Geocoder - Free tier: 2500 requests/day
+ * Fallback 3: Photon (Komoot) - Free, no API key
+ * Fallback 4: LocationIQ - Free tier: 5000 requests/day
  */
 async function geocode(location: string): Promise<{ lat: number; lon: number } | null> {
+  // Try Nominatim first (Primary)
   try {
+    console.log('🌍 Geocoding with Nominatim (OSM)...');
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`;
     const response = await fetch(url, {
       headers: {
@@ -85,54 +93,197 @@ async function geocode(location: string): Promise<{ lat: number; lon: number } |
     const data = await response.json() as any[];
     
     if (data && data.length > 0) {
+      console.log('✅ Nominatim geocoding successful');
       return {
         lat: parseFloat(data[0].lat),
         lon: parseFloat(data[0].lon),
       };
     }
-    
-    return null;
   } catch (error) {
-    console.error('Geocoding error:', error);
-    return null;
+    console.warn('⚠️ Nominatim failed, trying fallback...');
   }
+
+  // Fallback 2: Photon (Komoot)
+  try {
+    console.log('🌍 Geocoding with Photon (Komoot)...');
+    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(location)}&limit=1`;
+    const response = await fetch(url);
+    const data = await response.json() as any;
+    
+    if (data.features && data.features.length > 0) {
+      const coords = data.features[0].geometry.coordinates;
+      console.log('✅ Photon geocoding successful');
+      return {
+        lat: coords[1],
+        lon: coords[0],
+      };
+    }
+  } catch (error) {
+    console.warn('⚠️ Photon failed, trying next fallback...');
+  }
+
+  // Fallback 3: OpenCage (requires API key but has free tier)
+  const OPENCAGE_API_KEY = process.env.OPENCAGE_API_KEY;
+  if (OPENCAGE_API_KEY) {
+    try {
+      console.log('🌍 Geocoding with OpenCage...');
+      const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=${OPENCAGE_API_KEY}&limit=1`;
+      const response = await fetch(url);
+      const data = await response.json() as any;
+      
+      if (data.results && data.results.length > 0) {
+        console.log('✅ OpenCage geocoding successful');
+        return {
+          lat: data.results[0].geometry.lat,
+          lon: data.results[0].geometry.lng,
+        };
+      }
+    } catch (error) {
+      console.warn('⚠️ OpenCage failed');
+    }
+  }
+
+  // Fallback 4: LocationIQ (requires API key but has free tier)
+  const LOCATIONIQ_API_KEY = process.env.LOCATIONIQ_API_KEY;
+  if (LOCATIONIQ_API_KEY) {
+    try {
+      console.log('🌍 Geocoding with LocationIQ...');
+      const url = `https://us1.locationiq.com/v1/search.php?key=${LOCATIONIQ_API_KEY}&q=${encodeURIComponent(location)}&format=json&limit=1`;
+      const response = await fetch(url);
+      const data = await response.json() as any[];
+      
+      if (data && data.length > 0) {
+        console.log('✅ LocationIQ geocoding successful');
+        return {
+          lat: parseFloat(data[0].lat),
+          lon: parseFloat(data[0].lon),
+        };
+      }
+    } catch (error) {
+      console.warn('⚠️ LocationIQ failed');
+    }
+  }
+
+  console.error('❌ All geocoding services failed for:', location);
+  return null;
 }
 
 /**
- * Calculate distance and travel time using OSRM (Open Source Routing Machine)
+ * Calculate distance and travel time using multiple routing services
+ * Primary: OSRM (Open Source Routing Machine) - Free, no API key
+ * Fallback 1: GraphHopper - Free tier: 500 requests/day
+ * Fallback 2: OpenRouteService - Free tier: 2000 requests/day
+ * Fallback 3: Geolib (straight-line distance) - Always works
  */
 async function calculateRoute(
   origin: string,
   destination: string,
   mode: 'driving' | 'walking' | 'cycling' = 'driving'
 ): Promise<{ distance_km: number; duration_hours: number } | null> {
+  // Get coordinates first
+  const originCoords = await geocode(origin);
+  const destCoords = await geocode(destination);
+  
+  if (!originCoords || !destCoords) {
+    console.error('❌ Could not geocode locations');
+    return null;
+  }
+
+  // Try OSRM first (Primary)
   try {
-    // Get coordinates
-    const originCoords = await geocode(origin);
-    const destCoords = await geocode(destination);
-    
-    if (!originCoords || !destCoords) {
-      console.error('Could not geocode locations');
-      return null;
-    }
-    
-    // Use OSRM to calculate route
+    console.log('🗺️ Calculating route with OSRM...');
     const url = `http://router.project-osrm.org/route/v1/${mode}/${originCoords.lon},${originCoords.lat};${destCoords.lon},${destCoords.lat}?overview=false`;
     
-    const response = await fetch(url);
+    const response = await fetch(url, { timeout: 5000 } as any);
     const data = await response.json() as any;
     
     if (data.routes && data.routes.length > 0) {
       const route = data.routes[0];
+      console.log('✅ OSRM routing successful');
       return {
-        distance_km: route.distance / 1000, // Convert meters to km
-        duration_hours: route.duration / 3600, // Convert seconds to hours
+        distance_km: route.distance / 1000,
+        duration_hours: route.duration / 3600,
       };
     }
-    
-    return null;
   } catch (error) {
-    console.error('Route calculation error:', error);
+    console.warn('⚠️ OSRM failed, trying fallback...');
+  }
+
+  // Fallback 1: GraphHopper
+  const GRAPHHOPPER_API_KEY = process.env.GRAPHHOPPER_API_KEY;
+  if (GRAPHHOPPER_API_KEY) {
+    try {
+      console.log('🗺️ Calculating route with GraphHopper...');
+      const url = `https://graphhopper.com/api/1/route?point=${originCoords.lat},${originCoords.lon}&point=${destCoords.lat},${destCoords.lon}&vehicle=${mode === 'driving' ? 'car' : mode}&key=${GRAPHHOPPER_API_KEY}`;
+      
+      const response = await axios.get(url, { timeout: 5000 });
+      const data = response.data;
+      
+      if (data.paths && data.paths.length > 0) {
+        const path = data.paths[0];
+        console.log('✅ GraphHopper routing successful');
+        return {
+          distance_km: path.distance / 1000,
+          duration_hours: path.time / 3600000,
+        };
+      }
+    } catch (error) {
+      console.warn('⚠️ GraphHopper failed, trying next fallback...');
+    }
+  }
+
+  // Fallback 2: OpenRouteService
+  const ORS_API_KEY = process.env.OPENROUTESERVICE_API_KEY;
+  if (ORS_API_KEY) {
+    try {
+      console.log('🗺️ Calculating route with OpenRouteService...');
+      const profile = mode === 'driving' ? 'driving-car' : mode === 'cycling' ? 'cycling-regular' : 'foot-walking';
+      const url = `https://api.openrouteservice.org/v2/directions/${profile}?start=${originCoords.lon},${originCoords.lat}&end=${destCoords.lon},${destCoords.lat}`;
+      
+      const response = await axios.get(url, {
+        headers: { 'Authorization': ORS_API_KEY },
+        timeout: 5000,
+      });
+      const data = response.data;
+      
+      if (data.features && data.features.length > 0) {
+        const route = data.features[0].properties.segments[0];
+        console.log('✅ OpenRouteService routing successful');
+        return {
+          distance_km: route.distance / 1000,
+          duration_hours: route.duration / 3600,
+        };
+      }
+    } catch (error) {
+      console.warn('⚠️ OpenRouteService failed, using straight-line distance...');
+    }
+  }
+
+  // Fallback 3: Geolib (straight-line distance - always works)
+  try {
+    console.log('🗺️ Calculating straight-line distance with Geolib...');
+    const distanceMeters = getDistance(
+      { latitude: originCoords.lat, longitude: originCoords.lon },
+      { latitude: destCoords.lat, longitude: destCoords.lon }
+    );
+    
+    const distance_km = distanceMeters / 1000;
+    
+    // Estimate duration based on average speed
+    const avg_speed_kmh = mode === 'driving' ? 60 : mode === 'cycling' ? 20 : 5;
+    const duration_hours = distance_km / avg_speed_kmh;
+    
+    // Add 30% for road routing (straight-line is shorter than actual roads)
+    const adjusted_distance_km = distance_km * 1.3;
+    const adjusted_duration_hours = duration_hours * 1.3;
+    
+    console.log('✅ Geolib straight-line calculation successful (with 30% road adjustment)');
+    return {
+      distance_km: adjusted_distance_km,
+      duration_hours: adjusted_duration_hours,
+    };
+  } catch (error) {
+    console.error('❌ Even Geolib failed:', error);
     return null;
   }
 }

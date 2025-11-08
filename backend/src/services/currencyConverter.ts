@@ -79,20 +79,25 @@ const CACHE_DURATION = 3600000; // 1 hour in milliseconds
 // ============================================================================
 
 /**
- * Fetch latest exchange rates from free API
- * Using exchangerate-api.com (free tier: 1500 requests/month)
+ * Fetch latest exchange rates from multiple free APIs
+ * Primary: exchangerate-api.com - Free tier: 1500 requests/month
+ * Fallback 1: frankfurter.app - Free, no API key, ECB data
+ * Fallback 2: exchangerate.host - Free tier: 100 requests/month
+ * Fallback 3: fixer.io - Free tier: 100 requests/month (requires key)
  */
 async function fetchExchangeRates(baseCurrency: string = 'USD'): Promise<CurrencyRates | null> {
-  try {
-    // Check cache
-    const now = Date.now();
-    if (cachedRates && cachedRates.base === baseCurrency && (now - lastFetchTime) < CACHE_DURATION) {
-      return cachedRates;
-    }
+  // Check cache first
+  const now = Date.now();
+  if (cachedRates && cachedRates.base === baseCurrency && (now - lastFetchTime) < CACHE_DURATION) {
+    console.log('✅ Using cached exchange rates');
+    return cachedRates;
+  }
 
-    // Fetch from API
+  // Try exchangerate-api.com (Primary)
+  try {
+    console.log('💱 Fetching rates from exchangerate-api.com...');
     const url = `https://api.exchangerate-api.com/v4/latest/${baseCurrency}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { timeout: 5000 } as any);
     const data = await response.json() as any;
 
     if (data && data.rates) {
@@ -102,31 +107,122 @@ async function fetchExchangeRates(baseCurrency: string = 'USD'): Promise<Currenc
         timestamp: now,
       };
       lastFetchTime = now;
+      console.log('✅ Exchange rates fetched successfully');
       return cachedRates;
     }
-
-    return null;
   } catch (error) {
-    console.error('Error fetching exchange rates:', error);
-    
-    // Fallback to approximate rates if API fails
-    return {
-      base: 'USD',
-      rates: {
-        USD: 1,
-        EUR: 0.92,
-        GBP: 0.79,
-        INR: 83.12,
-        JPY: 149.50,
-        CNY: 7.24,
-        AUD: 1.52,
-        CAD: 1.36,
-        SGD: 1.34,
-        AED: 3.67,
-      },
-      timestamp: Date.now(),
-    };
+    console.warn('⚠️ exchangerate-api.com failed, trying fallback...');
   }
+
+  // Fallback 1: frankfurter.app (ECB data)
+  try {
+    console.log('💱 Fetching rates from frankfurter.app...');
+    const url = `https://api.frankfurter.app/latest?from=${baseCurrency}`;
+    const response = await fetch(url, { timeout: 5000 } as any);
+    const data = await response.json() as any;
+
+    if (data && data.rates) {
+      cachedRates = {
+        base: baseCurrency,
+        rates: { [baseCurrency]: 1, ...data.rates },
+        timestamp: now,
+      };
+      lastFetchTime = now;
+      console.log('✅ Frankfurter rates fetched successfully');
+      return cachedRates;
+    }
+  } catch (error) {
+    console.warn('⚠️ frankfurter.app failed, trying next fallback...');
+  }
+
+  // Fallback 2: exchangerate.host
+  try {
+    console.log('💱 Fetching rates from exchangerate.host...');
+    const url = `https://api.exchangerate.host/latest?base=${baseCurrency}`;
+    const response = await fetch(url, { timeout: 5000 } as any);
+    const data = await response.json() as any;
+
+    if (data && data.rates) {
+      cachedRates = {
+        base: baseCurrency,
+        rates: data.rates,
+        timestamp: now,
+      };
+      lastFetchTime = now;
+      console.log('✅ exchangerate.host rates fetched successfully');
+      return cachedRates;
+    }
+  } catch (error) {
+    console.warn('⚠️ exchangerate.host failed, trying next fallback...');
+  }
+
+  // Fallback 3: fixer.io (requires API key)
+  const FIXER_API_KEY = process.env.FIXER_API_KEY;
+  if (FIXER_API_KEY) {
+    try {
+      console.log('💱 Fetching rates from fixer.io...');
+      const url = `http://data.fixer.io/api/latest?access_key=${FIXER_API_KEY}&base=${baseCurrency}`;
+      const response = await fetch(url, { timeout: 5000 } as any);
+      const data = await response.json() as any;
+
+      if (data && data.rates) {
+        cachedRates = {
+          base: baseCurrency,
+          rates: data.rates,
+          timestamp: now,
+        };
+        lastFetchTime = now;
+        console.log('✅ Fixer.io rates fetched successfully');
+        return cachedRates;
+      }
+    } catch (error) {
+      console.warn('⚠️ fixer.io failed');
+    }
+  }
+
+  // Final fallback: Use last known rates or approximate rates
+  console.warn('⚠️ All exchange rate APIs failed, using fallback rates');
+  
+  if (cachedRates) {
+    console.log('✅ Using stale cached rates (better than nothing)');
+    return cachedRates;
+  }
+
+  // Last resort: Approximate rates (updated periodically)
+  console.log('⚠️ Using approximate exchange rates (last resort)');
+  return {
+    base: 'USD',
+    rates: {
+      USD: 1,
+      EUR: 0.92,
+      GBP: 0.79,
+      INR: 83.12,
+      JPY: 149.50,
+      CNY: 7.24,
+      AUD: 1.52,
+      CAD: 1.36,
+      SGD: 1.34,
+      AED: 3.67,
+      SAR: 3.75,
+      ZAR: 18.50,
+      BRL: 4.95,
+      MXN: 17.20,
+      RUB: 92.50,
+      KRW: 1320,
+      IDR: 15600,
+      MYR: 4.72,
+      THB: 35.50,
+      PHP: 56.20,
+      VND: 24500,
+      PKR: 278,
+      BDT: 110,
+      LKR: 325,
+      NGN: 790,
+      EGP: 31,
+      KES: 155,
+    },
+    timestamp: Date.now(),
+  };
 }
 
 /**
