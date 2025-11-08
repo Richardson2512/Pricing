@@ -19,6 +19,16 @@ export interface ParsedDocument {
   dependencies?: string[];
   category?: string;
   keywords?: string[];
+  travel_required?: boolean;
+  travel_details?: {
+    frequency?: string;
+    scope?: string;
+    mode?: string;
+    purpose?: string;
+    client_bears_cost?: boolean;
+    origin?: string;
+    destination?: string;
+  };
 }
 
 export async function parseDocument(documentText: string): Promise<ParsedDocument> {
@@ -42,7 +52,17 @@ Extract and return ONLY a JSON object with these fields:
   "tools": ["tools, software, equipment, or technology mentioned"],
   "dependencies": ["dependencies, prerequisites, or requirements mentioned"],
   "category": "inferred category (e.g., 'UI/UX Design', 'Web Development', 'Manufacturing', 'Consulting')",
-  "keywords": ["key terms that describe the work"]
+  "keywords": ["key terms that describe the work"],
+  "travel_required": true or false (detect from keywords: onsite, visit, site visit, inspection, travel, client location, field, installation, delivery, physical presence),
+  "travel_details": {
+    "frequency": "one_time", "daily", "weekly", "monthly", or "per_project" if travel mentioned,
+    "scope": "local", "regional", "inter_city", "interstate", or "international" if travel mentioned,
+    "mode": "bike", "car", "public_transport", "train", "flight", or "mixed" if specified,
+    "purpose": "reason for travel (e.g., installation, inspection, meeting, delivery)",
+    "client_bears_cost": true or false if mentioned (keywords: reimbursable, travel allowance, client bears),
+    "origin": "service provider location if mentioned",
+    "destination": "client/site location if mentioned"
+  }
 }
 
 Rules:
@@ -50,6 +70,8 @@ Rules:
 - Infer offering_type and domain based on context
 - For complexity, consider scope, technical requirements, and deliverables
 - Extract any pricing hints even if vague
+- Detect travel requirements from keywords like: onsite, visit, inspection, travel, site visit, client location, field work, installation, delivery, physical presence
+- If no travel keywords found, set travel_required to false and omit travel_details
 - Return valid JSON only`;
 
 

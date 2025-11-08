@@ -142,6 +142,17 @@ interface QuestionnaireState {
   clientSegment: 'individual' | 'smb' | 'enterprise' | '';
   engagementType: 'retainer' | 'one_time' | 'both' | '';
 
+  // Travel Requirements (for services)
+  travelRequired: boolean;
+  travelFrequency: 'one_time' | 'weekly' | 'daily' | 'per_project' | 'monthly' | '';
+  travelScope: 'local' | 'regional' | 'inter_city' | 'interstate' | 'international' | '';
+  travelMode: 'bike' | 'car' | 'public_transport' | 'train' | 'flight' | 'mixed' | '';
+  travelDistance: string;
+  travelTime: string;
+  clientBearsTravelCost: boolean;
+  travelOrigin: string;
+  travelDestination: string;
+
   // Stage 3: Experience & Positioning
   yearsInField: string;
   skillLevel: 'beginner' | 'intermediate' | 'expert' | '';
@@ -256,6 +267,15 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
     complianceCosts: '',
     clientSegment: '',
     engagementType: '',
+    travelRequired: false,
+    travelFrequency: '',
+    travelScope: '',
+    travelMode: '',
+    travelDistance: '',
+    travelTime: '',
+    clientBearsTravelCost: false,
+    travelOrigin: '',
+    travelDestination: '',
     yearsInField: '',
     skillLevel: '',
     businessStage: '',
