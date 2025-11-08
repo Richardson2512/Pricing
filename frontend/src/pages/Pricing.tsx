@@ -121,9 +121,6 @@ export function Pricing() {
                       ${pkg.price}
                     </span>
                   </div>
-                  <div className="text-sm text-slate-500">
-                    ${pkg.pricePerCredit.toFixed(2)} per consultation
-                  </div>
                   <div className="text-lg font-semibold text-slate-700 mt-2">
                     {pkg.credits} Credits
                   </div>
