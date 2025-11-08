@@ -23,6 +23,20 @@ const consultationSchema = z.object({
   competitorPricing: z.string().min(1),
   valueProposition: z.string().min(1),
   files: z.array(z.any()).optional(),
+  
+  // Additional metadata from anthropological questionnaire
+  preferredCurrency: z.string().optional(),
+  businessEntity: z.string().optional(),
+  targetMarket: z.string().optional(),
+  yearsInField: z.string().optional(),
+  businessStage: z.string().optional(),
+  pricingPriority: z.string().optional(),
+  outputDetail: z.string().optional(),
+  wantsComparison: z.boolean().optional(),
+  
+  // Pre-analyzed data
+  usePreAnalyzedData: z.boolean().optional(),
+  preAnalyzedMarketData: z.any().optional(),
 });
 
 // Note: generatePricingRecommendation is now imported from deepseek.ts service
@@ -112,8 +126,19 @@ router.post('/', authenticateUser, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
 
+    console.log('📥 Received consultation request from user:', userId);
+    console.log('📊 Request data:', {
+      businessType: req.body.businessType,
+      offeringType: req.body.offeringType,
+      region: req.body.region,
+      niche: req.body.niche,
+      preferredCurrency: req.body.preferredCurrency,
+      usePreAnalyzedData: req.body.usePreAnalyzedData,
+    });
+
     // Validate request body
     const validatedData = consultationSchema.parse(req.body);
+    console.log('✅ Data validation passed');
 
     // Check user credits
     const { data: profile, error: profileError } = await supabaseAdmin
@@ -160,14 +185,19 @@ router.post('/', authenticateUser, async (req: AuthRequest, res) => {
     }
 
     // Step 4: Generate AI-powered recommendation with all context
-    console.log('Generating AI pricing analysis with DeepSeek V3...');
+    console.log('🤖 Generating AI pricing analysis with DeepSeek V3...');
+    console.log('📊 Market data points:', enrichedData?.length || 0);
+    
     const recommendation = await generatePricingRecommendation({
       ...validatedData,
       parsedDocuments,
       marketData: enrichedData,
     });
 
+    console.log('✅ AI analysis complete, recommendation length:', recommendation.length);
+
     // Step 5: Store consultation in database
+    console.log('💾 Storing consultation in Supabase...');
     const { data: consultation, error: consultationError } = await supabaseAdmin
       .from('consultations')
       .insert({
@@ -183,15 +213,27 @@ router.post('/', authenticateUser, async (req: AuthRequest, res) => {
       .select()
       .single();
 
-    if (consultationError) throw consultationError;
+    if (consultationError) {
+      console.error('❌ Supabase insert error:', consultationError);
+      throw consultationError;
+    }
+
+    console.log('✅ Consultation stored with ID:', consultation.id);
 
     // Deduct credit
+    console.log('💳 Deducting 1 credit from user...');
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .update({ credits: profile.credits - 1 })
       .eq('id', userId);
 
-    if (updateError) throw updateError;
+    if (updateError) {
+      console.error('❌ Credit deduction error:', updateError);
+      throw updateError;
+    }
+
+    console.log('✅ Credit deducted. New balance:', profile.credits - 1);
+    console.log('🎉 Consultation completed successfully!');
 
     res.status(201).json({ consultation });
   } catch (error) {

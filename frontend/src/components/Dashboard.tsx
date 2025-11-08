@@ -88,7 +88,17 @@ export function Dashboard() {
         preAnalyzedMarketData: formData.preAnalysisData?.marketData || null,
       };
 
-      console.log('📤 Submitting with pre-analysis:', formData.preAnalysisData ? 'YES ✅' : 'NO - will scrape now');
+      console.log('📤 Submitting consultation request');
+      console.log('📊 Transformed data:', {
+        businessType: transformedData.businessType,
+        offeringType: transformedData.offeringType,
+        experienceLevel: transformedData.experienceLevel,
+        region: transformedData.region,
+        niche: transformedData.niche,
+        preferredCurrency: transformedData.preferredCurrency,
+        usePreAnalyzedData: transformedData.usePreAnalyzedData,
+      });
+      console.log('🔄 Pre-analysis data available:', formData.preAnalysisData ? 'YES ✅' : 'NO - will scrape now');
 
       // Call backend API to generate pricing with DeepSeek
       const response = await fetch(`${API_URL}/api/consultations`, {
