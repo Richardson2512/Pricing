@@ -322,8 +322,8 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
   };
 
   const handleNext = () => {
-    // Determine category after Stage 1 (now has 7 substages: 0-6)
-    if (stage === 1 && substage === 6) {
+    // Determine category after Stage 1 (now has 8 substages: 0-7)
+    if (stage === 1 && substage === 7) {
       const category = determineCategory();
       setFormData({ ...formData, category });
       setStage(2);
@@ -348,7 +348,7 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
       setSubstage(0);
     } else if (stage === 4 && substage < 2) { // Stage 4 now has 3 questions (0-2)
       setSubstage(substage + 1);
-    } else if (stage === 1 && substage < 6) {
+    } else if (stage === 1 && substage < 7) {
       setSubstage(substage + 1);
     }
   };
@@ -358,7 +358,7 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
       setSubstage(substage - 1);
     } else if (stage > 1) {
       setStage(stage - 1);
-      setSubstage(stage === 2 ? 6 : 0);
+      setSubstage(stage === 2 ? 7 : 0); // Stage 1 now has 8 questions (0-7)
     }
   };
 
@@ -381,7 +381,7 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
   };
 
   const getTotalProgress = (): number => {
-    const stage1Questions = 7; // Currency + 6 business context questions
+    const stage1Questions = 8; // Currency + Product/Service + Type + 5 business context questions
     const stage2Questions = getMaxSubstagesForCategory() + 1;
     const stage3Questions = 6;
     const stage4Questions = 3; // Reduced from 4 (currency moved to Stage 1)
@@ -585,104 +585,147 @@ function renderStage1Questions(
           <p className="text-slate-600 mb-6">
             This helps us understand the nature of your offering
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <button
               type="button"
               onClick={() => setFormData({ ...formData, offeringType: 'product' })}
-              className={`p-6 rounded-xl border-2 transition ${
+              className={`p-8 rounded-xl border-2 transition ${
                 formData.offeringType === 'product'
-                  ? 'border-olive-600 bg-olive-50'
+                  ? 'border-olive-600 bg-olive-50 shadow-lg'
                   : 'border-beige-200 hover:border-olive-300'
               }`}
             >
-              <Package className="w-8 h-8 text-olive-600 mx-auto mb-3" />
-              <p className="font-semibold text-slate-800">Product</p>
-              <p className="text-sm text-slate-600 mt-1">Physical or digital goods</p>
+              <Package className="w-12 h-12 text-olive-600 mx-auto mb-4" />
+              <p className="font-bold text-slate-800 text-lg mb-2">Product</p>
+              <p className="text-sm text-slate-600">Something you create, manufacture, or sell</p>
+              <p className="text-xs text-slate-500 mt-2">Examples: Software, Books, Crafts, Electronics, Food</p>
             </button>
             <button
               type="button"
               onClick={() => setFormData({ ...formData, offeringType: 'service' })}
-              className={`p-6 rounded-xl border-2 transition ${
+              className={`p-8 rounded-xl border-2 transition ${
                 formData.offeringType === 'service'
-                  ? 'border-olive-600 bg-olive-50'
+                  ? 'border-olive-600 bg-olive-50 shadow-lg'
                   : 'border-beige-200 hover:border-olive-300'
               }`}
             >
-              <Wrench className="w-8 h-8 text-olive-600 mx-auto mb-3" />
-              <p className="font-semibold text-slate-800">Service</p>
-              <p className="text-sm text-slate-600 mt-1">Work you provide to clients</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, offeringType: 'both' })}
-              className={`p-6 rounded-xl border-2 transition ${
-                formData.offeringType === 'both'
-                  ? 'border-olive-600 bg-olive-50'
-                  : 'border-beige-200 hover:border-olive-300'
-              }`}
-            >
-              <Briefcase className="w-8 h-8 text-olive-600 mx-auto mb-3" />
-              <p className="font-semibold text-slate-800">Both</p>
-              <p className="text-sm text-slate-600 mt-1">Product + Service bundle</p>
+              <Wrench className="w-12 h-12 text-olive-600 mx-auto mb-4" />
+              <p className="font-bold text-slate-800 text-lg mb-2">Service</p>
+              <p className="text-sm text-slate-600">Work or expertise you provide to clients</p>
+              <p className="text-xs text-slate-500 mt-2">Examples: Design, Consulting, Repair, Coaching, Development</p>
             </button>
           </div>
         </div>
       );
 
-    case 1: // Q1.2: Is it physical, digital, or hybrid?
+    case 2: // Q1.2: What TYPE of product/service? (Immediate segregation)
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
-            Is it physical, digital, or hybrid?
+            What type of {formData.offeringType} is it?
           </h3>
           <p className="text-slate-600 mb-6">
-            This determines which markets and platforms we'll analyze
+            This determines which markets and platforms we'll analyze for pricing data
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, medium: 'physical' })}
-              className={`p-6 rounded-xl border-2 transition ${
-                formData.medium === 'physical'
-                  ? 'border-olive-600 bg-olive-50'
-                  : 'border-beige-200 hover:border-olive-300'
-              }`}
-            >
-              <Package className="w-8 h-8 text-olive-600 mx-auto mb-3" />
-              <p className="font-semibold text-slate-800">Physical</p>
-              <p className="text-sm text-slate-600 mt-1">Tangible, shipped items</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, medium: 'digital' })}
-              className={`p-6 rounded-xl border-2 transition ${
-                formData.medium === 'digital'
-                  ? 'border-olive-600 bg-olive-50'
-                  : 'border-beige-200 hover:border-olive-300'
-              }`}
-            >
-              <Monitor className="w-8 h-8 text-olive-600 mx-auto mb-3" />
-              <p className="font-semibold text-slate-800">Digital</p>
-              <p className="text-sm text-slate-600 mt-1">Online, downloadable</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, medium: 'hybrid' })}
-              className={`p-6 rounded-xl border-2 transition ${
-                formData.medium === 'hybrid'
-                  ? 'border-olive-600 bg-olive-50'
-                  : 'border-beige-200 hover:border-olive-300'
-              }`}
-            >
-              <Globe className="w-8 h-8 text-olive-600 mx-auto mb-3" />
-              <p className="font-semibold text-slate-800">Hybrid</p>
-              <p className="text-sm text-slate-600 mt-1">Mix of both</p>
-            </button>
-          </div>
+          
+          {formData.offeringType === 'product' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, medium: 'physical' })}
+                className={`p-8 rounded-xl border-2 transition ${
+                  formData.medium === 'physical'
+                    ? 'border-olive-600 bg-olive-50 shadow-lg'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <Package className="w-12 h-12 text-olive-600 mx-auto mb-4" />
+                <p className="font-bold text-slate-800 text-lg mb-2">Physical Product</p>
+                <p className="text-sm text-slate-600 mb-3">Tangible items that need to be manufactured, stored, and shipped</p>
+                <div className="text-left">
+                  <p className="text-xs text-slate-500 font-semibold mb-1">Examples:</p>
+                  <p className="text-xs text-slate-500">• Handmade crafts, Jewelry, Apparel</p>
+                  <p className="text-xs text-slate-500">• Electronics, Auto parts, Furniture</p>
+                  <p className="text-xs text-slate-500">• Food products, Cosmetics, Toys</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, medium: 'digital' })}
+                className={`p-8 rounded-xl border-2 transition ${
+                  formData.medium === 'digital'
+                    ? 'border-olive-600 bg-olive-50 shadow-lg'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <Monitor className="w-12 h-12 text-olive-600 mx-auto mb-4" />
+                <p className="font-bold text-slate-800 text-lg mb-2">Digital Product</p>
+                <p className="text-sm text-slate-600 mb-3">Downloadable or online products with no physical shipping</p>
+                <div className="text-left">
+                  <p className="text-xs text-slate-500 font-semibold mb-1">Examples:</p>
+                  <p className="text-xs text-slate-500">• Software, Apps, SaaS, Plugins</p>
+                  <p className="text-xs text-slate-500">• Ebooks, Courses, Templates</p>
+                  <p className="text-xs text-slate-500">• Design assets, Stock photos, Music</p>
+                </div>
+              </button>
+            </div>
+          )}
+          
+          {formData.offeringType === 'service' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, medium: 'physical' })}
+                className={`p-8 rounded-xl border-2 transition ${
+                  formData.medium === 'physical'
+                    ? 'border-olive-600 bg-olive-50 shadow-lg'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <Wrench className="w-12 h-12 text-olive-600 mx-auto mb-4" />
+                <p className="font-bold text-slate-800 text-lg mb-2">Physical Service</p>
+                <p className="text-sm text-slate-600 mb-3">On-site work requiring physical presence or travel</p>
+                <div className="text-left">
+                  <p className="text-xs text-slate-500 font-semibold mb-1">Examples:</p>
+                  <p className="text-xs text-slate-500">• Construction, Plumbing, Electrical</p>
+                  <p className="text-xs text-slate-500">• Photography, Event planning, Catering</p>
+                  <p className="text-xs text-slate-500">• Repair, Installation, Delivery</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, medium: 'digital' })}
+                className={`p-8 rounded-xl border-2 transition ${
+                  formData.medium === 'digital'
+                    ? 'border-olive-600 bg-olive-50 shadow-lg'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <Code className="w-12 h-12 text-olive-600 mx-auto mb-4" />
+                <p className="font-bold text-slate-800 text-lg mb-2">Digital Service</p>
+                <p className="text-sm text-slate-600 mb-3">Remote work done online without physical presence</p>
+                <div className="text-left">
+                  <p className="text-xs text-slate-500 font-semibold mb-1">Examples:</p>
+                  <p className="text-xs text-slate-500">• Web/App Development, Design</p>
+                  <p className="text-xs text-slate-500">• Writing, Marketing, Consulting</p>
+                  <p className="text-xs text-slate-500">• Video editing, Data analysis, Coaching</p>
+                </div>
+              </button>
+            </div>
+          )}
+          
+          {formData.medium && (
+            <div className="mt-6 bg-olive-50 border border-olive-200 rounded-lg p-4">
+              <p className="text-sm text-olive-800 flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" />
+                <strong>Detected Category:</strong> {formData.medium.charAt(0).toUpperCase() + formData.medium.slice(1)} {formData.offeringType.charAt(0).toUpperCase() + formData.offeringType.slice(1)}
+              </p>
+            </div>
+          )}
         </div>
       );
 
-    case 2: // Q1.3: Business entity type
+    case 3: // Q1.3: Business entity type
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -717,7 +760,7 @@ function renderStage1Questions(
         </div>
       );
 
-    case 3: // Q1.4: Location and target market
+    case 4: // Q1.4: Location and target market
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -772,7 +815,7 @@ function renderStage1Questions(
         </div>
       );
 
-    case 4: // Q1.5: Pricing strategy
+    case 5: // Q1.5: Pricing strategy
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -825,7 +868,7 @@ function renderStage1Questions(
         </div>
       );
 
-    case 5: // Q1.6: Competitors
+    case 6: // Q1.6: Competitors
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
@@ -874,7 +917,7 @@ function renderStage1Questions(
         </div>
       );
 
-    case 6: // Q1.7: Review and category detection
+    case 7: // Q1.7: Review and category detection
       return (
         <div>
           <h3 className="text-2xl font-bold text-slate-800 mb-4">
