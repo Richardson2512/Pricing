@@ -37,6 +37,12 @@ export function Header() {
               Pricing
             </Link>
             <Link
+              to="/blog"
+              className="text-slate-700 hover:text-olive-600 font-medium transition"
+            >
+              Blog
+            </Link>
+            <Link
               to="/contact"
               className="text-slate-700 hover:text-olive-600 font-medium transition"
             >
@@ -79,6 +85,13 @@ export function Header() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Pricing
+              </Link>
+              <Link
+                to="/blog"
+                className="text-slate-700 hover:text-olive-600 font-medium transition px-2 py-1"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Blog
               </Link>
               <Link
                 to="/contact"
