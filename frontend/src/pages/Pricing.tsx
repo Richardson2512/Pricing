@@ -97,7 +97,7 @@ export function Pricing() {
             {packages.map((pkg, index) => (
               <div
                 key={index}
-                className={`relative bg-white rounded-2xl p-6 border-2 transition hover:shadow-xl ${
+                className={`relative bg-white rounded-2xl p-6 border-2 transition hover:shadow-xl flex flex-col ${
                   pkg.popular
                     ? 'border-olive-500 shadow-lg'
                     : 'border-beige-200 hover:border-olive-300'
@@ -129,7 +129,7 @@ export function Pricing() {
                   </div>
                 </div>
 
-                <ul className="space-y-3 mb-6">
+                <ul className="space-y-3 mb-6 flex-grow">
                   {pkg.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm">
                       <Check className="w-5 h-5 text-olive-600 flex-shrink-0 mt-0.5" />
@@ -140,7 +140,7 @@ export function Pricing() {
 
                 <button
                   onClick={() => navigate('/auth')}
-                  className={`w-full py-3 rounded-lg font-semibold transition ${
+                  className={`w-full py-3 rounded-lg font-semibold transition mt-auto ${
                     pkg.popular
                       ? 'bg-olive-600 text-white hover:bg-olive-700'
                       : pkg.price === 0
