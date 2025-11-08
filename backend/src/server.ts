@@ -15,9 +15,36 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 // Security middleware
 app.use(helmet());
 
-// CORS configuration
+// CORS configuration - support multiple origins for Vercel deployments
+const allowedOrigins = [
+  'http://localhost:5173', // Local development
+  'http://localhost:5174', // Alternative local port
+  FRONTEND_URL, // Production frontend
+];
+
+// Add Vercel preview deployments support
+if (process.env.NODE_ENV === 'production') {
+  allowedOrigins.push(/\.vercel\.app$/); // Allow all Vercel preview URLs
+}
+
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is in allowed list or matches Vercel pattern
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (typeof allowed === 'string') return allowed === origin;
+      if (allowed instanceof RegExp) return allowed.test(origin);
+      return false;
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 

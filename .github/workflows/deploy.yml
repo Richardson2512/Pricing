@@ -1,0 +1,82 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Frontend Build Test
+  frontend-build:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+      
+      - name: Type check
+        working-directory: ./frontend
+        run: npm run typecheck
+      
+      - name: Build
+        working-directory: ./frontend
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
+
+  # Backend Build Test
+  backend-build:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+      
+      - name: Build
+        working-directory: ./backend
+        run: npm run build
+
+  # Deploy notification (optional)
+  deploy-status:
+    name: Deployment Status
+    runs-on: ubuntu-latest
+    needs: [frontend-build, backend-build]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Deployment Success
+        run: |
+          echo "✅ All builds passed!"
+          echo "🚀 Vercel will auto-deploy to production"
+          echo "📦 Frontend: Deploying to Vercel"
+          echo "🔧 Backend: Deploying to Railway/Vercel"
+
