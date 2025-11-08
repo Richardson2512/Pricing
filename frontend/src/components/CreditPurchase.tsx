@@ -34,6 +34,9 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
 
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      console.log('🔄 Creating checkout for', credits, 'credits');
+      console.log('📡 Backend URL:', backendUrl);
+      
       const response = await fetch(`${backendUrl}/api/payments/create-checkout`, {
         method: 'POST',
         headers: {
@@ -44,13 +47,27 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
           userId: user.id,
         }),
       });
+      
+      console.log('📥 Response status:', response.status, response.statusText);
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create checkout');
+        let errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // Response body is empty or not JSON
+          console.error('Empty or invalid error response from backend');
+        }
+        throw new Error(errorMessage);
       }
 
-      const { checkoutUrl } = await response.json();
+      const data = await response.json();
+      const { checkoutUrl } = data;
+      
+      if (!checkoutUrl) {
+        throw new Error('No checkout URL received from backend');
+      }
       
       // Redirect to Dodo Payments checkout
       window.location.href = checkoutUrl;
