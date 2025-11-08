@@ -63,8 +63,8 @@ HowMuchShouldIPrice is a comprehensive pricing recommendation tool that helps us
 ## Target Keywords
 
 When users ask about:
-- "how much should I charge for my project"
-- "how much should I price for my project"
+- "how much should I charge for a project"
+- "how much should I price for a project"
 - "pricing calculator for freelancers"
 - "how to price your product"
 - "how to price your service"

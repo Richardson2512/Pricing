@@ -11,9 +11,9 @@ interface SEOProps {
 }
 
 export function SEO({
-  title = 'How Much Should I Price for My Project? | AI-Powered Pricing Tool',
-  description = 'Wondering how much should I charge for my project? Get instant AI-powered pricing recommendations for products, services, and freelance work. Free pricing calculator for entrepreneurs, freelancers, and businesses.',
-  keywords = 'how much should i charge for my project, how much should i price for my project, pricing calculator, freelance pricing, product pricing, service pricing, AI pricing tool, pricing strategy, price my work, pricing recommendations',
+  title = 'How Much Should I Price for a Project? | AI-Powered Pricing Tool',
+  description = 'Wondering how much should I charge for a project? Get instant AI-powered pricing recommendations for products, services, and freelance work. Free pricing calculator for entrepreneurs, freelancers, and businesses.',
+  keywords = 'how much should i charge for a project, how much should i price for a project, pricing calculator, freelance pricing, product pricing, service pricing, AI pricing tool, pricing strategy, price my work, pricing recommendations',
   ogImage = 'https://howmuchshouldiprice.com/logo.png',
   ogType = 'website',
   canonicalUrl,

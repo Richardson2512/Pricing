@@ -99,7 +99,7 @@ export function Blog() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 flex flex-col">
       <SEO
-        title="Pricing Guides & Resources | How Much Should I Price for My Project?"
+        title="Pricing Guides & Resources | How Much Should I Price for a Project?"
         description="Expert pricing guides for freelancers, entrepreneurs, and businesses. Learn how to price your products, services, and projects with our comprehensive blog articles and pricing strategies."
         keywords="pricing guides, how to price your product, how to price your service, pricing calculator, freelance pricing, pricing strategy"
         canonicalUrl="https://howmuchshouldiprice.com/blog"
