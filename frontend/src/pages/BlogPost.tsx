@@ -134,7 +134,7 @@ export function BlogPost() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 flex flex-col">
+    <div className="min-h-screen bg-[#F5F1E8] flex flex-col">
       <SEO
         title={post.meta_title}
         description={post.meta_description}
@@ -144,49 +144,37 @@ export function BlogPost() {
       />
       <Header />
 
-      <main className="flex-1">
-        {/* Back Button */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-          <button
-            onClick={() => navigate('/blog')}
-            className="flex items-center gap-2 text-olive-600 hover:text-olive-700 font-medium mb-8"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Blog
-          </button>
-        </div>
-
-        {/* Article Header */}
-        <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-          {/* Category Badge */}
-          {post.category && (
-            <Link
-              to={`/blog?category=${post.category.slug}`}
-              className="inline-block px-4 py-2 bg-olive-100 text-olive-700 text-sm font-semibold rounded-full mb-4 hover:bg-olive-200 transition"
+      <main className="flex-1 py-10">
+        <div className="max-w-3xl mx-auto px-6">
+          {/* Breadcrumb */}
+          <div className="mb-8">
+            <button
+              onClick={() => navigate('/blog')}
+              className="text-sm text-slate-600 hover:text-slate-800 transition"
             >
-              {post.category.name}
-            </Link>
-          )}
-
-          {/* Title */}
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6 leading-tight">
-            {post.title}
-          </h1>
-
-          {/* Meta Info */}
-          <div className="flex flex-wrap items-center gap-6 text-slate-600 mb-8 pb-8 border-b border-beige-200">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-olive-600" />
-              <span>{formatDate(post.published_at)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-olive-600" />
-              <span>{post.reading_time_minutes} min read</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">By {post.author_name}</span>
-            </div>
+              ← Back to Articles
+            </button>
           </div>
+
+          {/* Article Header */}
+          <article>
+            {/* Title */}
+            <h1 className="text-3xl font-semibold text-slate-900 mb-3 leading-snug">
+              {post.title}
+            </h1>
+
+            {/* Meta Info */}
+            <p className="text-slate-600 text-sm mb-8">
+              {formatDate(post.published_at)} • {post.reading_time_minutes} min read • Category:{' '}
+              {post.category && (
+                <Link
+                  to={`/blog?category=${post.category.slug}`}
+                  className="font-medium text-slate-800 hover:text-olive-600 transition"
+                >
+                  {post.category.name}
+                </Link>
+              )}
+            </p>
 
           {/* Featured Image */}
           {post.featured_image_url && (
@@ -201,19 +189,20 @@ export function BlogPost() {
 
           {/* Article Content */}
           <div 
-            className="prose prose-lg max-w-none 
-              prose-headings:font-bold prose-headings:text-slate-900 prose-headings:mb-6 prose-headings:mt-10
-              prose-h2:text-3xl prose-h2:leading-tight prose-h2:border-b prose-h2:border-beige-200 prose-h2:pb-3
-              prose-h3:text-2xl prose-h3:leading-snug prose-h3:mt-8 prose-h3:mb-4
-              prose-p:text-slate-700 prose-p:leading-relaxed prose-p:mb-6 prose-p:text-lg
-              prose-a:text-olive-600 prose-a:font-medium prose-a:underline hover:prose-a:text-olive-700
+            className="prose prose-gray max-w-none
+              prose-headings:font-semibold prose-headings:text-slate-900
+              prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
+              prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+              prose-p:text-slate-800 prose-p:text-[17px] prose-p:leading-relaxed prose-p:mb-6
+              prose-a:text-olive-600 prose-a:font-medium hover:prose-a:text-olive-700
               prose-strong:text-slate-900 prose-strong:font-semibold
-              prose-ul:my-6 prose-ul:space-y-3
-              prose-ol:my-6 prose-ol:space-y-3
-              prose-li:text-slate-700 prose-li:leading-relaxed prose-li:text-lg
-              prose-code:bg-beige-100 prose-code:text-olive-700 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-base prose-code:font-mono
-              prose-blockquote:border-l-4 prose-blockquote:border-olive-600 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-slate-600
-              prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8"
+              prose-ul:list-disc prose-ul:ml-6 prose-ul:mt-2 prose-ul:text-slate-700 prose-ul:mb-6
+              prose-ol:list-decimal prose-ol:ml-6 prose-ol:mt-2 prose-ol:text-slate-700 prose-ol:mb-6
+              prose-li:mb-1
+              prose-code:bg-slate-100 prose-code:text-slate-700 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
+              prose-pre:bg-slate-100 prose-pre:rounded-xl prose-pre:p-4 prose-pre:my-6
+              prose-blockquote:border-l-4 prose-blockquote:border-olive-600 prose-blockquote:pl-4 prose-blockquote:italic
+              first:prose-p:text-slate-800 first:prose-p:text-[17px]"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 

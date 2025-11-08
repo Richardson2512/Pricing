@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Blog Post Typography Enhancements */
+/* Blog Post Typography - Clean Minimalist Style */
 .prose {
-  @apply text-slate-700;
+  @apply text-slate-800;
 }
 
 .prose h2 {
@@ -15,35 +15,44 @@
   @apply scroll-mt-20;
 }
 
-/* Better list spacing */
+/* Lists with proper spacing */
+.prose ul,
+.prose ol {
+  @apply my-4;
+}
+
 .prose ul li,
 .prose ol li {
-  @apply mb-2;
+  @apply mb-1;
 }
 
-/* Code blocks */
+/* Code blocks - Light theme */
 .prose pre {
-  @apply bg-slate-900 text-slate-100 rounded-xl p-6 overflow-x-auto my-8;
+  @apply bg-slate-100 text-slate-800 rounded-xl p-4 overflow-x-auto my-6;
 }
 
-/* Inline code */
+/* Inline code - Subtle */
 .prose :not(pre) > code {
-  @apply font-normal;
+  @apply font-normal bg-slate-100 text-slate-700;
 }
 
-/* Links in content */
+/* Links */
 .prose a {
-  @apply transition-colors duration-200;
+  @apply transition-colors duration-200 text-olive-600 font-medium;
 }
 
-/* Blockquotes */
+.prose a:hover {
+  @apply text-olive-700;
+}
+
+/* Blockquotes - Minimal */
 .prose blockquote {
-  @apply my-8 bg-beige-50 rounded-r-xl;
+  @apply my-6 border-l-4 border-olive-600 pl-4 italic text-slate-700;
 }
 
-/* Tables (if used) */
+/* Tables */
 .prose table {
-  @apply border-collapse w-full my-8;
+  @apply border-collapse w-full my-6;
 }
 
 .prose th {
@@ -51,10 +60,10 @@
 }
 
 .prose td {
-  @apply border border-beige-200 p-3;
+  @apply border border-slate-200 p-3;
 }
 
-/* First paragraph larger */
-.prose > p:first-of-type {
-  @apply text-xl leading-relaxed text-slate-600;
+/* Formula/Example boxes */
+.prose div[style*="background"] {
+  @apply rounded-xl;
 }
