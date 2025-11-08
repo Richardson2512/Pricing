@@ -28,6 +28,7 @@ export function Blog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<any[]>([]);
+  const [visiblePosts, setVisiblePosts] = useState(6);
 
   useEffect(() => {
     loadBlogPosts();
@@ -155,7 +156,7 @@ export function Blog() {
       </div>
 
       {/* Blog Posts Grid */}
-      <section className="bg-[#F5F1E8] pb-16 md:pb-24">
+      <section className="bg-[#F5F1E8] pt-8 md:pt-12 pb-16 md:pb-24">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           {loading ? (
             <div className="text-center py-20">
@@ -169,7 +170,7 @@ export function Blog() {
             </div>
           ) : (
             <div className="flex flex-col gap-8 md:gap-12">
-              {/* Mobile: Single column, Desktop: 3 columns */}
+              {/* Row 1 - First 3 posts */}
               <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
                 {filteredPosts.slice(0, 3).map((post) => (
                   <article
@@ -232,8 +233,8 @@ export function Blog() {
                 ))}
               </div>
 
-              {/* Row 2 - Same responsive pattern */}
-              {filteredPosts.length > 3 && (
+              {/* Row 2 - Posts 4-6 */}
+              {filteredPosts.length > 3 && visiblePosts >= 6 && (
                 <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
                   {filteredPosts.slice(3, 6).map((post) => (
                     <article
@@ -285,10 +286,119 @@ export function Blog() {
                 </div>
               )}
 
-              {/* Load More Button - Full width on mobile, centered on desktop */}
-              {filteredPosts.length > 6 && (
+              {/* Row 3 - Posts 7-9 */}
+              {filteredPosts.length > 6 && visiblePosts >= 9 && (
+                <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
+                  {filteredPosts.slice(6, 9).map((post) => (
+                    <article
+                      key={post.id}
+                      className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
+                      onClick={() => navigate(`/blog/${post.slug}`)}
+                    >
+                      <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
+                        {post.featured_image_url ? (
+                          <img
+                            src={post.featured_image_url}
+                            alt={post.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-6xl">📊</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
+                        <div className="flex flex-col gap-3">
+                          {post.category && (
+                            <span className="text-sm font-semibold text-olive-700">
+                              {post.category.name}
+                            </span>
+                          )}
+                          <div className="flex flex-col gap-3">
+                            <h2 className="text-xl md:text-2xl font-semibold text-slate-900 leading-[30px] md:leading-8 line-clamp-2">
+                              {post.title}
+                            </h2>
+                            <p className="text-base text-slate-500 leading-6 line-clamp-3">
+                              {post.excerpt}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm font-medium text-olive-700">
+                              {post.author_name.charAt(0)}
+                            </span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-slate-900">{post.author_name}</span>
+                            <span className="text-sm text-slate-500">{formatDate(post.published_at)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+
+              {/* Row 4 - Posts 10+ */}
+              {filteredPosts.length > 9 && visiblePosts >= 12 && (
+                <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
+                  {filteredPosts.slice(9, visiblePosts).map((post) => (
+                    <article
+                      key={post.id}
+                      className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer rounded-none"
+                      onClick={() => navigate(`/blog/${post.slug}`)}
+                    >
+                      <div className="w-full h-[200px] md:h-60 bg-gradient-to-br from-olive-100 to-beige-100 flex items-center justify-center">
+                        {post.featured_image_url ? (
+                          <img
+                            src={post.featured_image_url}
+                            alt={post.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-6xl">📊</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col justify-between p-6 gap-8 flex-grow">
+                        <div className="flex flex-col gap-3">
+                          {post.category && (
+                            <span className="text-sm font-semibold text-olive-700">
+                              {post.category.name}
+                            </span>
+                          )}
+                          <div className="flex flex-col gap-3">
+                            <h2 className="text-xl md:text-2xl font-semibold text-slate-900 leading-[30px] md:leading-8 line-clamp-2">
+                              {post.title}
+                            </h2>
+                            <p className="text-base text-slate-500 leading-6 line-clamp-3">
+                              {post.excerpt}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-olive-200 flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm font-medium text-olive-700">
+                              {post.author_name.charAt(0)}
+                            </span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-slate-900">{post.author_name}</span>
+                            <span className="text-sm text-slate-500">{formatDate(post.published_at)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+
+              {/* Load More Button */}
+              {filteredPosts.length > visiblePosts && (
                 <div className="flex justify-center w-full">
-                  <button className="flex items-center justify-center gap-2 px-5 py-3 bg-[#F5F1E8] border border-olive-600 rounded-lg shadow-sm hover:bg-beige-100 transition w-full md:w-auto">
+                  <button 
+                    onClick={() => setVisiblePosts(prev => prev + 3)}
+                    className="flex items-center justify-center gap-2 px-5 py-3 bg-[#F5F1E8] border border-olive-600 rounded-lg shadow-sm hover:bg-beige-100 transition w-full md:w-auto"
+                  >
                     <ArrowRight className="w-5 h-5 text-olive-700 rotate-90" />
                     <span className="text-base font-medium text-olive-700">Load more</span>
                   </button>
