@@ -1374,17 +1374,341 @@ function renderDigitalProductQuestions(substage: number, formData: Questionnaire
 // ============================================================================
 
 function renderPhysicalProductQuestions(substage: number, formData: QuestionnaireState, setFormData: any) {
-  // Placeholder for now - will implement next
-  return (
-    <div className="text-center py-12">
-      <h3 className="text-2xl font-bold text-slate-800 mb-4">
-        Physical Product Question {substage + 1}
-      </h3>
-      <p className="text-sm text-slate-500">
-        (Physical product questions will be implemented here)
-      </p>
-    </div>
-  );
+  switch (substage) {
+    case 0: // Q2A.1: Product type
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What type of product is it?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Select the category that best describes your product
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {[
+              'Apparel', 'Food & Beverage', 'Electronics', 'Home Decor', 
+              'Auto Parts', 'Handmade Craft', 'Jewelry', 'Beauty Products',
+              'Furniture', 'Sports Equipment', 'Toys', 'Other'
+            ].map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setFormData({ ...formData, productType: type })}
+                className={`p-4 rounded-xl border-2 text-center transition ${
+                  formData.productType === type
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800 text-sm">{type}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 1: // Q2A.2: Production type
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Is it mass-produced, custom-made, or limited edition?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Production method affects pricing strategy
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { value: 'mass_produced', label: 'Mass-Produced', desc: 'High volume, standardized' },
+              { value: 'custom_made', label: 'Custom-Made', desc: 'Made to order, personalized' },
+              { value: 'limited_edition', label: 'Limited Edition', desc: 'Small batch, exclusive' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, productionType: option.value as any })}
+                className={`p-6 rounded-xl border-2 text-center transition ${
+                  formData.productionType === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">{option.label}</p>
+                <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 2: // Q2A.3: Production volume
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What's your current production volume per month?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            How many units do you produce or can produce monthly?
+          </p>
+          <input
+            type="text"
+            value={formData.productionVolume}
+            onChange={(e) => setFormData({ ...formData, productionVolume: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., 10 units, 100-200 units, 1000+ units, Made on demand"
+          />
+        </div>
+      );
+
+    case 3: // Q2A.4: Raw materials
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What are your raw materials or components?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            List the main materials used to make your product
+          </p>
+          <textarea
+            value={formData.rawMaterials}
+            onChange={(e) => setFormData({ ...formData, rawMaterials: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={4}
+            placeholder="e.g., Cotton fabric, Wood, Electronic components, Leather, Metal parts, Organic ingredients"
+          />
+        </div>
+      );
+
+    case 4: // Q2A.5: Material source
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Where are you sourcing these materials from?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Material sourcing affects cost and quality
+          </p>
+          <input
+            type="text"
+            value={formData.materialSource}
+            onChange={(e) => setFormData({ ...formData, materialSource: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., Local suppliers, China, Alibaba, Wholesale markets, Direct from manufacturers"
+          />
+        </div>
+      );
+
+    case 5: // Q2A.6: Production time
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            How long does it take to make or assemble one unit?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Production time per unit
+          </p>
+          <input
+            type="text"
+            value={formData.productionTime}
+            onChange={(e) => setFormData({ ...formData, productionTime: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., 2 hours, 1 day, 1 week, 30 minutes"
+          />
+        </div>
+      );
+
+    case 6: // Q2A.7: Packaging and shipping
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you handle packaging and shipping yourself or through partners?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Logistics affects your cost structure
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, handlesShipping: true })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                formData.handlesShipping
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">I handle it</p>
+              <p className="text-sm text-slate-600 mt-1">Own packaging & shipping</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, handlesShipping: false })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                !formData.handlesShipping
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">Through partners</p>
+              <p className="text-sm text-slate-600 mt-1">Third-party logistics</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 7: // Q2A.8: Target demographic
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What is your target customer demographic?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Age, gender, profession, location, etc.
+          </p>
+          <input
+            type="text"
+            value={formData.targetDemographic}
+            onChange={(e) => setFormData({ ...formData, targetDemographic: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., Women 25-40, Small business owners, Millennials, Parents, Tech professionals"
+          />
+        </div>
+      );
+
+    case 8: // Q2A.9: Brand
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you have a brand or sell under a marketplace name?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Brand presence affects pricing power
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, hasBrand: true })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                formData.hasBrand
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">Yes, I have a brand</p>
+              <p className="text-sm text-slate-600 mt-1">Established brand identity</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, hasBrand: false })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                !formData.hasBrand
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">No brand yet</p>
+              <p className="text-sm text-slate-600 mt-1">Selling under marketplace</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 9: // Q2A.10: Sales channels
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What are your main sales channels?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Select all platforms where you sell (multiple selection)
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {[
+              'IndiaMART', 'Etsy', 'Amazon', 'Shopify', 'eBay',
+              'Own Website', 'Offline Retail', 'B2B Supply', 
+              'Social Media', 'Wholesale', 'Other'
+            ].map((channel) => (
+              <button
+                key={channel}
+                type="button"
+                onClick={() => {
+                  const current = formData.salesChannels || [];
+                  const updated = current.includes(channel)
+                    ? current.filter(c => c !== channel)
+                    : [...current, channel];
+                  setFormData({ ...formData, salesChannels: updated });
+                }}
+                className={`p-3 rounded-lg border-2 text-center transition text-sm ${
+                  (formData.salesChannels || []).includes(channel)
+                    ? 'border-olive-600 bg-olive-50 font-semibold'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                {channel}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 10: // Q2A.11: Certifications
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Are there any certification or compliance costs?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            E.g., BIS, ISO, Organic, Food Safety, etc.
+          </p>
+          <textarea
+            value={formData.certifications}
+            onChange={(e) => setFormData({ ...formData, certifications: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={3}
+            placeholder="e.g., ISO 9001 certified, Organic certification, BIS approval, or 'None'"
+          />
+        </div>
+      );
+
+    case 11: // Q2A.12: After-sales service
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you provide after-sales service, warranty, or installation?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Additional services add value and cost
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, afterSalesService: true })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                formData.afterSalesService
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">Yes, I provide support</p>
+              <p className="text-sm text-slate-600 mt-1">Warranty, installation, or service</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, afterSalesService: false })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                !formData.afterSalesService
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">No, product only</p>
+              <p className="text-sm text-slate-600 mt-1">Sold as-is</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    default:
+      return <div>Unknown question</div>;
+  }
 }
 
 // ============================================================================
@@ -1392,17 +1716,342 @@ function renderPhysicalProductQuestions(substage: number, formData: Questionnair
 // ============================================================================
 
 function renderDigitalServiceQuestions(substage: number, formData: QuestionnaireState, setFormData: any) {
-  // Placeholder for now
-  return (
-    <div className="text-center py-12">
-      <h3 className="text-2xl font-bold text-slate-800 mb-4">
-        Digital Service Question {substage + 1}
-      </h3>
-      <p className="text-sm text-slate-500">
-        (Digital service questions will be implemented here)
-      </p>
-    </div>
-  );
+  switch (substage) {
+    case 0: // Q2D.1: Service category
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What's your main service category?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Select the primary type of digital service you provide
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { value: 'design', label: 'Design', desc: 'UI/UX, Graphics, Branding' },
+              { value: 'development', label: 'Development', desc: 'Web, Mobile, Software' },
+              { value: 'writing', label: 'Writing', desc: 'Content, Copywriting, Technical' },
+              { value: 'marketing', label: 'Marketing', desc: 'SEO, Ads, Social Media' },
+              { value: 'consulting', label: 'Consulting', desc: 'Strategy, Business, Tech' },
+              { value: 'video', label: 'Video/Audio', desc: 'Editing, Production, Animation' },
+              { value: 'data', label: 'Data/Analytics', desc: 'Analysis, Visualization, BI' },
+              { value: 'other', label: 'Other', desc: 'Specify your service' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, digitalServiceCategory: option.value })}
+                className={`p-4 rounded-xl border-2 text-left transition ${
+                  formData.digitalServiceCategory === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">{option.label}</p>
+                <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 1: // Q2D.2: What does your service do?
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What does your service do?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Describe the work you do for clients in detail
+          </p>
+          <textarea
+            value={formData.deliverables}
+            onChange={(e) => setFormData({ ...formData, deliverables: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={6}
+            placeholder="Example: 'I design custom WordPress websites for small businesses. This includes homepage design, 5-10 inner pages, mobile responsive layouts, contact forms, SEO optimization, and 2 rounds of revisions. I also provide basic training on how to update content.'"
+          />
+        </div>
+      );
+
+    case 2: // Q2D.3: Charge model
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you charge per project, hourly, or retainer?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Select your primary pricing model
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { value: 'project', label: 'Per Project', desc: 'Fixed price per deliverable' },
+              { value: 'hourly', label: 'Hourly Rate', desc: 'Charge by time spent' },
+              { value: 'retainer', label: 'Retainer', desc: 'Monthly recurring fee' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, chargeModel: option.value as any })}
+                className={`p-6 rounded-xl border-2 text-center transition ${
+                  formData.chargeModel === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">{option.label}</p>
+                <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 3: // Q2D.4: Project complexity
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            How complex are your typical projects?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This helps us understand the value and effort involved
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { value: 'basic', label: 'Basic', desc: 'Simple, straightforward work' },
+              { value: 'medium', label: 'Medium', desc: 'Moderate complexity' },
+              { value: 'advanced', label: 'Advanced', desc: 'Complex, specialized work' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, projectComplexity: option.value as any })}
+                className={`p-6 rounded-xl border-2 text-center transition ${
+                  formData.projectComplexity === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">{option.label}</p>
+                <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 4: // Q2D.5: Tools/software used
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What tools or software do you use?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            List the main tools, platforms, or software you use to deliver your service
+          </p>
+          <textarea
+            value={formData.toolsUsed}
+            onChange={(e) => setFormData({ ...formData, toolsUsed: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={4}
+            placeholder="e.g., Figma, Adobe Creative Suite, VS Code, AWS, Webflow, Notion"
+          />
+        </div>
+      );
+
+    case 5: // Q2D.6: Revisions allowed
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            How many revisions do you typically allow?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Number of revision rounds included in your standard package
+          </p>
+          <input
+            type="text"
+            value={formData.revisionsAllowed}
+            onChange={(e) => setFormData({ ...formData, revisionsAllowed: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., 2 rounds, 3 revisions, Unlimited minor changes"
+          />
+        </div>
+      );
+
+    case 6: // Q2D.7: Project timeline
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What's your average project timeline?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            How long does a typical project take from start to delivery?
+          </p>
+          <input
+            type="text"
+            value={formData.projectTimeline}
+            onChange={(e) => setFormData({ ...formData, projectTimeline: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., 2 weeks, 1-2 months, 3-5 days"
+          />
+        </div>
+      );
+
+    case 7: // Q2D.8: Client management
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you handle client communication and management yourself?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This affects the overhead and time commitment
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, handlesClientManagement: true })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                formData.handlesClientManagement
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">Yes, I handle it</p>
+              <p className="text-sm text-slate-600 mt-1">Direct client communication</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, handlesClientManagement: false })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                !formData.handlesClientManagement
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">No, through agency/platform</p>
+              <p className="text-sm text-slate-600 mt-1">Managed by intermediary</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 8: // Q2D.9: Subcontractors
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you subcontract or collaborate with others?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Understanding your team structure helps with cost calculations
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, usesSubcontractors: true })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                formData.usesSubcontractors
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">Yes, I collaborate</p>
+              <p className="text-sm text-slate-600 mt-1">Work with freelancers/partners</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, usesSubcontractors: false })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                !formData.usesSubcontractors
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">No, solo work</p>
+              <p className="text-sm text-slate-600 mt-1">I handle everything myself</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 9: // Q2D.10: Client region
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What region or type of clients do you target?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Geographic or industry focus of your client base
+          </p>
+          <input
+            type="text"
+            value={formData.clientRegion}
+            onChange={(e) => setFormData({ ...formData, clientRegion: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., US startups, European SMBs, Global SaaS companies, Local businesses"
+          />
+        </div>
+      );
+
+    case 10: // Q2D.11: Niche specialization
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you have a niche specialization?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Specialization often commands premium pricing
+          </p>
+          <input
+            type="text"
+            value={formData.nicheSpecialization}
+            onChange={(e) => setFormData({ ...formData, nicheSpecialization: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., SaaS UI design, Legal writing, Fintech apps, E-commerce development"
+          />
+        </div>
+      );
+
+    case 11: // Q2D.12: Have SoW/contracts
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Have you signed or used Statements of Work (SoW) or contracts before?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This helps us understand your professional experience level
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, hasSoW: true })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                formData.hasSoW
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">Yes, regularly</p>
+              <p className="text-sm text-slate-600 mt-1">I use formal contracts</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, hasSoW: false })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                !formData.hasSoW
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">No, informal agreements</p>
+              <p className="text-sm text-slate-600 mt-1">Mostly verbal or simple agreements</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    default:
+      return <div>Unknown question</div>;
+  }
 }
 
 // ============================================================================
@@ -1410,17 +2059,271 @@ function renderDigitalServiceQuestions(substage: number, formData: Questionnaire
 // ============================================================================
 
 function renderPhysicalServiceQuestions(substage: number, formData: QuestionnaireState, setFormData: any) {
-  // Placeholder for now
-  return (
-    <div className="text-center py-12">
-      <h3 className="text-2xl font-bold text-slate-800 mb-4">
-        Physical Service Question {substage + 1}
-      </h3>
-      <p className="text-sm text-slate-500">
-        (Physical service questions will be implemented here)
-      </p>
-    </div>
-  );
+  switch (substage) {
+    case 0: // Q2C.1: Service type
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What service do you provide?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Describe the type of physical service you offer
+          </p>
+          <input
+            type="text"
+            value={formData.serviceType}
+            onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., Construction, Event Planning, Photography, Repair, Delivery, Salon, Plumbing, Electrical"
+          />
+        </div>
+      );
+
+    case 1: // Q2C.2: Operating region
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What's your operating region or coverage radius?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Where do you provide your services?
+          </p>
+          <input
+            type="text"
+            value={formData.operatingRegion}
+            onChange={(e) => setFormData({ ...formData, operatingRegion: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., Within 50km, City-wide, Statewide, Multiple cities"
+          />
+        </div>
+      );
+
+    case 2: // Q2C.3: Pricing model
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you price per hour, per project, or per outcome?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Select your primary pricing structure
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { value: 'hourly', label: 'Per Hour', desc: 'Charge by time' },
+              { value: 'project', label: 'Per Project', desc: 'Fixed project price' },
+              { value: 'outcome', label: 'Per Outcome', desc: 'Based on results' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, pricingModel: option.value as any })}
+                className={`p-6 rounded-xl border-2 text-center transition ${
+                  formData.pricingModel === option.value
+                    ? 'border-olive-600 bg-olive-50'
+                    : 'border-beige-200 hover:border-olive-300'
+                }`}
+              >
+                <p className="font-semibold text-slate-800">{option.label}</p>
+                <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 3: // Q2C.4: Staff count
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            How many people or staff are involved?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Number of people working on each job
+          </p>
+          <input
+            type="text"
+            value={formData.staffCount}
+            onChange={(e) => setFormData({ ...formData, staffCount: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., Just me, 2-3 people, 5-10 team members"
+          />
+        </div>
+      );
+
+    case 4: // Q2C.5: Materials/tools
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you bring your own materials/tools or do clients provide them?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            This affects your cost structure
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, clientProvidesMaterials: false })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                !formData.clientProvidesMaterials
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">I bring everything</p>
+              <p className="text-sm text-slate-600 mt-1">Materials/tools included in price</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, clientProvidesMaterials: true })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                formData.clientProvidesMaterials
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">Client provides</p>
+              <p className="text-sm text-slate-600 mt-1">I only provide labor</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 5: // Q2C.6: Turnaround time
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What is your average turnaround time per job?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            How long does a typical job take to complete?
+          </p>
+          <input
+            type="text"
+            value={formData.turnaroundTime}
+            onChange={(e) => setFormData({ ...formData, turnaroundTime: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
+            placeholder="e.g., Same day, 2-3 days, 1 week, 2-4 weeks"
+          />
+        </div>
+      );
+
+    case 6: // Q2C.7: Travel costs
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Are there travel or logistics costs involved?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Do you need to travel to client locations?
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, travelCosts: true })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                formData.travelCosts
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">Yes, travel required</p>
+              <p className="text-sm text-slate-600 mt-1">I visit client sites</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, travelCosts: false })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                !formData.travelCosts
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">No, fixed location</p>
+              <p className="text-sm text-slate-600 mt-1">Clients come to me or remote</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 7: // Q2C.8: Equipment/depreciation
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you handle equipment depreciation, rentals, or consumables?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Describe any equipment costs or consumables you need to factor in
+          </p>
+          <textarea
+            value={formData.equipmentDepreciation}
+            onChange={(e) => setFormData({ ...formData, equipmentDepreciation: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={4}
+            placeholder="e.g., Camera equipment depreciation, Vehicle maintenance, Tools replacement, Consumables like paint/materials"
+          />
+        </div>
+      );
+
+    case 8: // Q2C.9: Certification/license
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            Do you have certification or licenses for the service?
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Professional certifications can justify premium pricing
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, hasLicense: true })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                formData.hasLicense
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">Yes, certified/licensed</p>
+              <p className="text-sm text-slate-600 mt-1">Professional credentials</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, hasLicense: false })}
+              className={`p-6 rounded-xl border-2 text-center transition ${
+                !formData.hasLicense
+                  ? 'border-olive-600 bg-olive-50'
+                  : 'border-beige-200 hover:border-olive-300'
+              }`}
+            >
+              <p className="font-semibold text-slate-800">No formal certification</p>
+              <p className="text-sm text-slate-600 mt-1">Experience-based</p>
+            </button>
+          </div>
+        </div>
+      );
+
+    case 9: // Q2C.10: Local competitor pricing
+      return (
+        <div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-4">
+            What do competitors charge locally (if known)?
+          </h3>
+          <p className="text-slate-600 mb-4">
+            Any information about local market rates helps us benchmark
+          </p>
+          <textarea
+            value={formData.localCompetitorPricing}
+            onChange={(e) => setFormData({ ...formData, localCompetitorPricing: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500 resize-none"
+            rows={4}
+            placeholder="e.g., Plumbers charge $80-120/hour here, Event planners charge $2000-5000 per event, or 'Not sure'"
+          />
+        </div>
+      );
+
+    default:
+      return <div>Unknown question</div>;
+  }
 }
 
 // ============================================================================
