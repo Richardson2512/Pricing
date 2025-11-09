@@ -8,6 +8,7 @@ import { DocumentUploadFlow } from './DocumentUploadFlow';
 import { CreditPurchase } from './CreditPurchase';
 import { PricingAnalysisResult } from './PricingAnalysisResult';
 import { Footer } from './Footer';
+import { buildApiUrl, fetchWithTimeout, API_CONFIG } from '../config/api';
 
 type View = 'dashboard' | 'intake-selector' | 'questionnaire' | 'document-upload' | 'result';
 
@@ -38,8 +39,8 @@ export function Dashboard() {
     }
   };
 
-  // API endpoint for backend
-  const API_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  // API endpoint for backend (now centralized)
+  const API_URL = API_CONFIG.BACKEND_URL;
 
   const handleQuestionnaireSubmit = async (formData: any) => {
     if (!profile || profile.credits < 1) {

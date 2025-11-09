@@ -306,7 +306,8 @@ export function AnthropologicalQuestionnaire({ onSubmit, loading }: Anthropologi
     
     // Start pre-scraping market data based on Stage 1 answers
     try {
-      const API_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const { API_CONFIG } = await import('../config/api');
+      const API_URL = API_CONFIG.BACKEND_URL;
       
       // Import supabase from lib
       const { supabase } = await import('../lib/supabase');

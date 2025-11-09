@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Coins, X, CreditCard, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { buildApiUrl, API_CONFIG } from '../config/api';
 
 type CreditPackage = {
   credits: number;
@@ -72,17 +73,10 @@ export function CreditPurchase({ onClose }: CreditPurchaseProps) {
     setError(null);
 
     try {
-      let backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-      
-      // Ensure URL has protocol
-      if (!backendUrl.startsWith('http://') && !backendUrl.startsWith('https://')) {
-        backendUrl = `https://${backendUrl}`;
-      }
-      
       console.log('🔄 Creating checkout for', credits, 'credits');
-      console.log('📡 Backend URL:', backendUrl);
+      console.log('📡 Backend URL:', API_CONFIG.BACKEND_URL);
       
-      const response = await fetch(`${backendUrl}/api/payments/create-checkout`, {
+      const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.CREATE_CHECKOUT), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

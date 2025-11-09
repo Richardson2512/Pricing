@@ -5,8 +5,10 @@ dotenv.config();
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
+// Validate API key but don't crash - log warning instead
 if (!DEEPSEEK_API_KEY) {
-  throw new Error('DEEPSEEK_API_KEY is required');
+  console.warn('⚠️ DEEPSEEK_API_KEY not configured - pricing recommendations will fail');
+  console.warn('   Set DEEPSEEK_API_KEY environment variable to enable AI pricing');
 }
 
 // Helper function to calculate market statistics
@@ -56,6 +58,11 @@ export interface PricingInput {
 export async function generatePricingRecommendation(
   input: PricingInput
 ): Promise<string> {
+  // Validate API key at function call time
+  if (!DEEPSEEK_API_KEY) {
+    throw new Error('DeepSeek API key is not configured. Please set DEEPSEEK_API_KEY environment variable.');
+  }
+  
   try {
     // Build comprehensive prompt with all available data
     let prompt = `You are an expert pricing consultant analyzing a ${input.businessType} ${input.offeringType}.

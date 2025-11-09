@@ -5,6 +5,12 @@ dotenv.config();
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
+// Validate API key but don't crash - log warning instead
+if (!DEEPSEEK_API_KEY) {
+  console.warn('⚠️ DEEPSEEK_API_KEY not configured - document parsing will fail');
+  console.warn('   Set DEEPSEEK_API_KEY environment variable to enable document parsing');
+}
+
 export interface ParsedDocument {
   offering_type?: 'product' | 'service';
   domain?: 'digital' | 'physical';
@@ -32,6 +38,11 @@ export interface ParsedDocument {
 }
 
 export async function parseDocument(documentText: string): Promise<ParsedDocument> {
+  // Validate API key at function call time
+  if (!DEEPSEEK_API_KEY) {
+    throw new Error('DeepSeek API key is not configured. Document parsing requires DEEPSEEK_API_KEY environment variable.');
+  }
+  
   try {
     const prompt = `You are a pricing data extraction model. Parse the following business document (SoW, contract, quotation, invoice, RFP, purchase order, or project proposal) and extract all relevant information for pricing analysis.
 
