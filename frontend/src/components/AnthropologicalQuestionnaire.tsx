@@ -20,6 +20,7 @@ import {
   Award,
   FileText,
 } from 'lucide-react';
+import { LocationAutocomplete } from './LocationAutocomplete';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -866,13 +867,22 @@ function renderStage1Questions(
                   Your Location (City, Country)
                 </div>
               </label>
-              <input
-                type="text"
+              <LocationAutocomplete
                 value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-olive-500"
-                placeholder="e.g., Mumbai, India"
+                onChange={(value, coordinates) => {
+                  setFormData({ 
+                    ...formData, 
+                    location: value,
+                    // Optionally store coordinates for future use
+                    ...(coordinates && { locationCoordinates: coordinates })
+                  });
+                }}
+                placeholder="e.g., Mumbai, India or New York, USA"
+                required={false}
               />
+              <p className="mt-2 text-xs text-slate-500">
+                💡 Start typing your city or country name to see suggestions
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-3">
