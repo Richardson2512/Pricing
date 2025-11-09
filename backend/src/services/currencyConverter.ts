@@ -179,7 +179,10 @@ async function fetchFromCurrencyService(service: string, baseCurrency: string): 
   switch (service) {
     case 'frankfurter':
       const frankfurterUrl = `https://api.frankfurter.app/latest?from=${baseCurrency}`;
-      const frankfurterRes = await fetch(frankfurterUrl, { timeout: 5000 } as any);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const frankfurterRes = await fetch(frankfurterUrl, { signal: controller.signal });
+      clearTimeout(timeout);
       const frankfurterData = await frankfurterRes.json() as any;
       if (frankfurterData && frankfurterData.rates) {
         return {
@@ -192,7 +195,10 @@ async function fetchFromCurrencyService(service: string, baseCurrency: string): 
 
     case 'exchangerate-api':
       const exchangerateUrl = `https://api.exchangerate-api.com/v4/latest/${baseCurrency}`;
-      const exchangerateRes = await fetch(exchangerateUrl, { timeout: 5000 } as any);
+      const controller2 = new AbortController();
+      const timeout2 = setTimeout(() => controller2.abort(), 5000);
+      const exchangerateRes = await fetch(exchangerateUrl, { signal: controller2.signal });
+      clearTimeout(timeout2);
       const exchangerateData = await exchangerateRes.json() as any;
       if (exchangerateData && exchangerateData.rates) {
         return {
@@ -205,7 +211,10 @@ async function fetchFromCurrencyService(service: string, baseCurrency: string): 
 
     case 'exchangerate-host':
       const hostUrl = `https://api.exchangerate.host/latest?base=${baseCurrency}`;
-      const hostRes = await fetch(hostUrl, { timeout: 5000 } as any);
+      const controller3 = new AbortController();
+      const timeout3 = setTimeout(() => controller3.abort(), 5000);
+      const hostRes = await fetch(hostUrl, { signal: controller3.signal });
+      clearTimeout(timeout3);
       const hostData = await hostRes.json() as any;
       if (hostData && hostData.rates) {
         return {
@@ -219,7 +228,10 @@ async function fetchFromCurrencyService(service: string, baseCurrency: string): 
     case 'fixer':
       const fixerKey = process.env.FIXER_API_KEY;
       const fixerUrl = `http://data.fixer.io/api/latest?access_key=${fixerKey}&base=${baseCurrency}`;
-      const fixerRes = await fetch(fixerUrl, { timeout: 5000 } as any);
+      const controller4 = new AbortController();
+      const timeout4 = setTimeout(() => controller4.abort(), 5000);
+      const fixerRes = await fetch(fixerUrl, { signal: controller4.signal });
+      clearTimeout(timeout4);
       const fixerData = await fixerRes.json() as any;
       if (fixerData && fixerData.rates) {
         return {

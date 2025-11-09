@@ -7,6 +7,7 @@ import consultationsRouter from './routes/consultations.js';
 import creditsRouter from './routes/credits.js';
 import paymentsRouter from './routes/payments.js';
 import { logStartupStatus } from './services/startupValidation.js';
+import { logger } from './services/logger.js';
 
 dotenv.config();
 
@@ -106,6 +107,9 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🌍 Listening on 0.0.0.0:${PORT}`);
   console.log(`✅ Server is ready to accept connections`);
   
+  // Log startup to database
+  logger.systemStartup(PORT, process.env.NODE_ENV || 'development');
+  
   // Keep-alive logging to prevent Railway from thinking the app is idle
   setInterval(() => {
     console.log(`💓 Server heartbeat - ${new Date().toISOString()}`);
@@ -118,6 +122,7 @@ process.on('SIGTERM', () => {
   console.log('📊 Server uptime:', process.uptime(), 'seconds');
   console.log('📊 Memory usage:', process.memoryUsage());
   console.log('🔍 This should NOT happen immediately after start!');
+  logger.systemShutdown('SIGTERM received');
   
   // Don't exit immediately - log and wait
   console.log('⏳ Waiting 5 seconds before shutdown...');
@@ -144,6 +149,7 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
   console.log('⚠️ SIGINT received, shutting down gracefully...');
+  logger.systemShutdown('SIGINT received');
   
   const forceExitTimer = setTimeout(() => {
     console.error('❌ Graceful shutdown timeout, forcing exit');
@@ -162,11 +168,13 @@ process.on('SIGINT', () => {
 // Handle uncaught errors
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error);
+  logger.systemError(error.message, error.stack);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.systemError(`Unhandled rejection: ${reason}`);
   process.exit(1);
 });
 

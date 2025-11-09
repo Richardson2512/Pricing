@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import { supabaseAdmin } from '../config/supabase.js';
 import { createCheckoutSession, getProductIdForCredits, processPaymentWebhook, verifyWebhookSignature } from '../services/dodoPayments.js';
+import { logger } from '../services/logger.js';
 
 const router = Router();
 
@@ -19,9 +20,13 @@ router.post('/create-checkout', async (req, res) => {
   try {
     const { credits, userId } = req.body;
 
+    // Log payment attempt
+    logger.paymentAttempt(userId, credits, CREDIT_PACKAGES.find(pkg => pkg.credits === credits)?.price || 0);
+
     // Validate package
     const selectedPackage = CREDIT_PACKAGES.find(pkg => pkg.credits === credits);
     if (!selectedPackage) {
+      logger.paymentFailed(userId, 'unknown', 'invalid_package', 'Invalid credit package selected');
       return res.status(400).json({ error: 'Invalid credit package' });
     }
 
@@ -99,6 +104,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
     if (!isValid) {
       console.error('❌ Invalid webhook signature');
+      logger.paymentFailed('unknown', webhookId || 'unknown', 'invalid_signature', 'Webhook signature verification failed');
       return res.status(401).json({ error: 'Invalid webhook signature' });
     }
 
@@ -133,6 +139,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
     if (result && result.credits) {
       console.log('💳 Processing credit addition for user:', result.userId);
+      logger.paymentSuccess(result.userId, result.paymentId, result.credits, result.amount);
       
       // Update user credits in database
       const { data: profile, error: profileError } = await supabaseAdmin

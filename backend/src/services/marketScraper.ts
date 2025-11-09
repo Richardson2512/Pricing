@@ -1,6 +1,7 @@
 // Market data scraping service
-// In production, this would use Scrapy/Playwright for real scraping
-// For now, we'll provide mock data structure and API endpoints
+// Integrates with Python scraper service on Render
+
+const SCRAPER_URL = process.env.SCRAPER_SERVICE_URL || process.env.RENDER_SCRAPER_URL;
 
 export interface MarketListing {
   source: string;
@@ -16,6 +17,7 @@ interface ScrapingConfig {
   businessType: 'digital' | 'physical';
   offeringType: 'product' | 'service';
   region: string;
+  query?: string;
   niche?: string;
   sources?: string[];
 }
@@ -38,25 +40,71 @@ export function getRelevantPlatforms(config: ScrapingConfig): string[] {
 
 /**
  * Scrape market data from relevant platforms
- * Integrates with Python Scrapy spiders via subprocess or API
+ * Calls Python scraper service on Render
  */
 export async function scrapeMarketData(config: ScrapingConfig): Promise<MarketListing[]> {
   try {
-    // In production, trigger Python scraping workflow:
-    // Option 1: Call Python API connector
-    // Option 2: Use child_process to run scrapy spiders
-    // Option 3: Use message queue (Redis/RabbitMQ)
+    // Step 1: Try calling scraper service if configured
+    if (SCRAPER_URL) {
+      console.log(`🔄 Calling scraper service: ${SCRAPER_URL}`);
+      
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+        
+        const response = await fetch(`${SCRAPER_URL}/scrape`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            business_type: config.businessType,
+            offering_type: config.offeringType,
+            query: config.query || config.offeringType,
+            region: config.region || 'global',
+            use_cache: true, // Use cached data if available
+            max_age_hours: 24,
+          }),
+        });
+        
+        clearTimeout(timeout);
+        
+        if (response.ok) {
+          const result: any = await response.json();
+          console.log(`✅ Scraper returned ${result.count} listings`);
+          
+          if (result.data && result.data.length > 0) {
+            return result.data.map((item: any) => ({
+              source: item.source || 'Unknown',
+              title: item.title || '',
+              price: Number(item.price) || 0,
+              currency: item.currency || 'USD',
+              rating: item.rating ? Number(item.rating) : undefined,
+              reviews: item.reviews || undefined,
+              delivery: item.delivery_time || undefined,
+            }));
+          }
+        } else {
+          console.warn(`⚠️ Scraper service returned ${response.status}`);
+        }
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          console.warn('⏱️ Scraper service timeout (30s)');
+        } else {
+          console.warn('⚠️ Scraper service unavailable:', error.message);
+        }
+      }
+    } else {
+      console.log('ℹ️ RENDER_SCRAPER_URL not configured, using cached/mock data');
+    }
     
-    // For now, fetch from Supabase (assuming scrapers have run)
+    // Step 2: Fallback - Check Supabase for cached data
     const { createClient } = await import('@supabase/supabase-js');
     const supabaseUrl = process.env.SUPABASE_URL!;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // Build query based on business type
     const query = `${config.offeringType}`;
     
-    // Fetch recent market data from Supabase
     const { data, error } = await supabase
       .from('market_listings')
       .select('*')
@@ -64,14 +112,8 @@ export async function scrapeMarketData(config: ScrapingConfig): Promise<MarketLi
       .gte('scraped_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       .limit(50);
     
-    if (error) {
-      console.error('Error fetching market data:', error);
-      // Fallback to mock data
-      return generateMockData(config);
-    }
-    
     if (data && data.length > 0) {
-      console.log(`Found ${data.length} market listings from database`);
+      console.log(`✅ Found ${data.length} cached listings from Supabase`);
       return data.map(item => ({
         source: item.source,
         title: item.title,
@@ -83,12 +125,12 @@ export async function scrapeMarketData(config: ScrapingConfig): Promise<MarketLi
       }));
     }
     
-    // No data found, use mock data
-    console.log('No market data found, using mock data');
+    // Step 3: Final fallback - Use mock data
+    console.log('⚠️ No market data available, using mock data');
     return generateMockData(config);
     
   } catch (error) {
-    console.error('Error in scrapeMarketData:', error);
+    console.error('❌ Error in scrapeMarketData:', error);
     return generateMockData(config);
   }
 }

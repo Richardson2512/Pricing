@@ -142,7 +142,10 @@ async function geocodeWithService(service: string, location: string): Promise<{ 
   switch (service) {
     case 'photon':
       const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(location)}&limit=1`;
-      const photonRes = await fetch(photonUrl, { timeout: 5000 } as any);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const photonRes = await fetch(photonUrl, { signal: controller.signal });
+      clearTimeout(timeout);
       const photonData = await photonRes.json() as any;
       if (photonData.features && photonData.features.length > 0) {
         const coords = photonData.features[0].geometry.coordinates;
@@ -153,7 +156,10 @@ async function geocodeWithService(service: string, location: string): Promise<{ 
     case 'locationiq':
       const locationiqKey = process.env.LOCATIONIQ_API_KEY;
       const locationiqUrl = `https://us1.locationiq.com/v1/search.php?key=${locationiqKey}&q=${encodeURIComponent(location)}&format=json&limit=1`;
-      const locationiqRes = await fetch(locationiqUrl, { timeout: 5000 } as any);
+      const controller2 = new AbortController();
+      const timeout2 = setTimeout(() => controller2.abort(), 5000);
+      const locationiqRes = await fetch(locationiqUrl, { signal: controller2.signal });
+      clearTimeout(timeout2);
       const locationiqData = await locationiqRes.json() as any[];
       if (locationiqData && locationiqData.length > 0) {
         return { lat: parseFloat(locationiqData[0].lat), lon: parseFloat(locationiqData[0].lon) };
@@ -163,7 +169,10 @@ async function geocodeWithService(service: string, location: string): Promise<{ 
     case 'opencage':
       const opencageKey = process.env.OPENCAGE_API_KEY;
       const opencageUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=${opencageKey}&limit=1`;
-      const opencageRes = await fetch(opencageUrl, { timeout: 5000 } as any);
+      const controller3 = new AbortController();
+      const timeout3 = setTimeout(() => controller3.abort(), 5000);
+      const opencageRes = await fetch(opencageUrl, { signal: controller3.signal });
+      clearTimeout(timeout3);
       const opencageData = await opencageRes.json() as any;
       if (opencageData.results && opencageData.results.length > 0) {
         return { lat: opencageData.results[0].geometry.lat, lon: opencageData.results[0].geometry.lng };
@@ -172,10 +181,13 @@ async function geocodeWithService(service: string, location: string): Promise<{ 
 
     case 'nominatim':
       const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`;
+      const controller4 = new AbortController();
+      const timeout4 = setTimeout(() => controller4.abort(), 5000);
       const nominatimRes = await fetch(nominatimUrl, {
         headers: { 'User-Agent': 'PriceWise-App/1.0' },
-        timeout: 5000,
-      } as any);
+        signal: controller4.signal,
+      });
+      clearTimeout(timeout4);
       const nominatimData = await nominatimRes.json() as any[];
       if (nominatimData && nominatimData.length > 0) {
         return { lat: parseFloat(nominatimData[0].lat), lon: parseFloat(nominatimData[0].lon) };
@@ -274,7 +286,10 @@ async function routeWithService(
   switch (service) {
     case 'osrm':
       const osrmUrl = `http://router.project-osrm.org/route/v1/${mode}/${originCoords.lon},${originCoords.lat};${destCoords.lon},${destCoords.lat}?overview=false`;
-      const osrmRes = await fetch(osrmUrl, { timeout: 5000 } as any);
+      const controller5 = new AbortController();
+      const timeout5 = setTimeout(() => controller5.abort(), 5000);
+      const osrmRes = await fetch(osrmUrl, { signal: controller5.signal });
+      clearTimeout(timeout5);
       const osrmData = await osrmRes.json() as any;
       if (osrmData.routes && osrmData.routes.length > 0) {
         const route = osrmData.routes[0];
