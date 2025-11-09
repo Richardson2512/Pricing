@@ -1785,24 +1785,55 @@ function renderDigitalServiceQuestions(substage: number, formData: Questionnaire
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { value: 'project', label: 'Per Project', desc: 'Fixed price per deliverable' },
-              { value: 'hourly', label: 'Hourly Rate', desc: 'Charge by time spent' },
-              { value: 'retainer', label: 'Retainer', desc: 'Monthly recurring fee' },
+              { 
+                value: 'project', 
+                label: 'Per Project', 
+                desc: 'Fixed price per deliverable',
+                badge: '⭐ Most Popular',
+                detail: 'Preferred by 70% of freelancers'
+              },
+              { 
+                value: 'hourly', 
+                label: 'Hourly Rate', 
+                desc: 'Charge by time spent',
+                badge: null,
+                detail: 'Good for: Unclear scope, consulting'
+              },
+              { 
+                value: 'retainer', 
+                label: 'Retainer', 
+                desc: 'Monthly recurring fee',
+                badge: '💰 Best Income',
+                detail: 'Stable revenue, long-term clients'
+              },
             ].map((option) => (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => setFormData({ ...formData, chargeModel: option.value as any })}
-                className={`p-6 rounded-xl border-2 text-center transition ${
+                className={`p-6 rounded-xl border-2 text-center transition relative ${
                   formData.chargeModel === option.value
                     ? 'border-olive-600 bg-olive-50'
                     : 'border-beige-200 hover:border-olive-300'
                 }`}
               >
+                {option.badge && (
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                    <span className="bg-olive-600 text-white text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">
+                      {option.badge}
+                    </span>
+                  </div>
+                )}
                 <p className="font-semibold text-slate-800">{option.label}</p>
                 <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+                <p className="text-xs text-slate-500 mt-2">{option.detail}</p>
               </button>
             ))}
+          </div>
+          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              💡 <strong>Recommendation:</strong> Per-project pricing is most common for digital services (design, development, writing) as clients prefer knowing the total cost upfront. Retainers work best for ongoing relationships, while hourly is ideal when scope is unclear.
+            </p>
           </div>
         </div>
       );
@@ -2109,24 +2140,55 @@ function renderPhysicalServiceQuestions(substage: number, formData: Questionnair
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { value: 'hourly', label: 'Per Hour', desc: 'Charge by time' },
-              { value: 'project', label: 'Per Project', desc: 'Fixed project price' },
-              { value: 'outcome', label: 'Per Outcome', desc: 'Based on results' },
+              { 
+                value: 'hourly', 
+                label: 'Per Hour', 
+                desc: 'Charge by time',
+                badge: null,
+                detail: 'Good for: Unpredictable scope, ongoing work'
+              },
+              { 
+                value: 'project', 
+                label: 'Per Project', 
+                desc: 'Fixed project price',
+                badge: '⭐ Most Popular',
+                detail: 'Preferred by 65% of service providers'
+              },
+              { 
+                value: 'outcome', 
+                label: 'Per Outcome', 
+                desc: 'Based on results',
+                badge: '💎 Premium',
+                detail: 'Best for: High-value, measurable results'
+              },
             ].map((option) => (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => setFormData({ ...formData, pricingModel: option.value as any })}
-                className={`p-6 rounded-xl border-2 text-center transition ${
+                className={`p-6 rounded-xl border-2 text-center transition relative ${
                   formData.pricingModel === option.value
                     ? 'border-olive-600 bg-olive-50'
                     : 'border-beige-200 hover:border-olive-300'
                 }`}
               >
+                {option.badge && (
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                    <span className="bg-olive-600 text-white text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">
+                      {option.badge}
+                    </span>
+                  </div>
+                )}
                 <p className="font-semibold text-slate-800">{option.label}</p>
                 <p className="text-sm text-slate-600 mt-1">{option.desc}</p>
+                <p className="text-xs text-slate-500 mt-2">{option.detail}</p>
               </button>
             ))}
+          </div>
+          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              💡 <strong>Recommendation:</strong> Per-project pricing is most popular for physical services as it provides clarity for both you and your clients. Hourly works well when scope is uncertain, while outcome-based pricing commands premium rates for measurable results.
+            </p>
           </div>
         </div>
       );
