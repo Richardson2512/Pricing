@@ -335,12 +335,16 @@ Analyze the business type and provide appropriate pricing structure:
 
 Your response must be actionable and specific enough that the user can implement pricing IMMEDIATELY.`;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120000); // 2 minute timeout for AI
+
     const response = await fetch(DEEPSEEK_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
       },
+      signal: controller.signal,
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
@@ -358,6 +362,8 @@ Your response must be actionable and specific enough that the user can implement
       }),
     });
 
+    clearTimeout(timeout);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('DeepSeek API error:', errorData);
@@ -371,7 +377,11 @@ Your response must be actionable and specific enough that the user can implement
     }
 
     return data.choices[0].message.content;
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      console.error('DeepSeek API timeout after 2 minutes');
+      throw new Error('AI pricing analysis timeout. Please try again.');
+    }
     console.error('Error calling DeepSeek API:', error);
     
     // Fallback to basic recommendation if API fails

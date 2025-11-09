@@ -86,12 +86,16 @@ Rules:
 - Return valid JSON only`;
 
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000); // 1 minute timeout
+
     const response = await fetch(DEEPSEEK_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
       },
+      signal: controller.signal,
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
@@ -108,6 +112,8 @@ Rules:
         max_tokens: 2000,
       }),
     });
+
+    clearTimeout(timeout);
 
     if (!response.ok) {
       console.error('DeepSeek API error for document parsing');
@@ -128,7 +134,11 @@ Rules:
     }
 
     return {};
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      console.error('Document parsing timeout after 1 minute');
+      return {};
+    }
     console.error('Error parsing document:', error);
     return {};
   }

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Dashboard } from './components/Dashboard';
 import { Landing } from './pages/Landing';
 import { Pricing } from './pages/Pricing';
@@ -30,10 +31,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <HelmetProvider>
-      <AuthProvider>
-        <Router>
-        <Routes>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <AuthProvider>
+          <Router>
+          <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/blog" element={<Blog />} />
@@ -50,10 +52,11 @@ function App() {
               </ProtectedRoute>
             }
           />
-        </Routes>
-        </Router>
-      </AuthProvider>
-    </HelmetProvider>
+          </Routes>
+          </Router>
+        </AuthProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
   );
 }
 
