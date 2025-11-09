@@ -1,0 +1,58 @@
+name: Keep Render Service Alive
+
+# Run every 10 minutes to prevent Render free tier from sleeping
+on:
+  schedule:
+    # Runs every 10 minutes
+    - cron: '*/10 * * * *'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  ping-render:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ping Render Scraper Service
+        run: |
+          echo "🔄 Pinging Render service at $(date)"
+          
+          RENDER_URL="${{ secrets.RENDER_SCRAPER_URL }}"
+          
+          if [ -z "$RENDER_URL" ]; then
+            echo "⚠️ RENDER_SCRAPER_URL secret not set, using default"
+            RENDER_URL="https://your-scraper-service.onrender.com"
+          fi
+          
+          echo "📡 Target: $RENDER_URL/health"
+          
+          # Ping with timeout
+          RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 30 "$RENDER_URL/health" || echo "FAILED")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Ping successful (HTTP $HTTP_CODE)"
+            echo "📊 Response: $BODY"
+          elif [ "$RESPONSE" = "FAILED" ]; then
+            echo "❌ Ping failed (connection error)"
+            exit 1
+          else
+            echo "⚠️ Ping returned HTTP $HTTP_CODE"
+            echo "📊 Response: $BODY"
+            exit 1
+          fi
+      
+      - name: Log Success
+        if: success()
+        run: |
+          echo "✅ Render service is alive and responding"
+          echo "⏰ Next ping in 10 minutes"
+      
+      - name: Log Failure
+        if: failure()
+        run: |
+          echo "❌ Render service ping failed"
+          echo "🔔 Check Render dashboard for issues"
+
