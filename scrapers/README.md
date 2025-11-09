@@ -61,6 +61,8 @@ scrapers/
 │       └── indiamart_spider.py  # Physical products/services
 ├── workflows/
 │   └── scraping_flow.py         # Prefect orchestration
+├── keep-alive.js                # Keep Render service awake
+├── cron-keep-alive.js           # Cron-based keep-alive
 ├── requirements.txt             # Python dependencies
 ├── scrapy.cfg                   # Scrapy project config
 ├── .env.example
@@ -327,6 +329,26 @@ async function triggerScraping(config) {
 - Consider using official APIs where available
 - Respect rate limits and robots.txt
 - Store data securely and comply with privacy laws
+
+## Keeping Render Service Alive
+
+Render free tier services sleep after 15 minutes of inactivity. To prevent this:
+
+### Option 1: GitHub Actions (Recommended)
+See `../.github/workflows/keep-render-alive.yml` - runs automatically every 10 minutes.
+
+### Option 2: Local Script
+```bash
+node keep-alive.js
+```
+
+### Option 3: Cron Script
+```bash
+npm install node-cron
+node cron-keep-alive.js
+```
+
+**[📖 Complete Keep-Alive Guide →](../docs/KEEP_RENDER_ALIVE.md)**
 
 ## Maintenance
 

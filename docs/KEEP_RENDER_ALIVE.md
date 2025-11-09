@@ -67,17 +67,17 @@ Keep the service alive by pinging it regularly (every 10 minutes).
 
 2. **Run the script:**
    ```bash
-   node scripts/keep-render-alive.js
+   node scrapers/keep-alive.js
    ```
 
 3. **Run in background (Mac/Linux):**
    ```bash
-   nohup node scripts/keep-render-alive.js > logs/render-pinger.log 2>&1 &
+   nohup node scrapers/keep-alive.js > logs/render-pinger.log 2>&1 &
    ```
 
 4. **Run in background (Windows):**
    ```powershell
-   Start-Process node -ArgumentList "scripts/keep-render-alive.js" -WindowStyle Hidden
+   Start-Process node -ArgumentList "scrapers/keep-alive.js" -WindowStyle Hidden
    ```
 
 **Stop the script:**
@@ -110,7 +110,7 @@ Keep the service alive by pinging it regularly (every 10 minutes).
 
 3. **Run the script:**
    ```bash
-   node scripts/cron-ping-render.js
+   node scrapers/cron-keep-alive.js
    ```
 
 ---
@@ -176,7 +176,7 @@ Keep the service alive by pinging it regularly (every 10 minutes).
 
 ### **Test Local Script:**
 ```bash
-node scripts/keep-render-alive.js
+node scrapers/keep-alive.js
 ```
 
 Expected output:
