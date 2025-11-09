@@ -62,7 +62,7 @@ export function Header() {
               onClick={handleGetStarted}
               className="px-6 py-2 bg-olive-600 text-white rounded-lg hover:bg-olive-700 transition font-medium"
             >
-              Get Started
+              {user ? 'Dashboard' : 'Get Started'}
             </button>
           </div>
 
@@ -118,7 +118,7 @@ export function Header() {
                 }}
                 className="px-6 py-2 bg-olive-600 text-white rounded-lg hover:bg-olive-700 transition font-medium text-left"
               >
-                Get Started
+                {user ? 'Dashboard' : 'Get Started'}
               </button>
             </div>
           </div>
