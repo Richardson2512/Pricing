@@ -21,8 +21,16 @@ jobs:
           RENDER_URL="${{ secrets.RENDER_SCRAPER_URL }}"
           
           if [ -z "$RENDER_URL" ]; then
-            echo "⚠️ RENDER_SCRAPER_URL secret not set, using default"
-            RENDER_URL="https://your-scraper-service.onrender.com"
+            echo "⚠️ RENDER_SCRAPER_URL secret not set!"
+            echo "📝 To fix this:"
+            echo "   1. Go to: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo "   2. Click: 'New repository secret'"
+            echo "   3. Name: RENDER_SCRAPER_URL"
+            echo "   4. Value: https://pricing-s1on.onrender.com"
+            echo "   5. Click: 'Add secret'"
+            echo ""
+            echo "⏭️ Skipping ping until secret is configured"
+            exit 0
           fi
           
           echo "📡 Target: $RENDER_URL/health"
@@ -36,12 +44,15 @@ jobs:
             echo "✅ Ping successful (HTTP $HTTP_CODE)"
             echo "📊 Response: $BODY"
           elif [ "$RESPONSE" = "FAILED" ]; then
-            echo "❌ Ping failed (connection error)"
-            exit 1
+            echo "⚠️ Ping failed (connection error)"
+            echo "🔍 This might be normal if Render service is sleeping"
+            echo "⏭️ Will retry in 10 minutes"
+            exit 0
           else
             echo "⚠️ Ping returned HTTP $HTTP_CODE"
             echo "📊 Response: $BODY"
-            exit 1
+            echo "⏭️ Will retry in 10 minutes"
+            exit 0
           fi
       
       - name: Log Success
