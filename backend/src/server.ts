@@ -21,28 +21,54 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 // Security middleware
 app.use(helmet());
 
-// CORS configuration - Allow all production domains
+// CORS configuration - allow specific production domains
 const allowedOrigins = [
-  'http://localhost:5173', // Local development
-  'http://localhost:5174', // Alternative local port
-  'https://howmuchshouldiprice.com', // Production (non-www)
-  'https://www.howmuchshouldiprice.com', // Production (www)
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://howmuchshouldiprice.com',
+  'https://www.howmuchshouldiprice.com',
+  // Railway preview URLs (optional wildcards are not supported directly, add known domains if needed)
 ];
 
-// Simple CORS - allow all origins for now to debug
-app.use(cors({
-  origin: true, // Allow all origins temporarily
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow server-to-server or tools with no Origin
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Length', 'X-Request-Id'],
-  maxAge: 86400, // 24 hours
+  maxAge: 86400,
   preflightContinue: false,
   optionsSuccessStatus: 204,
-}));
+};
 
-console.log('✅ CORS enabled for ALL ORIGINS (debug mode)');
-console.log('📋 Intended origins:', allowedOrigins);
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+// Ensure preflight responses include headers
+app.use((req, res, next) => {
+  const requestOrigin = req.headers.origin as string | undefined;
+  if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+    res.header('Access-Control-Allow-Origin', requestOrigin);
+    res.header('Vary', 'Origin');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  }
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
+console.log('✅ CORS enabled for allowed origins');
+console.log('📋 Allowed origins:', allowedOrigins);
 
 // Rate limiting
 const limiter = rateLimit({
