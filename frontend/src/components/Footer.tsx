@@ -66,11 +66,7 @@ export function Footer() {
                   Privacy Policy
                 </Link>
               </li>
-              <li>
-                <Link to="/terms#refund" className="text-sm hover:text-olive-400 transition">
-                  Refund Policy
-                </Link>
-              </li>
+              
             </ul>
           </div>
 

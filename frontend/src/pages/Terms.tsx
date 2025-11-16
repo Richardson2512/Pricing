@@ -41,15 +41,7 @@ export function Terms() {
               <h3 className="font-semibold text-slate-800">Privacy Policy</h3>
             </a>
 
-            <a
-              href="#refund"
-              className="bg-white rounded-xl p-6 border border-beige-200 hover:shadow-lg transition text-center"
-            >
-              <div className="bg-olive-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <RefreshCw className="w-6 h-6 text-olive-600" />
-              </div>
-              <h3 className="font-semibold text-slate-800">Refund Policy</h3>
-            </a>
+            
           </div>
 
           {/* Terms & Conditions */}
@@ -176,75 +168,13 @@ export function Terms() {
             </div>
           </section>
 
-          {/* Refund Policy */}
-          <section id="refund" className="bg-white rounded-xl p-8 border border-beige-200 mb-8">
-            <h2 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
-              <RefreshCw className="w-8 h-8 text-olive-600" />
-              Refund Policy
-            </h2>
-
-            <div className="prose prose-slate max-w-none space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-3">30-Day Money-Back Guarantee</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  We offer a 30-day money-back guarantee on all credit purchases. If you're not satisfied with our service, contact us within 30 days of purchase for a full refund.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-3">Refund Eligibility</h3>
-                <p className="text-slate-600 leading-relaxed mb-3">
-                  To be eligible for a refund:
-                </p>
-                <ul className="list-disc list-inside text-slate-600 space-y-2">
-                  <li>Request must be made within 30 days of purchase</li>
-                  <li>You must provide a reason for the refund request</li>
-                  <li>Credits must not have been fully used</li>
-                  <li>No evidence of abuse or fraud</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-3">Refund Process</h3>
-                <p className="text-slate-600 leading-relaxed mb-3">
-                  To request a refund:
-                </p>
-                <ol className="list-decimal list-inside text-slate-600 space-y-2">
-                  <li>Contact our support team at support@howmuchshouldiprice.com</li>
-                  <li>Provide your account email and reason for refund</li>
-                  <li>We'll review your request within 2-3 business days</li>
-                  <li>If approved, refund will be processed to original payment method</li>
-                  <li>Refunds typically appear within 5-10 business days</li>
-                </ol>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-3">Non-Refundable Items</h3>
-                <p className="text-slate-600 leading-relaxed mb-3">
-                  The following are not eligible for refunds:
-                </p>
-                <ul className="list-disc list-inside text-slate-600 space-y-2">
-                  <li>Free credits provided upon registration</li>
-                  <li>Promotional or bonus credits</li>
-                  <li>Credits purchased more than 30 days ago</li>
-                  <li>Fully consumed credit packages</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-3">Questions?</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  If you have any questions about our refund policy, please contact us at support@howmuchshouldiprice.com or call +1 (234) 567-890.
-                </p>
-              </div>
-            </div>
-          </section>
+          
 
           {/* Contact CTA */}
           <div className="bg-gradient-to-r from-olive-600 to-olive-700 rounded-xl p-8 text-white text-center">
             <h3 className="text-2xl font-bold mb-3">Have Questions?</h3>
             <p className="text-beige-100 mb-6">
-              If you have any questions about our terms, privacy policy, or refund policy, we're here to help.
+              If you have any questions about our terms or privacy policy, we're here to help.
             </p>
             <a
               href="/contact"
