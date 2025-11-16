@@ -164,49 +164,7 @@ export function Pricing() {
             </div>
           </div>
 
-          {/* FAQ Section */}
-          <div className="mt-20 max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-slate-800 text-center mb-12">
-              Frequently Asked Questions
-            </h2>
-            <div className="space-y-6">
-              <div className="bg-white rounded-xl p-6 border border-beige-200">
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                  Do credits expire?
-                </h3>
-                <p className="text-slate-600">
-                  No! Your credits never expire. Use them whenever you need to check pricing for your products.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 border border-beige-200">
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                  Can I purchase more credits anytime?
-                </h3>
-                <p className="text-slate-600">
-                  Yes, you can purchase additional credits at any time from your dashboard. Choose from our flexible credit packages.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 border border-beige-200">
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                  What payment methods do you accept?
-                </h3>
-                <p className="text-slate-600">
-                  We accept all major credit cards, debit cards, and PayPal for your convenience.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 border border-beige-200">
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                  Is there a refund policy?
-                </h3>
-                <p className="text-slate-600">
-                  Yes, we offer a 30-day money-back guarantee. If you're not satisfied, contact us for a full refund.
-                </p>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </main>
 
