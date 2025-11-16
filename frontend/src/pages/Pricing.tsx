@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, Sparkles } from 'lucide-react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { SEO } from '../components/SEO';
 
 export function Pricing() {
   const navigate = useNavigate();
@@ -52,6 +53,12 @@ export function Pricing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-beige-50 to-beige-100 flex flex-col">
+      <SEO
+        title="Pricing Calculator for Startups and SMBs | Product & Service Pricing"
+        description="Use our online pricing calculator to set a fair price for your product or service. Run competitive pricing analysis and optimize margins with AI-powered recommendations."
+        keywords="Product pricing tool, Service pricing calculator, Price comparison tool, How to price my product, How to price my service, Best pricing strategy, Product pricing software, Service pricing software, Online pricing calculator, Competitive pricing analysis, Pricing optimization tool, Set price for product, Set price for service, Pricing tool for small business, Pricing tool for freelancers, Product pricing guide, Service pricing guide, Pricing calculator for startups, Pricing calculator for entrepreneurs, Pricing tool for e-commerce"
+        canonicalUrl="https://howmuchshouldiprice.com/pricing"
+      />
       <Header />
 
       <main className="flex-1 py-20">

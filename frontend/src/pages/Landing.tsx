@@ -54,7 +54,7 @@ export function Landing() {
       <SEO
         title="How Much Should I Price for a Project? | Free AI Pricing Calculator"
         description="Wondering how much should I charge for a project? Get instant AI-powered pricing recommendations for products, services, and freelance work. Free pricing calculator for entrepreneurs, freelancers, and businesses. Start with 3 free pricing checks!"
-        keywords="how much should i charge for a project, how much should i price for a project, pricing calculator, freelance pricing tool, product pricing calculator, service pricing, AI pricing recommendations, price my work, pricing strategy, freelance rates calculator, project pricing tool"
+        keywords="Product pricing tool, Service pricing calculator, Price comparison tool, How to price my product, How to price my service, Best pricing strategy, Product pricing software, Service pricing software, Online pricing calculator, Competitive pricing analysis, Pricing optimization tool, Set price for product, Set price for service, Pricing tool for small business, Pricing tool for freelancers, Product pricing guide, Service pricing guide, Pricing calculator for startups, Pricing calculator for entrepreneurs, Pricing tool for e-commerce"
         canonicalUrl="https://howmuchshouldiprice.com"
       />
       <Header />
@@ -107,6 +107,109 @@ export function Landing() {
               <div className="text-4xl font-bold text-olive-600 mb-2">$2M+</div>
               <div className="text-slate-600">Revenue Optimized</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AEO: Pricing FAQs */}
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 text-center mb-12">
+            Pricing FAQs
+          </h2>
+          <div className="space-y-6">
+            {[
+              {
+                q: 'What is the best way to price a product?',
+                a: 'Blend cost-plus, value-based, and competitive pricing. Validate with market demand and target margins using our product pricing tool.',
+              },
+              {
+                q: 'How do I price my service competitively?',
+                a: 'Benchmark competitor rates, account for scope and expertise, and set a fair margin. The service pricing calculator guides you to a competitive rate.',
+              },
+              {
+                q: 'What factors should I consider when pricing a product?',
+                a: 'Unit costs, positioning, demand, seasonality, competitor prices, and desired margin. Our pricing optimization tool balances these inputs.',
+              },
+              {
+                q: 'How can I compare my product price with competitors?',
+                a: 'Use competitive pricing analysis to gather and normalize prices by features and quality. The price comparison tool automates this process.',
+              },
+              {
+                q: 'What is the average price for my product or service?',
+                a: 'Averages vary by niche and region. The online pricing calculator estimates a market range tailored to your category.',
+              },
+              {
+                q: 'How do I calculate profit margin for my product?',
+                a: 'Profit margin = (Price − Cost) ÷ Price. Enter your costs and goals to see margin scenarios.',
+              },
+              {
+                q: 'What is the recommended pricing strategy for my industry?',
+                a: 'Many industries use tiered, bundle, or value-based pricing. Our strategy suggestions adapt to your industry signals.',
+              },
+              {
+                q: 'How do I set a fair price for my service?',
+                a: 'Estimate time, include overhead, benchmark, and align with value delivered. The service pricing guide helps you justify pricing.',
+              },
+              {
+                q: 'What tools help with pricing decisions?',
+                a: 'Product pricing software, service pricing calculators, competitive analysis, and optimization tools—combined in our platform.',
+              },
+              {
+                q: 'How do I optimize my pricing for higher sales?',
+                a: 'Test price points, create value tiers, and monitor ROI. Our optimization tool recommends data-backed adjustments.',
+              },
+              {
+                q: 'What are the latest pricing trends?',
+                a: 'Dynamic pricing, transparent bundles, and personalized offers. We surface relevant trends for your niche.',
+              },
+              {
+                q: 'How do I adjust pricing for different markets?',
+                a: 'Localize for purchasing power, taxes, logistics, and competition. Use regional price bands from our analysis.',
+              },
+              {
+                q: 'What is dynamic pricing and how does it work?',
+                a: 'Dynamic pricing updates prices with demand and competition. Our recommendations include safe dynamic rules where applicable.',
+              },
+              {
+                q: 'How do I use a pricing calculator?',
+                a: 'Input costs, margin, and market info. Review the recommended price range and rationale, then finalize.',
+              },
+              {
+                q: 'What is the impact of pricing on sales?',
+                a: 'Small price changes can shift conversion and profit. We model price–volume trade-offs to find optimal points.',
+              },
+            ].map((item, idx) => (
+              <div key={idx} className="bg-beige-50 rounded-xl p-6 border border-beige-200">
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">{item.q}</h3>
+                <p className="text-slate-600">{item.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AEO: How to Use a Pricing Calculator */}
+      <section className="py-20 bg-gradient-to-br from-beige-50 to-beige-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 text-center mb-8">
+            How to Use a Pricing Calculator
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[
+              { step: '1', title: 'Gather Inputs', text: 'Collect costs, target margin, and competitor prices.' },
+              { step: '2', title: 'Enter Details', text: 'Add your product or service info and goals.' },
+              { step: '3', title: 'Review Outputs', text: 'Compare recommended price range and justification.' },
+              { step: '4', title: 'Adjust & Publish', text: 'Refine strategy (tiers/bundles) and set your price.' },
+            ].map((s, i) => (
+              <div key={i} className="bg-white rounded-xl p-6 border border-beige-200 text-center">
+                <div className="w-10 h-10 rounded-full bg-olive-600 text-white flex items-center justify-center font-semibold mx-auto mb-3">
+                  {s.step}
+                </div>
+                <h3 className="font-semibold text-slate-800 mb-1">{s.title}</h3>
+                <p className="text-slate-600 text-sm">{s.text}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
